@@ -17,6 +17,7 @@ enum class SymbolType(
     STRING('s', "string"),
     ENUM('g', "enum", { EnumConfig() }),
     VAR_PLAYER('\u0000', "varp", { VarpConfig() }),
+    INV('\u0000', "inv", { InvConfig() }),
     STRUCT('J', "struct", { StructConfig() }),
     VAR_BIT('\u0000', "varbit", { VarbitConfig() }),
     PARAM('\u0000', "param"),
