@@ -23,6 +23,17 @@ fun JsonNode.asValue(type: SymbolType, context: CompilationContext) = asText().p
 fun JsonNode.asReference(type: SymbolType, context: CompilationContext) = asText().parseReference(type, context)
 
 /**
+ * Convert the value of this [JsonNode] to a custom [LiteralEnum] constant reference.
+ */
+inline fun <reified T> JsonNode.asEnumLiteral(defaultValue: T? = null): T where T : Enum<T>, T : LiteralEnum {
+    val values = enumValues<T>()
+    val literal = asText() ?: error("A text literal is required")
+    return values.find { it.literal == literal }
+        ?: defaultValue
+        ?: error("Could not find enum constant for literal: $literal for type: ${T::class.java.simpleName}")
+}
+
+/**
  * Parse a value that is compatible of the specified [SymbolType] from the raw value of this [String].
  */
 fun String.parseValue(type: SymbolType, context: CompilationContext): Any = when (type) {
