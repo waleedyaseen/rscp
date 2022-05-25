@@ -37,9 +37,9 @@ class VarbitConfig : Config(SymbolType.VAR_BIT) {
     override fun encode(): ByteArray {
         val packet = BinaryEncoder(6)
         packet.code(1) {
+            write2(baseVar)
             write1(startBit)
             write1(endBit)
-            write2(baseVar)
         }
         packet.terminateCode()
         return packet.toByteArray()
