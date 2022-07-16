@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import me.waliedyassen.tomlrs.CompilationContext
 import me.waliedyassen.tomlrs.binary.BinaryEncoder
 import me.waliedyassen.tomlrs.parser.Parser
+import me.waliedyassen.tomlrs.parser.parseParam
 import me.waliedyassen.tomlrs.symbol.SymbolType
 import me.waliedyassen.tomlrs.util.asValue
 
@@ -32,15 +33,7 @@ class StructConfig : Config(SymbolType.STRUCT) {
 
     override fun parseProperty(name: String, parser: Parser) {
         when (name) {
-            "val" -> {
-                val paramId = parser.parseReference(SymbolType.PARAM, false)
-                if (paramId == -1) {
-                    return
-                }
-                val param = parser.context.sym.lookup(SymbolType.PARAM).lookupById(paramId)!!
-                parser.parseComma()
-                params[param.id] = parser.parseDynamic(param.content!!)
-            }
+            "param" -> parser.parseParam(params)
             else -> parser.unknownProperty()
         }
     }
