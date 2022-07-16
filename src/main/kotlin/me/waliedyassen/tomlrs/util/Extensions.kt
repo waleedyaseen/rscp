@@ -45,7 +45,8 @@ fun String.parseValue(type: SymbolType, context: CompilationContext): Any = when
     SymbolType.PARAM,
     SymbolType.VAR_PLAYER,
     SymbolType.VAR_BIT,
-    SymbolType.INV -> parseReference(type, context)
+    SymbolType.INV,
+    SymbolType.VARC -> parseReference(type, context)
 }
 
 /**

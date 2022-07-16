@@ -64,7 +64,7 @@ object PackTool : CliktCommand() {
                 configs.forEach {
                     val name = it.first
                     val config = it.second
-                    val type = config.type
+                    val type = config.symbolType
                     val directory = outputDirectory.resolve(type.literal)
                     check(directory.exists() || directory.mkdirs()) { "Failed to create the output directory '$directory'" }
                     val file = directory.resolve("${table.lookupOrNull(type, name)!!.id}")

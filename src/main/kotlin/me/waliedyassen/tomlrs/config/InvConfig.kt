@@ -32,14 +32,14 @@ class InvConfig : Config(SymbolType.INV) {
 
     override fun encode(): ByteArray {
         val packet = BinaryEncoder(1 + if (size != 0) 3 else 0)
+        if (scope != InvScope.TEMPORARY) {
+            packet.code(1) {
+                write1(scope.id)
+            }
+        }
         if (size != 0) {
             packet.code(2) {
                 write2(size)
-            }
-        }
-        if (scope != InvScope.TEMPORARY) {
-            packet.code(4) {
-                write1(scope.id)
             }
         }
         packet.terminateCode()

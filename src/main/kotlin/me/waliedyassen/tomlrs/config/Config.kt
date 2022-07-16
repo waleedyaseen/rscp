@@ -9,7 +9,7 @@ import me.waliedyassen.tomlrs.symbol.SymbolType
  *
  * @author Walied K. Yassen
  */
-abstract class Config(val type: SymbolType) {
+abstract class Config(val symbolType: SymbolType) {
 
     /**
      * Parses the attributes of the configuration from a toml configuration node.

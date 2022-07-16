@@ -21,6 +21,7 @@ enum class SymbolType(
     STRUCT('J', "struct", { StructConfig() }),
     VAR_BIT('\u0000', "varbit", { VarbitConfig() }),
     PARAM('\u0000', "param"),
+    VARC('\u0000', "varc", { VarcConfig() }),
     ;
 
     companion object {
