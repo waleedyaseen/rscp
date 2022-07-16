@@ -20,7 +20,7 @@ enum class SymbolType(
     INV('\u0000', "inv", ::InvConfig),
     STRUCT('J', "struct", ::StructConfig),
     VAR_BIT('\u0000', "varbit", ::VarbitConfig),
-    PARAM('\u0000', "param"),
+    PARAM('\u0000', "param", ::ParamConfig),
     VARC('\u0000', "varc", ::VarcConfig),
     ;
 
