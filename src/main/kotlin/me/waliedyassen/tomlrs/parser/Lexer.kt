@@ -53,7 +53,7 @@ class Lexer(private val input: CharArray, private val context: CompilationContex
      */
     fun lexLBracket(): Token {
         if (!isLBracket()) {
-            reportError(Span(index, index), "Expected a '[' but received '${peek()}")
+            reportError(Span(index, index), "Expected a '[' but received '${peek()}'")
             return Token.Dummy(Span(index, index))
         }
         val start = index
@@ -71,7 +71,7 @@ class Lexer(private val input: CharArray, private val context: CompilationContex
      */
     fun lexRBracket(): Token {
         if (!isRBracket()) {
-            reportError(Span(index, index), "Expected a ']' but received '${peek()}")
+            reportError(Span(index, index), "Expected a ']' but received '${peek()}'")
             return Token.Dummy(Span(index, index))
         }
         val start = index
@@ -90,7 +90,7 @@ class Lexer(private val input: CharArray, private val context: CompilationContex
      */
     fun lexEquals(): Token {
         if (!isEquals()) {
-            reportError(Span(index, index), "Expected a '=' but received '${peek()}")
+            reportError(Span(index, index), "Expected a '=' but received '${peek()}'")
             return Token.Dummy(Span(index, index))
         }
         val start = index
@@ -108,7 +108,7 @@ class Lexer(private val input: CharArray, private val context: CompilationContex
      */
     fun lexComma(): Token {
         if (!isComma()) {
-            reportError(Span(index, index), "Expected a ',' but received '${peek()}")
+            reportError(Span(index, index), "Expected a ',' but received '${peek()}'")
             return Token.Dummy(Span(index, index))
         }
         val start = index
@@ -125,7 +125,7 @@ class Lexer(private val input: CharArray, private val context: CompilationContex
             return Token.Dummy(Span(index, index))
         }
         if (!peek().isIdentifierPart()) {
-            reportError(Span(index, index), "Expecting an identifier but received: ${peek()}")
+            reportError(Span(index, index), "Expecting an identifier but received '${peek()}'")
             return Token.Dummy(Span(index, index))
         }
         val builder = StringBuilder()
