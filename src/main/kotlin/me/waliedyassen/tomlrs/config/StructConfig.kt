@@ -13,7 +13,7 @@ import me.waliedyassen.tomlrs.util.asValue
  *
  * @author Walied K. Yassen
  */
-class StructConfig : Config(SymbolType.STRUCT) {
+class StructConfig(name: String) : Config(name, SymbolType.STRUCT) {
 
     /**
      * The 'params' attribute of the struct type.

@@ -8,7 +8,7 @@ import me.waliedyassen.tomlrs.symbol.SymbolType
 import me.waliedyassen.tomlrs.util.asEnumLiteral
 import me.waliedyassen.tomlrs.util.asSymbolType
 
-class VarcConfig : Config(SymbolType.VARC) {
+class VarcConfig(name: String) : Config(name, SymbolType.VARC) {
 
     lateinit var type: SymbolType
     var scope = VarLifetime.TEMPORARY

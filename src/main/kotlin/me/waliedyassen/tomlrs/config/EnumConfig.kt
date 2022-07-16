@@ -14,7 +14,7 @@ import me.waliedyassen.tomlrs.util.parseValue
  *
  * @author Walied K. Yassen
  */
-class EnumConfig : Config(SymbolType.ENUM) {
+class EnumConfig(name: String) : Config(name, SymbolType.ENUM) {
 
     /**
      * The 'inputtype' attribute of the enum type.

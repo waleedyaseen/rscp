@@ -12,7 +12,7 @@ import me.waliedyassen.tomlrs.util.asReference
  *
  * @author Walied K. Yassen
  */
-class VarbitConfig : Config(SymbolType.VAR_BIT) {
+class VarbitConfig(name: String) : Config(name, SymbolType.VAR_BIT) {
 
     /**
      * The 'startbit' attribute of the enum type.

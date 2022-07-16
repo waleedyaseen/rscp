@@ -10,18 +10,18 @@ import me.waliedyassen.tomlrs.config.*
 enum class SymbolType(
     val char: Char,
     val literal: String,
-    val supplier: () -> Config = { error("Cannot construct type") }
+    val supplier: (String) -> Config = { error("Cannot construct type") }
 ) {
     INT('i', "int"),
     BOOLEAN('1', "boolean"),
     STRING('s', "string"),
-    ENUM('g', "enum", { EnumConfig() }),
-    VAR_PLAYER('\u0000', "varp", { VarpConfig() }),
-    INV('\u0000', "inv", { InvConfig() }),
-    STRUCT('J', "struct", { StructConfig() }),
-    VAR_BIT('\u0000', "varbit", { VarbitConfig() }),
+    ENUM('g', "enum", ::EnumConfig),
+    VAR_PLAYER('\u0000', "varp", ::VarpConfig),
+    INV('\u0000', "inv", ::InvConfig),
+    STRUCT('J', "struct", ::StructConfig),
+    VAR_BIT('\u0000', "varbit", ::VarbitConfig),
     PARAM('\u0000', "param"),
-    VARC('\u0000', "varc", { VarcConfig() }),
+    VARC('\u0000', "varc", ::VarcConfig),
     ;
 
     companion object {

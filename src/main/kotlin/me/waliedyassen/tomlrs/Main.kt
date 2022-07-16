@@ -63,7 +63,7 @@ object PackTool : CliktCommand() {
             val parsingRsConfigs = parseRsConfigs()
             generateConfigId(parsingTomlConfigs + parsingRsConfigs, table)
             val configs = parsingTomlConfigs.map {
-                val config = it.type.supplier()
+                val config = it.type.supplier(it.names[0])
                 config.parseToml(it.node, context)
                 it.names[0] to config
             }.toMutableList()

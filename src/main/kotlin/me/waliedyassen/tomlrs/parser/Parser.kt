@@ -73,8 +73,8 @@ class Parser(
      * Attempt to parse a single [Config] unit.
      */
     private fun parseConfig(): Pair<String?, Config?> {
-        val config = type.supplier()
         val name = parseSignature() ?: return null to null
+        val config = type.supplier(name)
         // LBracket means we reached another configuration beginning, eof means halt.
         while (!lexer.isLBracket() && !lexer.isEof()) {
             parseProperty(config)

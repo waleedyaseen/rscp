@@ -19,7 +19,7 @@ enum class VarLifetime(val id: Int, override val literal: String) : LiteralEnum 
  *
  * @author Walied K. Yassen
  */
-class VarpConfig : Config(SymbolType.VAR_PLAYER) {
+class VarpConfig(name: String) : Config(name, SymbolType.VAR_PLAYER) {
 
     /**
      * The 'clientcode' attribute of the enum type.

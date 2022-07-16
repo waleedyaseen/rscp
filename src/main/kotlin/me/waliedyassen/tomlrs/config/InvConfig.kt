@@ -20,7 +20,7 @@ enum class InvScope(val id: Int, override val literal: String) : LiteralEnum {
  *
  * @author Walied K. Yassen
  */
-class InvConfig : Config(SymbolType.INV) {
+class InvConfig(name: String) : Config(name, SymbolType.INV) {
 
     var size = 0
     var scope = InvScope.TEMPORARY
