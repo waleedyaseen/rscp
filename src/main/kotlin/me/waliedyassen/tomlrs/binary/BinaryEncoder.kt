@@ -27,7 +27,7 @@ class BinaryEncoder(expectedSize: Int) {
     /**
      * Write the specified [code] to the buffer and execute the specified [block] afterwards.
      */
-    fun code(code: Int, block: BinaryEncoder.() -> Unit) {
+    fun code(code: Int, block: BinaryEncoder.() -> Unit = {}) {
         write1(code)
         block()
     }
