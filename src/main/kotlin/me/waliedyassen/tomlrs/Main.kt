@@ -10,14 +10,26 @@ import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
 import com.github.michaelbull.logging.InlineLogger
+import me.waliedyassen.tomlrs.parser.Parser
+import me.waliedyassen.tomlrs.parser.Span
 import me.waliedyassen.tomlrs.symbol.SymbolTable
 import me.waliedyassen.tomlrs.symbol.SymbolType
 import java.io.File
 import kotlin.system.measureTimeMillis
 
-data class ParsingConfig(val name: String, val type: SymbolType, val node: JsonNode)
+abstract class ParsingConfig {
+    abstract val names: List<String>
+    abstract val type: SymbolType
+}
 
-class CompilationContext(val sym: SymbolTable) {
+data class ParsingTomlConfig(override val names: List<String>, override val type: SymbolType, val node: JsonNode) :
+    ParsingConfig()
+
+data class ParsingRsConfig(override val names: List<String>, override val type: SymbolType, val input: String) :
+    ParsingConfig()
+
+data class CompilationContext(val sym: SymbolTable) {
+
     val errors = mutableListOf<String>()
 
     fun reportError(message: String) {
@@ -47,12 +59,17 @@ object PackTool : CliktCommand() {
             val table = readSymbolTable()
             val context = CompilationContext(table)
             logger.info { "Parsing configs from $inputDirectory" }
-            val parsingConfigs = parseConfigs()
-            generateConfigId(parsingConfigs, table)
-            val configs = parsingConfigs.map {
+            val parsingTomlConfigs = parseTomlConfigs()
+            val parsingRsConfigs = parseRsConfigs()
+            generateConfigId(parsingTomlConfigs + parsingRsConfigs, table)
+            val configs = parsingTomlConfigs.map {
                 val config = it.type.supplier()
                 config.parseToml(it.node, context)
-                it.name to config
+                it.names[0] to config
+            }.toMutableList()
+            parsingRsConfigs.forEach {
+                val parser = Parser(it.type, context, it.input)
+                configs += parser.parseConfigs()
             }
             if (context.errors.isNotEmpty()) {
                 context.errors.forEach { logger.info { it } }
@@ -79,17 +96,18 @@ object PackTool : CliktCommand() {
     private fun generateConfigId(parsingConfigs: List<ParsingConfig>, table: SymbolTable) {
         parsingConfigs.forEach { config ->
             val type = config.type
-            val name = config.name
-            if (table.lookupOrNull(type, name) == null) {
-                table.insert(type, name, table.generateUniqueId(type))
+            config.names.forEach { name ->
+                if (table.lookupOrNull(type, name) == null) {
+                    table.insert(type, name, table.generateUniqueId(type))
+                }
             }
         }
     }
 
-    private fun parseConfigs(): List<ParsingConfig> {
+    private fun parseTomlConfigs(): List<ParsingTomlConfig> {
         val regex = Regex("(?:.+\\.)?([^.]+)\\.toml")
         val mapper = createMapper()
-        val configs = mutableListOf<ParsingConfig>()
+        val configs = mutableListOf<ParsingTomlConfig>()
         inputDirectory.walkTopDown().forEach { file ->
             val result = regex.matchEntire(file.name) ?: return@forEach
             val literal = result.groupValues[1]
@@ -97,8 +115,22 @@ object PackTool : CliktCommand() {
             val tree: JsonNode
             file.reader().use { tree = mapper.readTree(it) }
             tree.fields().asSequence().forEach {
-                configs += ParsingConfig(it.key, type, it.value)
+                configs += ParsingTomlConfig(listOf(it.key), type, it.value)
             }
+        }
+        return configs
+    }
+
+    private fun parseRsConfigs(): List<ParsingRsConfig> {
+        val configs = mutableListOf<ParsingRsConfig>()
+        inputDirectory.walkTopDown().forEach { file ->
+            val extension = file.extension
+            val type = SymbolType.lookupOrNull(extension) ?: return@forEach
+            val input = file.reader().use { it.readText() }
+            val dummyContext = CompilationContext(SymbolTable())
+            val parser = Parser(type, dummyContext, input)
+            val names = parser.peekConfigs()
+            configs += ParsingRsConfig(names, type, input)
         }
         return configs
     }

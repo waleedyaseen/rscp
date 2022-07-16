@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ser.std.ToEmptyObjectSerializer
 import me.waliedyassen.tomlrs.CompilationContext
 import me.waliedyassen.tomlrs.binary.BinaryEncoder
+import me.waliedyassen.tomlrs.parser.Parser
 import me.waliedyassen.tomlrs.symbol.SymbolType
 import me.waliedyassen.tomlrs.util.LiteralEnum
 import me.waliedyassen.tomlrs.util.asEnumLiteral
@@ -28,6 +29,18 @@ class InvConfig : Config(SymbolType.INV) {
         size = node["size"]?.asInt(0) ?: 0
         if (node.has("scope"))
             scope = node["scope"].asEnumLiteral()
+    }
+
+    override fun parseProperty(name: String, parser: Parser) {
+        when (name) {
+            "size" -> size = parser.parseInteger()
+            "scope" -> scope = parser.parseEnumLiteral(InvScope.TEMPORARY)
+            else -> parser.unknownProperty()
+        }
+    }
+
+    override fun verifyProperties(parser: Parser) {
+        // Do nothing.
     }
 
     override fun encode(): ByteArray {

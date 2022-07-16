@@ -3,6 +3,7 @@ package me.waliedyassen.tomlrs.config
 import com.fasterxml.jackson.databind.JsonNode
 import me.waliedyassen.tomlrs.CompilationContext
 import me.waliedyassen.tomlrs.binary.BinaryEncoder
+import me.waliedyassen.tomlrs.parser.Parser
 import me.waliedyassen.tomlrs.symbol.SymbolType
 import me.waliedyassen.tomlrs.util.LiteralEnum
 import me.waliedyassen.tomlrs.util.asEnumLiteral
@@ -36,8 +37,21 @@ class VarpConfig : Config(SymbolType.VAR_PLAYER) {
             lifetime = node["scope"].asEnumLiteral()
     }
 
+    override fun parseProperty(name: String, parser: Parser) {
+        when (name) {
+            "clientcode" -> clientCode = parser.parseInteger()
+            "scope" -> lifetime = parser.parseEnumLiteral(VarLifetime.TEMPORARY)
+            else -> parser.unknownProperty()
+        }
+    }
+
+    override fun verifyProperties(parser: Parser) {
+        // Do nothing.
+    }
+
     override fun encode(): ByteArray {
-        val packet = BinaryEncoder(1 + (if (clientCode != 0) 3 else 0) + if (lifetime != VarLifetime.TEMPORARY) 2 else 0)
+        val packet =
+            BinaryEncoder(1 + (if (clientCode != 0) 3 else 0) + if (lifetime != VarLifetime.TEMPORARY) 2 else 0)
         if (lifetime != VarLifetime.TEMPORARY) {
             packet.code(4) {
                 write1(lifetime.id)

@@ -18,6 +18,8 @@ class SymbolList {
         internalSymbols[symbol.name] = symbol
         modified = true
     }
+
+    fun lookupById(id: Int) = symbols.values.find { it.id == id }
 }
 
 class SymbolTable {

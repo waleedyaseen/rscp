@@ -3,6 +3,7 @@ package me.waliedyassen.tomlrs.config
 import com.fasterxml.jackson.databind.JsonNode
 import me.waliedyassen.tomlrs.CompilationContext
 import me.waliedyassen.tomlrs.binary.BinaryEncoder
+import me.waliedyassen.tomlrs.parser.Parser
 import me.waliedyassen.tomlrs.symbol.SymbolType
 import me.waliedyassen.tomlrs.util.asReference
 
@@ -32,6 +33,19 @@ class VarbitConfig : Config(SymbolType.VAR_BIT) {
         startBit = node["startbit"].asInt()
         endBit = node["endbit"].asInt()
         baseVar = node["basevar"].asReference(SymbolType.VAR_PLAYER, context)
+    }
+
+    override fun parseProperty(name: String, parser: Parser) {
+        when (name) {
+            "startbit" -> startBit = parser.parseInteger()
+            "endbit" -> endBit = parser.parseInteger()
+            "basevar" -> baseVar = parser.parseReference(SymbolType.VAR_PLAYER)
+            else -> parser.unknownProperty()
+        }
+    }
+
+    override fun verifyProperties(parser: Parser) {
+        // Do nothing.
     }
 
     override fun encode(): ByteArray {

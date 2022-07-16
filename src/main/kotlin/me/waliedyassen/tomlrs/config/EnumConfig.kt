@@ -3,6 +3,7 @@ package me.waliedyassen.tomlrs.config
 import com.fasterxml.jackson.databind.JsonNode
 import me.waliedyassen.tomlrs.CompilationContext
 import me.waliedyassen.tomlrs.binary.BinaryEncoder
+import me.waliedyassen.tomlrs.parser.Parser
 import me.waliedyassen.tomlrs.symbol.SymbolType
 import me.waliedyassen.tomlrs.util.asSymbolType
 import me.waliedyassen.tomlrs.util.asValue
@@ -46,6 +47,52 @@ class EnumConfig : Config(SymbolType.ENUM) {
         }
     }
 
+    override fun parseProperty(name: String, parser: Parser) {
+        when (name) {
+            "inputtype" -> inputType = parser.parseType() ?: return
+            "outputtype" -> outputType = parser.parseType() ?: return
+            "default" -> {
+                if (!this::outputType.isInitialized) {
+                    parser.reportError("outputtype must be specified before default")
+                    return
+                }
+                default = parser.parseDynamic(outputType)
+            }
+
+            "val" -> {
+                if (!this::inputType.isInitialized) {
+                    parser.reportError("inputtype must be specified before val")
+                    return
+                }
+                if (!this::outputType.isInitialized) {
+                    parser.reportError("outputtype must be specified before val")
+                    return
+                }
+                val key = parser.parseDynamic(inputType) as Int
+                parser.parseComma()
+                val value = parser.parseDynamic(outputType)
+                values[key] = value
+            }
+
+            else -> parser.unknownProperty()
+        }
+    }
+
+    override fun verifyProperties(parser: Parser) {
+        if (!this::inputType.isInitialized) {
+            parser.reportError("inputtype property must be specified")
+            return
+        }
+        if (!this::outputType.isInitialized) {
+            parser.reportError("outputtype property must be specified")
+            return
+        }
+        if (!this::default.isInitialized) {
+            parser.reportError("default property must be specified")
+            return
+        }
+    }
+
     override fun encode(): ByteArray {
         val packet = BinaryEncoder(32)
         packet.code(1) {
@@ -58,6 +105,7 @@ class EnumConfig : Config(SymbolType.ENUM) {
             is String -> packet.code(3) {
                 writeString(default as String)
             }
+
             is Int -> packet.code(4) {
                 write4(default as Int)
             }
