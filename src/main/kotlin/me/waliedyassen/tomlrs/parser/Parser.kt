@@ -76,7 +76,11 @@ class Parser(
         val name = parseSignature() ?: return null to null
         val config = type.supplier(name)
         // LBracket means we reached another configuration beginning, eof means halt.
-        while (!lexer.isLBracket() && !lexer.isEof()) {
+        while (true) {
+            lexer.skipWhitespace()
+            if (lexer.isLBracket() || lexer.isEof()) {
+                break
+            }
             parseProperty(config)
         }
         config.verifyProperties(this)
