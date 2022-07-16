@@ -168,6 +168,26 @@ class Parser(
         return integer.value
     }
 
+
+    /**
+     * Attempt to parse a valid boolean value and return false if it fails.
+     */
+    fun parseBoolean(): Boolean {
+        val token = lexer.lexIdentifier()
+        if (token is Token.Dummy) {
+            return false
+        }
+        val identifier = token as Token.Identifier
+        return when (identifier.text) {
+            "true", "yes" -> true
+            "false", "no" -> false
+            else -> {
+                reportError("Unrecognized boolean literal '${identifier.text}'")
+                false
+            }
+        }
+    }
+
     /**
      * Attempt to parse a valid text value and return 0 if it fails.
      */
@@ -260,6 +280,7 @@ class Parser(
         return when (outputType) {
             SymbolType.STRING -> parseString()
             SymbolType.INT -> parseInteger()
+            SymbolType.BOOLEAN -> parseBoolean()
             else -> error("Unexpected symbol type: $outputType")
         }
     }
