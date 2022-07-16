@@ -47,7 +47,7 @@ class SymbolTable {
             list.symbols.entries.sortedBy { it.value.id }.forEach { (_, symbol) ->
                 it.write("${symbol.name}:${symbol.id}")
                 if (symbol.content != null) {
-                    it.write(":${symbol.content.literal}")
+                    it.write(":${symbol.content!!.literal}")
                 }
                 it.newLine()
             }

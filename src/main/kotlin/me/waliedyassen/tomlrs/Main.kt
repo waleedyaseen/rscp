@@ -10,6 +10,8 @@ import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
 import com.github.michaelbull.logging.InlineLogger
+import me.waliedyassen.tomlrs.config.Config
+import me.waliedyassen.tomlrs.config.ParamConfig
 import me.waliedyassen.tomlrs.parser.Parser
 import me.waliedyassen.tomlrs.parser.Span
 import me.waliedyassen.tomlrs.symbol.SymbolTable
@@ -75,6 +77,8 @@ object PackTool : CliktCommand() {
                 context.errors.forEach { logger.info { it } }
                 return@measureTimeMillis
             }
+            // TODO(Walied): This need to be done while we are still parsing
+            assignContentType(configs.map { it.second }.toList(), table)
             if (configs.isNotEmpty()) {
                 check(outputDirectory.exists() || outputDirectory.mkdirs()) { "Failed to create the output directory '$outputDirectory'" }
                 logger.info { "Writing ${configs.size} configs to $outputDirectory" }
@@ -101,6 +105,23 @@ object PackTool : CliktCommand() {
                     table.insert(type, name, table.generateUniqueId(type))
                 }
             }
+        }
+    }
+
+    private fun assignContentType(configs: List<Config>, table: SymbolTable) {
+        configs.forEach { config ->
+            val type = config.symbolType
+            val name = config.name
+            val sym = table.lookupOrNull(type, name)!!
+            val content = when (config) {
+                is ParamConfig -> config.type
+                else -> null
+            }
+            if (sym.content != content) {
+                sym.content = content
+                table.lookup(type).modified = true
+            }
+
         }
     }
 
