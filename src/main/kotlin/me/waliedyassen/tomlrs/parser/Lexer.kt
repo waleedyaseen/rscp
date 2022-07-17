@@ -53,12 +53,20 @@ class Lexer(private val input: CharArray, private val context: CompilationContex
      */
     fun lexLBracket(): Token {
         if (!isLBracket()) {
-            reportError(Span(index, index), "Expected a '[' but received '${peek()}'")
-            return Token.Dummy(Span(index, index))
+            return unexpectedCharacter("[")
         }
         val start = index
         advance()
         return Token.LBracket(Span(start, index))
+    }
+
+    private fun unexpectedCharacter(expected: String): Token {
+        val start = index
+        val found = if (isEof()) "EOF" else peek()
+        advance()
+        val token = Token.Dummy(Span(start, index))
+        reportError(token.span, "Unexpected character '${found}'. Expected '$expected'")
+        return token
     }
 
     /**
@@ -71,8 +79,7 @@ class Lexer(private val input: CharArray, private val context: CompilationContex
      */
     fun lexRBracket(): Token {
         if (!isRBracket()) {
-            reportError(Span(index, index), "Expected a ']' but received '${peek()}'")
-            return Token.Dummy(Span(index, index))
+            return unexpectedCharacter("]")
         }
         val start = index
         advance()
@@ -90,8 +97,7 @@ class Lexer(private val input: CharArray, private val context: CompilationContex
      */
     fun lexEquals(): Token {
         if (!isEquals()) {
-            reportError(Span(index, index), "Expected a '=' but received '${peek()}'")
-            return Token.Dummy(Span(index, index))
+            return unexpectedCharacter("=")
         }
         val start = index
         advance()
@@ -108,8 +114,7 @@ class Lexer(private val input: CharArray, private val context: CompilationContex
      */
     fun lexComma(): Token {
         if (!isComma()) {
-            reportError(Span(index, index), "Expected a ',' but received '${peek()}'")
-            return Token.Dummy(Span(index, index))
+            return unexpectedCharacter(",")
         }
         val start = index
         advance()
@@ -120,13 +125,8 @@ class Lexer(private val input: CharArray, private val context: CompilationContex
      * Attempts to parse a [Token.Identifier] and returns [Token.Dummy] if it fails.
      */
     fun lexIdentifier(): Token {
-        if (isEof()) {
-            reportError(Span(index, index), "Expected an identifier but reached end of file")
-            return Token.Dummy(Span(index, index))
-        }
         if (!peek().isIdentifierPart()) {
-            reportError(Span(index, index), "Expecting an identifier but received '${peek()}'")
-            return Token.Dummy(Span(index, index))
+            return unexpectedCharacter("identifier")
         }
         val builder = StringBuilder()
         val start = index
@@ -145,8 +145,7 @@ class Lexer(private val input: CharArray, private val context: CompilationContex
      */
     fun lexLine(): Token {
         if (isEof()) {
-            reportError(Span(index, index), "Expected a string but reached end of file")
-            return Token.Dummy(Span(index, index))
+            return unexpectedCharacter("string")
         }
         val builder = StringBuilder()
         val start = index
@@ -169,13 +168,8 @@ class Lexer(private val input: CharArray, private val context: CompilationContex
      * A [Token.Text] will be returned if the parsing is successful otherwise a [Token.Dummy] will be returned.
      */
     fun lexQuotedString(): Token {
-        if (isEof()) {
-            reportError(Span(index, index), "Expected a a quote but reached end of file")
-            return Token.Dummy(Span(index, index))
-        }
         if (!peek().isQuote()) {
-            reportError(Span(index, index), "Expected a quote but received '${peek()}'")
-            return Token.Dummy(Span(index, index))
+            return unexpectedCharacter("string")
         }
         advance()
         val builder = StringBuilder()
@@ -202,9 +196,8 @@ class Lexer(private val input: CharArray, private val context: CompilationContex
      * A [Token.Number] will be returned if the parsing is successful otherwise a [Token.Dummy] will be returned.
      */
     fun lexInteger(): Token {
-        if (isEof()) {
-            reportError(Span(index, index), "Expected a digit but reached end of file")
-            return Token.Dummy(Span(index, index))
+        if (!peek().isAsciiDigit()) {
+            return unexpectedCharacter("digit")
         }
         val builder = StringBuilder()
         val start = index
@@ -238,7 +231,7 @@ class Lexer(private val input: CharArray, private val context: CompilationContex
      * Skip the current line and all the following line delimiter characters.
      */
     fun skipLine() {
-        skipWhile { !isEof() && !it.isLineDelimiter() }
+        skipWhile { !it.isLineDelimiter() }
         skipWhile { it.isLineDelimiter() }
     }
 
@@ -247,7 +240,7 @@ class Lexer(private val input: CharArray, private val context: CompilationContex
      */
     private fun skipWhile(predicate: (Char) -> (Boolean)): Boolean {
         var skipped = 0
-        while (peek() != 0.toChar() && predicate(peek())) {
+        while (!isEof() && predicate(peek())) {
             skipped++
             advance()
         }
