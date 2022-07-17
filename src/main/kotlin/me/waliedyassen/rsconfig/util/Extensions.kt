@@ -1,9 +1,9 @@
-package me.waliedyassen.tomlrs.util
+package me.waliedyassen.rsconfig.util
 
 import com.fasterxml.jackson.databind.JsonNode
-import me.waliedyassen.tomlrs.CompilationContext
-import me.waliedyassen.tomlrs.parser.Span
-import me.waliedyassen.tomlrs.symbol.SymbolType
+import me.waliedyassen.rsconfig.CompilationContext
+import me.waliedyassen.rsconfig.parser.Span
+import me.waliedyassen.rsconfig.symbol.SymbolType
 
 /**
  * Convert the value of this [JsonNode] to [SymbolType] object.

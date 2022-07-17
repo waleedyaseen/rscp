@@ -1,4 +1,4 @@
-package me.waliedyassen.tomlrs.binary
+package me.waliedyassen.rsconfig.binary
 
 /**
  * Encode the specified [params] map and write it to the buffer.

@@ -1,4 +1,4 @@
-package me.waliedyassen.tomlrs.parser
+package me.waliedyassen.rsconfig.parser
 
 import kotlin.math.max
 import kotlin.math.min

@@ -1,13 +1,13 @@
-package me.waliedyassen.tomlrs.config
+package me.waliedyassen.rsconfig.config
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ser.std.ToEmptyObjectSerializer
-import me.waliedyassen.tomlrs.CompilationContext
-import me.waliedyassen.tomlrs.binary.BinaryEncoder
-import me.waliedyassen.tomlrs.parser.Parser
-import me.waliedyassen.tomlrs.symbol.SymbolType
-import me.waliedyassen.tomlrs.util.LiteralEnum
-import me.waliedyassen.tomlrs.util.asEnumLiteral
+import me.waliedyassen.rsconfig.CompilationContext
+import me.waliedyassen.rsconfig.binary.BinaryEncoder
+import me.waliedyassen.rsconfig.parser.Parser
+import me.waliedyassen.rsconfig.symbol.SymbolType
+import me.waliedyassen.rsconfig.util.LiteralEnum
+import me.waliedyassen.rsconfig.util.asEnumLiteral
 import java.awt.Color
 
 enum class InvScope(val id: Int, override val literal: String) : LiteralEnum {

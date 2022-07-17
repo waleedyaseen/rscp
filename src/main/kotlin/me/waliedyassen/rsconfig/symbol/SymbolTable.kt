@@ -1,4 +1,4 @@
-package me.waliedyassen.tomlrs.symbol
+package me.waliedyassen.rsconfig.symbol
 
 import java.io.File
 

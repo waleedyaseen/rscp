@@ -1,6 +1,6 @@
-package me.waliedyassen.tomlrs.parser
+package me.waliedyassen.rsconfig.parser
 
-import me.waliedyassen.tomlrs.CompilationContext
+import me.waliedyassen.rsconfig.CompilationContext
 
 /**
  * Returns `true` if [this] character is an ascii letter.

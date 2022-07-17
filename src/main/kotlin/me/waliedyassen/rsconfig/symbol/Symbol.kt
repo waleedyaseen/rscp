@@ -1,4 +1,4 @@
-package me.waliedyassen.tomlrs.symbol
+package me.waliedyassen.rsconfig.symbol
 
 /**
  * Holds information about a single symbol in the system, a symbol represents information about

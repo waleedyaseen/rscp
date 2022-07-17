@@ -1,4 +1,4 @@
-package me.waliedyassen.tomlrs.parser
+package me.waliedyassen.rsconfig.parser
 
 
 /**

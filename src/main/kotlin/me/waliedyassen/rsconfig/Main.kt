@@ -1,4 +1,4 @@
-package me.waliedyassen.tomlrs
+package me.waliedyassen.rsconfig
 
 import ch.qos.logback.classic.Level
 import com.fasterxml.jackson.databind.DeserializationFeature
@@ -14,13 +14,13 @@ import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.enum
 import com.github.ajalt.clikt.parameters.types.file
 import com.github.michaelbull.logging.InlineLogger
-import me.waliedyassen.tomlrs.config.Config
-import me.waliedyassen.tomlrs.config.ParamConfig
-import me.waliedyassen.tomlrs.parser.Parser
-import me.waliedyassen.tomlrs.parser.SemanticInfo
-import me.waliedyassen.tomlrs.parser.Span
-import me.waliedyassen.tomlrs.symbol.SymbolTable
-import me.waliedyassen.tomlrs.symbol.SymbolType
+import me.waliedyassen.rsconfig.config.Config
+import me.waliedyassen.rsconfig.config.ParamConfig
+import me.waliedyassen.rsconfig.parser.Parser
+import me.waliedyassen.rsconfig.parser.SemanticInfo
+import me.waliedyassen.rsconfig.parser.Span
+import me.waliedyassen.rsconfig.symbol.SymbolTable
+import me.waliedyassen.rsconfig.symbol.SymbolType
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File

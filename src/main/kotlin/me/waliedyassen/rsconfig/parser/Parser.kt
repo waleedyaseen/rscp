@@ -1,9 +1,9 @@
-package me.waliedyassen.tomlrs.parser
+package me.waliedyassen.rsconfig.parser
 
-import me.waliedyassen.tomlrs.CompilationContext
-import me.waliedyassen.tomlrs.config.Config
-import me.waliedyassen.tomlrs.symbol.SymbolType
-import me.waliedyassen.tomlrs.util.LiteralEnum
+import me.waliedyassen.rsconfig.CompilationContext
+import me.waliedyassen.rsconfig.config.Config
+import me.waliedyassen.rsconfig.symbol.SymbolType
+import me.waliedyassen.rsconfig.util.LiteralEnum
 
 /**
  * Semantic information is essentially a span of text that holds a special meaning.

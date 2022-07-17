@@ -1,9 +1,9 @@
-package me.waliedyassen.tomlrs.config
+package me.waliedyassen.rsconfig.config
 
 import com.fasterxml.jackson.databind.JsonNode
-import me.waliedyassen.tomlrs.CompilationContext
-import me.waliedyassen.tomlrs.parser.Parser
-import me.waliedyassen.tomlrs.symbol.SymbolType
+import me.waliedyassen.rsconfig.CompilationContext
+import me.waliedyassen.rsconfig.parser.Parser
+import me.waliedyassen.rsconfig.symbol.SymbolType
 
 /**
  * The base class for all the configuration in the system.

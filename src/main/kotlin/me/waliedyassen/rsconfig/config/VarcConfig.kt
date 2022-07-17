@@ -1,12 +1,12 @@
-package me.waliedyassen.tomlrs.config
+package me.waliedyassen.rsconfig.config
 
 import com.fasterxml.jackson.databind.JsonNode
-import me.waliedyassen.tomlrs.CompilationContext
-import me.waliedyassen.tomlrs.binary.BinaryEncoder
-import me.waliedyassen.tomlrs.parser.Parser
-import me.waliedyassen.tomlrs.symbol.SymbolType
-import me.waliedyassen.tomlrs.util.asEnumLiteral
-import me.waliedyassen.tomlrs.util.asSymbolType
+import me.waliedyassen.rsconfig.CompilationContext
+import me.waliedyassen.rsconfig.binary.BinaryEncoder
+import me.waliedyassen.rsconfig.parser.Parser
+import me.waliedyassen.rsconfig.symbol.SymbolType
+import me.waliedyassen.rsconfig.util.asEnumLiteral
+import me.waliedyassen.rsconfig.util.asSymbolType
 
 class VarcConfig(name: String) : Config(name, SymbolType.VARC) {
 

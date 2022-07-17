@@ -1,6 +1,6 @@
-package me.waliedyassen.tomlrs.symbol
+package me.waliedyassen.rsconfig.symbol
 
-import me.waliedyassen.tomlrs.config.*
+import me.waliedyassen.rsconfig.config.*
 
 /**
  * Each instance holds information about single configuration type in the system.

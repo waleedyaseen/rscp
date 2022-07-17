@@ -1,6 +1,6 @@
-package me.waliedyassen.tomlrs.parser
+package me.waliedyassen.rsconfig.parser
 
-import me.waliedyassen.tomlrs.symbol.SymbolType
+import me.waliedyassen.rsconfig.symbol.SymbolType
 
 /**
  * Parse a parameter key and value and store them in the specified [params] map.
