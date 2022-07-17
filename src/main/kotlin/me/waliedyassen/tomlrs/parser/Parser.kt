@@ -277,6 +277,9 @@ class Parser(
      * Attempt to parse a dynamic value based on the given [SymbolType]
      */
     fun parseDynamic(outputType: SymbolType): Any {
+        if (outputType.isReference()) {
+            return parseReference(outputType, true)
+        }
         return when (outputType) {
             SymbolType.STRING -> parseString()
             SymbolType.INT -> parseInteger()

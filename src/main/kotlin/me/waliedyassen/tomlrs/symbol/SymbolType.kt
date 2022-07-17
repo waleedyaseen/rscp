@@ -24,6 +24,18 @@ enum class SymbolType(
     VARC('\u0000', "varc", ::VarcConfig),
     ;
 
+    fun isReference() = when (this) {
+        ENUM,
+        VAR_PLAYER,
+        INV,
+        STRUCT,
+        VAR_BIT,
+        PARAM,
+        VARC -> true
+
+        else -> false
+    }
+
     companion object {
 
         /**
