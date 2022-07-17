@@ -83,16 +83,7 @@ object PackTool : CliktCommand() {
                 println("No input files provided")
                 exitProcess(1)
             }
-            if (extract != ExtractMode.None) {
-                val output = when (extract) {
-                    ExtractMode.Errors -> compiler.diagnostics
-                    ExtractMode.SemInfo -> compiler.semanticInfo
-                    else -> error("Unhandled extract mode: $extract")
-                }
-                val mapper = jsonMapper { }
-                print(mapper.writeValueAsString(output))
-                exitProcess(0)
-            }
+            performExtraction(compiler)
             if (compiler.diagnostics.isNotEmpty()) {
                 compiler.diagnostics.forEach { logger.info { it } }
                 return@measureTimeMillis
@@ -102,6 +93,20 @@ object PackTool : CliktCommand() {
             compiler.writeSymbols(symbolDirectory)
         }
         logger.info { "Finished. Took $time ms" }
+    }
+
+    private fun performExtraction(compiler: Compiler) {
+        if (extract == ExtractMode.None) {
+            return
+        }
+        val output = when (extract) {
+            ExtractMode.Errors -> compiler.diagnostics
+            ExtractMode.SemInfo -> compiler.semanticInfo
+            else -> error("Unhandled extract mode: $extract")
+        }
+        val mapper = jsonMapper { }
+        print(mapper.writeValueAsString(output))
+        exitProcess(0)
     }
 }
 
