@@ -23,8 +23,8 @@ class InvConfig(name: String) : Config(name, SymbolType.Inv) {
 
     override fun parseProperty(name: String, parser: Parser) {
         when (name) {
-            "size" -> size = parser.parseInteger()
-            "scope" -> scope = parser.parseEnumLiteral(InvScope.TEMPORARY)
+            "size" -> size = parser.parseInteger() ?: return parser.skipProperty()
+            "scope" -> scope = parser.parseEnumLiteral() ?: return parser.skipProperty()
             else -> parser.unknownProperty()
         }
     }

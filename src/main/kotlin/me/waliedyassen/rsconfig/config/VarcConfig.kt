@@ -13,8 +13,8 @@ class VarcConfig(name: String) : Config(name, SymbolType.VarClient) {
 
     override fun parseProperty(name: String, parser: Parser) {
         when (name) {
-            "type" -> type = parser.parseType() ?: return
-            "scope" -> scope = parser.parseEnumLiteral(VarLifetime.TEMPORARY)
+            "type" -> type = parser.parseType() ?: return parser.skipProperty()
+            "scope" -> scope = parser.parseEnumLiteral() ?: return parser.skipProperty()
             else -> parser.unknownProperty()
         }
     }

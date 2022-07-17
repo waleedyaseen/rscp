@@ -36,14 +36,15 @@ class EnumConfig(name: String) : Config(name, SymbolType.Enum) {
 
     override fun parseProperty(name: String, parser: Parser) {
         when (name) {
-            "inputtype" -> inputType = parser.parseType() ?: return
-            "outputtype" -> outputType = parser.parseType() ?: return
+            "inputtype" -> inputType = parser.parseType() ?: return parser.skipProperty()
+            "outputtype" -> outputType = parser.parseType() ?: return parser.skipProperty()
             "default" -> {
                 if (outputType == SymbolType.Undefined) {
+                    parser.skipProperty()
                     parser.reportPropertyError("outputtype must be specified before default")
                     return
                 }
-                default = parser.parseDynamic(outputType) ?: return
+                default = parser.parseDynamic(outputType) ?: return parser.skipProperty()
             }
 
             "val" -> {
@@ -55,12 +56,10 @@ class EnumConfig(name: String) : Config(name, SymbolType.Enum) {
                     parser.reportPropertyError("outputtype must be specified before val")
                     return
                 }
-                val key = parser.parseDynamic(inputType)
-                parser.parseComma()
-                val value = parser.parseDynamic(outputType)
-                if (key != null && value != null) {
-                    values[key] = value
-                }
+                val key = parser.parseDynamic(inputType) ?: return parser.skipProperty()
+                parser.parseComma() ?: parser.skipProperty()
+                val value = parser.parseDynamic(outputType) ?: return parser.skipProperty()
+                values[key] = value
             }
 
             else -> parser.unknownProperty()

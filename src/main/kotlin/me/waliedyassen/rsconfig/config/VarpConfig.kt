@@ -37,9 +37,9 @@ class VarpConfig(name: String) : Config(name, SymbolType.VarPlayer) {
 
     override fun parseProperty(name: String, parser: Parser) {
         when (name) {
-            "type" -> type = parser.parseType() ?: return
-            "clientcode" -> clientCode = parser.parseInteger()
-            "scope" -> lifetime = parser.parseEnumLiteral(VarLifetime.TEMPORARY)
+            "type" -> type = parser.parseType() ?: return parser.skipProperty()
+            "clientcode" -> clientCode = parser.parseInteger() ?: return parser.skipProperty()
+            "scope" -> lifetime = parser.parseEnumLiteral() ?: return parser.skipProperty()
             else -> parser.unknownProperty()
         }
     }

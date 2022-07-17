@@ -93,8 +93,8 @@ class Parser(
      */
     private fun parseProperty(config: Config): Span? {
         val propertyNameToken = parseIdentifier()
-        if (propertyNameToken is Token.Dummy) {
-            lexer.skipLine()
+        if (propertyNameToken == null) {
+            skipProperty()
             return null
         }
         storeSemInfo(propertyNameToken.span, "property")
@@ -112,14 +112,14 @@ class Parser(
      * Attempt to parse a configuration signature and return the parsed name if it is valid otherwise null.
      */
     private fun parseSignature(): SyntaxSignature? {
-        val left = parseLBracket()
-        val name = parseIdentifier()
+        val left = parseLBracket() ?: return null
+        val name = parseIdentifier() ?: return null
         if (name is Token.Dummy) {
             return null
         }
         val nameId = name as Token.Identifier
         storeSemInfo(name.span, "name")
-        val right = parseRBracket()
+        val right = parseRBracket() ?: return null
         val signature = SyntaxSignature(left.span + right.span, nameId.text)
         parsingSignatureSpan = signature.span
         return signature
@@ -128,51 +128,71 @@ class Parser(
     /**
      * Skip all the whitespace and attempt to parse a [Token.LBracket] token.
      */
-    private fun parseLBracket(): Token {
+    private fun parseLBracket(): Token? {
         lexer.skipWhitespace()
-        return lexer.lexLBracket()
+        val bracket = lexer.lexLBracket()
+        if (bracket is Token.Dummy) {
+            return null
+        }
+        return bracket
     }
 
     /**
      * Skip all the whitespace and attempt to parse a [Token.RBracket] token.
      */
-    private fun parseRBracket(): Token {
+    private fun parseRBracket(): Token? {
         lexer.skipWhitespace()
-        return lexer.lexRBracket()
+        val bracket = lexer.lexRBracket()
+        if (bracket is Token.Dummy) {
+            return null
+        }
+        return bracket
     }
 
     /**
      * Skip all the whitespace and attempt to parse a [Token.Equals] token.
      */
-    private fun parseEquals(): Token {
+    private fun parseEquals(): Token? {
         lexer.skipWhitespace()
-        return lexer.lexEquals()
+        val equals = lexer.lexEquals()
+        if (equals is Token.Dummy) {
+            return null
+        }
+        return equals
     }
 
     /**
      * Skip all the whitespace and attempt to parse a [Token.Comma] token.
      */
-    fun parseComma(): Token {
+    fun parseComma(): Token? {
         lexer.skipWhitespace()
-        return lexer.lexComma()
+        val comma = lexer.lexComma()
+        if (comma is Token.Dummy) {
+            return null
+        }
+        return comma
     }
 
     /**
      * Attempt to parse an [Token.Identifier] and falls back to [Token.Dummy] if something occurs.
      * This will eliminate any preceding whitespace to the token.
      */
-    fun parseIdentifier(): Token {
+    fun parseIdentifier(): Token? {
         lexer.skipWhitespace()
-        return lexer.lexIdentifier()
+        val identifier = lexer.lexIdentifier()
+        if (identifier is Token.Dummy) {
+            return null
+        }
+        return identifier
     }
 
     /**
      * Attempt to parse a valid numerical value and return 0 if it fails.
      */
-    fun parseInteger(): Int {
+    fun parseInteger(): Int? {
         val token = lexer.lexInteger()
         if (token is Token.Dummy) {
-            return 0
+            return null
         }
         storeSemInfo(token.span, "number")
         val integer = token as Token.Number
@@ -228,7 +248,7 @@ class Parser(
      * Attempt to parse a type name literal.
      */
     fun parseType(): SymbolType<*>? {
-        val token = parseIdentifier()
+        val token = parseIdentifier() ?: return null
         if (token is Token.Dummy) {
             return null
         }
@@ -247,10 +267,7 @@ class Parser(
      * If no valid configuration is found or can be parsed, a -1 will be returned instead.
      */
     fun parseReference(type: SymbolType<*>): Reference? {
-        val literal = parseIdentifier()
-        if (literal is Token.Dummy) {
-            return null
-        }
+        val literal = parseIdentifier() ?: return null
         storeSemInfo(literal.span, "reference")
         val identifier = literal as Token.Identifier
         return Reference(type, identifier.span, identifier.text)
@@ -258,15 +275,9 @@ class Parser(
 
     /**
      * Attempt to parse a valid identifier then match it to a valid enum constant in [T].
-     *
-     * The [errorValue] exists in-case we could not parse a valid identifier or if we could not match
-     * the parsed identifier to valid enum constant, in that case, the [errorValue] is returned.
      */
-    inline fun <reified T> parseEnumLiteral(errorValue: T): T where T : Enum<T>, T : LiteralEnum {
-        val literal = parseIdentifier()
-        if (literal is Token.Dummy) {
-            return errorValue
-        }
+    inline fun <reified T> parseEnumLiteral(): T? where T : Enum<T>, T : LiteralEnum {
+        val literal = parseIdentifier() ?: return null
         storeSemInfo(literal.span, "literal")
         val identifier = literal as Token.Identifier
         val values = enumValues<T>()
@@ -274,7 +285,7 @@ class Parser(
         if (value == null) {
             val validValuesMsg = values.joinToString(", ") { "'$it'" }
             reportError(identifier.span, "Unrecognised value. Valid values are ($validValuesMsg)")
-            return errorValue
+            return null
         }
         return value
     }
@@ -320,6 +331,14 @@ class Parser(
      */
     fun unknownProperty() {
         reportPropertyError("Unknown property '${parsingPropertyName!!}'")
+        skipProperty()
+    }
+
+    /**
+     * Skip the remaining of the current property.
+     */
+    fun skipProperty() {
+        lexer.skipLine()
     }
 
     fun storeSemInfo(span: Span, name: String) {

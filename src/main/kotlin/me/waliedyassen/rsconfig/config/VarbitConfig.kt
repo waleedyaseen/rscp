@@ -30,9 +30,9 @@ class VarbitConfig(name: String) : Config(name, SymbolType.VarBit) {
 
     override fun parseProperty(name: String, parser: Parser) {
         when (name) {
-            "startbit" -> startBit = parser.parseInteger()
-            "endbit" -> endBit = parser.parseInteger()
-            "basevar" -> baseVar = parser.parseReference(SymbolType.VarPlayer) ?: return
+            "startbit" -> startBit = parser.parseInteger() ?: return parser.skipProperty()
+            "endbit" -> endBit = parser.parseInteger() ?: return parser.skipProperty()
+            "basevar" -> baseVar = parser.parseReference(SymbolType.VarPlayer) ?: return parser.skipProperty()
             else -> parser.unknownProperty()
         }
     }
