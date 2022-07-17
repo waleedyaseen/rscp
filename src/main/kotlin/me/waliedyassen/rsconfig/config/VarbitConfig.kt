@@ -1,11 +1,8 @@
 package me.waliedyassen.rsconfig.config
 
-import com.fasterxml.jackson.databind.JsonNode
-import me.waliedyassen.rsconfig.CompilationContext
 import me.waliedyassen.rsconfig.binary.BinaryEncoder
 import me.waliedyassen.rsconfig.parser.Parser
 import me.waliedyassen.rsconfig.symbol.SymbolType
-import me.waliedyassen.rsconfig.util.asReference
 
 /**
  * Implementation for 'varbit' type configuration.
@@ -28,12 +25,6 @@ class VarbitConfig(name: String) : Config(name, SymbolType.VarBit) {
      * The 'basevar' attribute of the enum type.
      */
     private var baseVar = -1
-
-    override fun parseToml(node: JsonNode, context: CompilationContext) {
-        startBit = node["startbit"].asInt()
-        endBit = node["endbit"].asInt()
-        baseVar = node["basevar"].asReference(SymbolType.VarPlayer, context)
-    }
 
     override fun parseProperty(name: String, parser: Parser) {
         when (name) {

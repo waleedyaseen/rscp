@@ -1,14 +1,10 @@
 package me.waliedyassen.rsconfig.config
 
-import com.fasterxml.jackson.databind.JsonNode
-import me.waliedyassen.rsconfig.CompilationContext
 import me.waliedyassen.rsconfig.binary.BinaryEncoder
 import me.waliedyassen.rsconfig.parser.Parser
 import me.waliedyassen.rsconfig.symbol.SymbolType
 import me.waliedyassen.rsconfig.symbol.TypedSymbol
 import me.waliedyassen.rsconfig.util.LiteralEnum
-import me.waliedyassen.rsconfig.util.asEnumLiteral
-import me.waliedyassen.rsconfig.util.asSymbolType
 
 enum class VarLifetime(val id: Int, override val literal: String) : LiteralEnum {
     TEMPORARY(0, "temp"),
@@ -37,15 +33,6 @@ class VarpConfig(name: String) : Config(name, SymbolType.VarPlayer) {
      * The `lifetime` attribute of the varp.
      */
     private var lifetime = VarLifetime.TEMPORARY
-
-    override fun parseToml(node: JsonNode, context: CompilationContext) {
-        if (node.has("type")) {
-            type = node["type"].asSymbolType()
-        }
-        clientCode = node["clientcode"]?.asInt(-1) ?: 0
-        if (node.has("scope"))
-            lifetime = node["scope"].asEnumLiteral()
-    }
 
     override fun parseProperty(name: String, parser: Parser) {
         when (name) {

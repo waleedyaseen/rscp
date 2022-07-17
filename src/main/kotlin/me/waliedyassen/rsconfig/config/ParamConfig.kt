@@ -1,13 +1,9 @@
 package me.waliedyassen.rsconfig.config
 
-import com.fasterxml.jackson.databind.JsonNode
-import me.waliedyassen.rsconfig.CompilationContext
 import me.waliedyassen.rsconfig.binary.BinaryEncoder
 import me.waliedyassen.rsconfig.parser.Parser
 import me.waliedyassen.rsconfig.symbol.SymbolType
 import me.waliedyassen.rsconfig.symbol.TypedSymbol
-import me.waliedyassen.rsconfig.util.asSymbolType
-import me.waliedyassen.rsconfig.util.asValue
 
 class ParamConfig(name: String) : Config(name, SymbolType.Param) {
 
@@ -15,21 +11,6 @@ class ParamConfig(name: String) : Config(name, SymbolType.Param) {
     private var defaultInt: Int? = null
     private var defaultStr: String? = null
     private var autoDisable: Boolean = true
-
-    override fun parseToml(node: JsonNode, context: CompilationContext) {
-        type = node["type"].asSymbolType()
-        if (node.has("default")) {
-            val value = node["default"].asValue(type!!, context)
-            if (type == SymbolType.String) {
-                defaultStr = value as String
-            } else {
-                defaultInt = value as Int
-            }
-        }
-        if (node.has("autodisable")) {
-            autoDisable = node["autodisable"].asBoolean()
-        }
-    }
 
     override fun parseProperty(name: String, parser: Parser) {
         when (name) {

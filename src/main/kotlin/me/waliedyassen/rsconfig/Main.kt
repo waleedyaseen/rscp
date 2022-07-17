@@ -1,12 +1,7 @@
 package me.waliedyassen.rsconfig
 
 import ch.qos.logback.classic.Level
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.dataformat.toml.TomlMapper
-import com.fasterxml.jackson.module.kotlin.KotlinFeature
 import com.fasterxml.jackson.module.kotlin.jsonMapper
-import com.fasterxml.jackson.module.kotlin.kotlinModule
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
@@ -28,16 +23,7 @@ import java.io.File
 import kotlin.system.exitProcess
 import kotlin.system.measureTimeMillis
 
-abstract class ParsingConfig {
-    abstract val names: List<String>
-    abstract val type: SymbolType<*>
-}
-
-data class ParsingTomlConfig(override val names: List<String>, override val type: SymbolType<*>, val node: JsonNode) :
-    ParsingConfig()
-
-data class ParsingRsConfig(override val names: List<String>, override val type: SymbolType<*>, val input: String) :
-    ParsingConfig()
+data class ParsingConfig(val names: List<String>, val type: SymbolType<*>, val input: String)
 
 data class Error(val span: Span, val message: String)
 
@@ -115,18 +101,12 @@ object PackTool : CliktCommand() {
             var semInfo = mutableListOf<SemanticInfo>()
             if (inputDirectory != null) {
                 logger.info { "Parsing configs from $inputDirectory" }
-                val parsingConfigs = parseTomlConfigs(inputDirectory!!) + parseRsConfigs(inputDirectory!!)
+                val parsingConfigs = parseRsConfigs(inputDirectory!!)
                 assignPreParseSymbol(parsingConfigs, table)
                 parsingConfigs.forEach {
-                    if (it is ParsingTomlConfig) {
-                        val config = it.type.constructor(it.names[0])
-                        config.parseToml(it.node, context)
-                        configs += it.names[0] to config
-                    } else if (it is ParsingRsConfig) {
-                        val parser = Parser(it.type, context, it.input, extract == ExtractMode.SemInfo)
-                        configs += parser.parseConfigs().map { config -> config.name to config }
-                        semInfo += parser.semInfo
-                    }
+                    val parser = Parser(it.type, context, it.input, extract == ExtractMode.SemInfo)
+                    configs += parser.parseConfigs().map { config -> config.name to config }
+                    semInfo += parser.semInfo
                 }
             } else if (inputFile != null) {
                 val parsingConfig = parseRsConfig(inputFile!!)
@@ -199,35 +179,18 @@ object PackTool : CliktCommand() {
         }
     }
 
-    private fun parseTomlConfigs(folder: File): List<ParsingTomlConfig> {
-        val regex = Regex("(?:.+\\.)?([^.]+)\\.toml")
-        val mapper = createMapper()
-        val configs = mutableListOf<ParsingTomlConfig>()
-        folder.walkTopDown().forEach { file ->
-            val result = regex.matchEntire(file.name) ?: return@forEach
-            val literal = result.groupValues[1]
-            val type = SymbolType.lookup(literal)
-            val tree: JsonNode
-            file.reader().use { tree = mapper.readTree(it) }
-            tree.fields().asSequence().forEach {
-                configs += ParsingTomlConfig(listOf(it.key), type, it.value)
-            }
-        }
-        return configs
-    }
-
-    private fun parseRsConfigs(folder: File): List<ParsingRsConfig> {
+    private fun parseRsConfigs(folder: File): List<ParsingConfig> {
         return folder.walkTopDown().map { parseRsConfig(it) }.filterNotNull().toList()
     }
 
-    private fun parseRsConfig(file: File): ParsingRsConfig? {
+    private fun parseRsConfig(file: File): ParsingConfig? {
         val extension = file.extension
         val type = SymbolType.lookupOrNull(extension) ?: return null
         val input = file.reader().use { it.readText() }
         val dummyContext = CompilationContext(SymbolTable())
         val parser = Parser(type, dummyContext, input, false)
         val names = parser.peekConfigs()
-        return ParsingRsConfig(names, type, input)
+        return ParsingConfig(names, type, input)
     }
 
     private fun readSymbolTable(): SymbolTable {
@@ -252,20 +215,6 @@ object PackTool : CliktCommand() {
                 table.write(type, symbolDirectory.resolve("${type.literal}.sym"))
             }
         }
-    }
-
-    private fun createMapper(): TomlMapper {
-        val mapper = TomlMapper()
-        mapper.registerModule(kotlinModule {
-            configure(KotlinFeature.NullToEmptyCollection, false)
-            configure(KotlinFeature.NullToEmptyMap, false)
-            configure(KotlinFeature.NullIsSameAsDefault, false)
-            configure(KotlinFeature.SingletonSupport, false)
-            configure(KotlinFeature.StrictNullChecks, false)
-        })
-        mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true)
-        mapper.configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, false)
-        return mapper
     }
 }
 

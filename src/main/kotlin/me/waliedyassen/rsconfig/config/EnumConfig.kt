@@ -1,14 +1,9 @@
 package me.waliedyassen.rsconfig.config
 
-import com.fasterxml.jackson.databind.JsonNode
-import me.waliedyassen.rsconfig.CompilationContext
 import me.waliedyassen.rsconfig.binary.BinaryEncoder
 import me.waliedyassen.rsconfig.parser.Parser
 import me.waliedyassen.rsconfig.symbol.SymbolType
 import me.waliedyassen.rsconfig.symbol.TypedSymbol
-import me.waliedyassen.rsconfig.util.asSymbolType
-import me.waliedyassen.rsconfig.util.asValue
-import me.waliedyassen.rsconfig.util.parseValue
 
 /**
  * Implementation for 'enum' type configuration.
@@ -36,17 +31,6 @@ class EnumConfig(name: String) : Config(name, SymbolType.Enum) {
      * The 'val=x,y' attributes of the enum type.
      */
     private var values = LinkedHashMap<Int, Any>()
-
-    override fun parseToml(node: JsonNode, context: CompilationContext) {
-        inputType = node["inputtype"].asSymbolType()
-        outputType = node["outputtype"].asSymbolType()
-        default = node["default"].asValue(outputType, context)
-        node["values"]?.fields()?.forEach { (key, value) ->
-            val parsedKey = key.toString().parseValue(inputType, context) as Int
-            val parsedValue = value.asValue(outputType, context)
-            values[parsedKey] = parsedValue
-        }
-    }
 
     override fun parseProperty(name: String, parser: Parser) {
         when (name) {

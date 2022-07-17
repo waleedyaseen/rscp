@@ -12,9 +12,8 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-toml:2.13.2")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.2")
-    implementation("com.github.ajalt.clikt:clikt:3.4.0")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.3")
+    implementation("com.github.ajalt.clikt:clikt:3.5.0")
     implementation("com.michael-bull.kotlin-inline-logger:kotlin-inline-logger:1.0.4")
     implementation("ch.qos.logback:logback-core:1.2.11")
     implementation("ch.qos.logback:logback-classic:1.2.11")

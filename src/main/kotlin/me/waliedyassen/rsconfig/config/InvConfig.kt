@@ -1,12 +1,9 @@
 package me.waliedyassen.rsconfig.config
 
-import com.fasterxml.jackson.databind.JsonNode
-import me.waliedyassen.rsconfig.CompilationContext
 import me.waliedyassen.rsconfig.binary.BinaryEncoder
 import me.waliedyassen.rsconfig.parser.Parser
 import me.waliedyassen.rsconfig.symbol.SymbolType
 import me.waliedyassen.rsconfig.util.LiteralEnum
-import me.waliedyassen.rsconfig.util.asEnumLiteral
 
 enum class InvScope(val id: Int, override val literal: String) : LiteralEnum {
     TEMPORARY(0, "temp"),
@@ -22,12 +19,6 @@ class InvConfig(name: String) : Config(name, SymbolType.Inv) {
 
     var size = 0
     var scope = InvScope.TEMPORARY
-
-    override fun parseToml(node: JsonNode, context: CompilationContext) {
-        size = node["size"]?.asInt(0) ?: 0
-        if (node.has("scope"))
-            scope = node["scope"].asEnumLiteral()
-    }
 
     override fun parseProperty(name: String, parser: Parser) {
         when (name) {

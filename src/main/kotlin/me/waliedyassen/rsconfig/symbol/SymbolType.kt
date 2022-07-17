@@ -35,13 +35,13 @@ open class SymbolType<T : Symbol>(
     object Int : PrimitiveSymbolType('i', "int")
     object Boolean : PrimitiveSymbolType('1', "boolean")
     object String : PrimitiveSymbolType('s', "string")
-    object Obj : PrimitiveSymbolType('\u0000', "obj")
+    object Obj : PrimitiveSymbolType('o', "obj")
     object Enum : SymbolType<TypedSymbol>('g', "enum", ::EnumConfig, TypedSymbolSerializer)
     object VarPlayer : SymbolType<TypedSymbol>('\u0000', "varp", ::VarpConfig, TypedSymbolSerializer)
     object VarClient : SymbolType<TypedSymbol>('\u0000', "varc", ::VarcConfig, TypedSymbolSerializer)
     object VarBit : SymbolType<BasicSymbol>('\u0000', "varbit", ::VarbitConfig, BasicSymbolSerializer)
     object Param : SymbolType<TypedSymbol>('\u0000', "param", ::ParamConfig, TypedSymbolSerializer)
-    object Inv : SymbolType<BasicSymbol>('\u0000', "inv", ::InvConfig, BasicSymbolSerializer)
+    object Inv : SymbolType<BasicSymbol>('v', "inv", ::InvConfig, BasicSymbolSerializer)
     object Struct : SymbolType<BasicSymbol>('j', "struct", ::StructConfig, BasicSymbolSerializer)
 
 
