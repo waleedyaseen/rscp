@@ -37,17 +37,16 @@ inline fun <reified T> JsonNode.asEnumLiteral(defaultValue: T? = null): T where 
 /**
  * Parse a value that is compatible of the specified [SymbolType] from the raw value of this [String].
  */
-fun String.parseValue(type: SymbolType, context: CompilationContext): Any = when (type) {
-    SymbolType.INT -> toInt()
-    SymbolType.BOOLEAN -> if (toBoolean()) 1 else 0
-    SymbolType.STRING -> this
-    SymbolType.ENUM,
-    SymbolType.STRUCT,
-    SymbolType.PARAM,
-    SymbolType.VAR_PLAYER,
-    SymbolType.VAR_BIT,
-    SymbolType.INV,
-    SymbolType.VARC -> parseReference(type, context)
+fun String.parseValue(type: SymbolType, context: CompilationContext): Any {
+    if (type.isReference()) {
+        return parseReference(type, context);
+    }
+    return when (type) {
+        SymbolType.INT -> toInt()
+        SymbolType.BOOLEAN -> if (toBoolean()) 1 else 0
+        SymbolType.STRING -> this
+        else -> error("Unrecognized type: $type")
+    }
 }
 
 /**
