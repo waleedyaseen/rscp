@@ -6,6 +6,14 @@ import me.waliedyassen.tomlrs.symbol.SymbolType
 import me.waliedyassen.tomlrs.util.LiteralEnum
 
 /**
+ * Semantic information is essentially a span of text that holds a special meaning.
+ */
+data class SemanticInfo(
+    val name: String,
+    val span: Span
+)
+
+/**
  * A higher level of parsing, it takes the output of [Lexer] as input and makes sure the tokens follow
  * a certain set of rules.
  */
@@ -13,6 +21,10 @@ class Parser(
     private val type: SymbolType,
     val context: CompilationContext,
     input: String,
+    /**
+     * Whether we should track the semantic information of the parser
+     */
+    private var trackSemanticInformation: Boolean
 ) {
 
     /**
@@ -31,13 +43,19 @@ class Parser(
     private var parsingPropertyName: String? = null
 
     /**
+     * A list containing all the semantic information that we tracked.
+     */
+    var semInfo = mutableListOf<SemanticInfo>()
+
+    /**
      * Quickly run through the source code and collect the names of all defined configurations.
      */
     fun peekConfigs(): List<String> {
         val names = mutableListOf<String>()
-        while (!lexer.isEof()) {
-            if (lexer.skipWhitespace()) {
-                continue
+        while (true) {
+            lexer.skipWhitespace()
+            if (lexer.isLBracket() || lexer.isEof()) {
+                break
             }
             val name = parseSignature()
             if (name != null) {
@@ -96,6 +114,7 @@ class Parser(
             lexer.skipLine()
             return
         }
+        storeSemInfo(propertyNameToken.span, "property")
         parseEquals()
         parsingPropertyName = (propertyNameToken as Token.Identifier).text
         parsingPropertySpan = propertyNameToken.span
@@ -111,6 +130,7 @@ class Parser(
         if (name is Token.Dummy) {
             return null
         }
+        storeSemInfo(name.span, "name")
         parseRBracket()
         return (name as Token.Identifier).text
     }
@@ -164,6 +184,7 @@ class Parser(
         if (token is Token.Dummy) {
             return 0
         }
+        storeSemInfo(token.span, "number")
         val integer = token as Token.Number
         return integer.value
     }
@@ -177,6 +198,7 @@ class Parser(
         if (token is Token.Dummy) {
             return false
         }
+        storeSemInfo(token.span, "boolean")
         val identifier = token as Token.Identifier
         return when (identifier.text) {
             "true", "yes" -> true
@@ -198,6 +220,7 @@ class Parser(
             if (token is Token.Dummy) {
                 return ""
             }
+            storeSemInfo(token.span, "string")
             val text = token as Token.Text
             return text.text
         } else {
@@ -205,6 +228,7 @@ class Parser(
             if (token is Token.Dummy) {
                 return ""
             }
+            storeSemInfo(token.span, "string")
             val text = token as Token.Text
             return text.text
         }
@@ -218,6 +242,7 @@ class Parser(
         if (token is Token.Dummy) {
             return null
         }
+        storeSemInfo(token.span, "type")
         val identifier = token as Token.Identifier
         val type = SymbolType.lookupOrNull(identifier.text)
         if (type == null) {
@@ -236,6 +261,7 @@ class Parser(
         if (literal is Token.Dummy) {
             return -1
         }
+        storeSemInfo(literal.span, "reference")
         val identifier = literal as Token.Identifier
         if (identifier.text == "null") {
             if (!permitNulls) {
@@ -262,6 +288,7 @@ class Parser(
         if (literal is Token.Dummy) {
             return errorValue
         }
+        storeSemInfo(literal.span, "literal")
         val identifier = literal as Token.Identifier
         val values = enumValues<T>()
         val value = values.find { it.literal == identifier.text }
@@ -300,5 +327,10 @@ class Parser(
      */
     fun unknownProperty() {
         reportError("Unknown property '${parsingPropertyName!!}'")
+    }
+
+    fun storeSemInfo(span: Span, name: String) {
+        if (!trackSemanticInformation) return
+        semInfo += SemanticInfo(name, span)
     }
 }

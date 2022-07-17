@@ -17,6 +17,7 @@ import com.github.michaelbull.logging.InlineLogger
 import me.waliedyassen.tomlrs.config.Config
 import me.waliedyassen.tomlrs.config.ParamConfig
 import me.waliedyassen.tomlrs.parser.Parser
+import me.waliedyassen.tomlrs.parser.SemanticInfo
 import me.waliedyassen.tomlrs.parser.Span
 import me.waliedyassen.tomlrs.symbol.SymbolTable
 import me.waliedyassen.tomlrs.symbol.SymbolType
@@ -52,7 +53,8 @@ data class CompilationContext(val sym: SymbolTable) {
  * The kind of information that we want to extract from the compiler.
  */
 enum class ExtractMode {
-    Errors
+    Errors,
+    SemInfo
 }
 
 object PackTool : CliktCommand() {
@@ -109,6 +111,7 @@ object PackTool : CliktCommand() {
             val table = readSymbolTable()
             val context = CompilationContext(table)
             val configs = mutableListOf<Pair<String, Config>>()
+            var semInfo = mutableListOf<SemanticInfo>()
             if (inputDirectory != null) {
                 logger.info { "Parsing configs from $inputDirectory" }
                 val parsingConfigs = parseTomlConfigs(inputDirectory!!) + parseRsConfigs(inputDirectory!!)
@@ -119,20 +122,23 @@ object PackTool : CliktCommand() {
                         config.parseToml(it.node, context)
                         configs += it.names[0] to config
                     } else if (it is ParsingRsConfig) {
-                        val parser = Parser(it.type, context, it.input)
+                        val parser = Parser(it.type, context, it.input, extract == ExtractMode.SemInfo)
                         configs += parser.parseConfigs()
+                        semInfo += parser.semInfo
                     }
                 }
             } else if (inputFile != null) {
                 val parsingConfig = parseRsConfig(inputFile!!)
                 if (parsingConfig != null) {
-                    val parser = Parser(parsingConfig.type, context, parsingConfig.input)
+                    val parser = Parser(parsingConfig.type, context, parsingConfig.input, extract == ExtractMode.SemInfo)
                     configs += parser.parseConfigs()
+                    semInfo += parser.semInfo
                 }
             }
             if (extract != null) {
                 val output = when (extract) {
                     ExtractMode.Errors -> context.errors
+                    ExtractMode.SemInfo -> semInfo
                     else -> error("Unhandled extract mode: $extract")
                 }
                 print(jsonMapper { }.writeValueAsString(output))
@@ -216,7 +222,7 @@ object PackTool : CliktCommand() {
         val type = SymbolType.lookupOrNull(extension) ?: return null
         val input = file.reader().use { it.readText() }
         val dummyContext = CompilationContext(SymbolTable())
-        val parser = Parser(type, dummyContext, input)
+        val parser = Parser(type, dummyContext, input, false)
         val names = parser.peekConfigs()
         return ParsingRsConfig(names, type, input)
     }
