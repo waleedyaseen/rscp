@@ -2,6 +2,7 @@ package me.waliedyassen.tomlrs.util
 
 import com.fasterxml.jackson.databind.JsonNode
 import me.waliedyassen.tomlrs.CompilationContext
+import me.waliedyassen.tomlrs.parser.Span
 import me.waliedyassen.tomlrs.symbol.SymbolType
 
 /**
@@ -58,7 +59,7 @@ fun String.parseReference(type: SymbolType, context: CompilationContext): Int {
     }
     val symbol = context.sym.lookup(type)[this]
     if (symbol == null) {
-        context.reportError("Unresolved ${type.literal} reference to '${this}'")
+        context.reportError(Span.empty(), "Unresolved ${type.literal} reference to '${this}'")
         return -1
     }
     return symbol.id

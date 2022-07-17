@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import me.waliedyassen.tomlrs.CompilationContext
 import me.waliedyassen.tomlrs.binary.BinaryEncoder
 import me.waliedyassen.tomlrs.parser.Parser
+import me.waliedyassen.tomlrs.parser.Span
 import me.waliedyassen.tomlrs.parser.parseParam
 import me.waliedyassen.tomlrs.symbol.SymbolType
 import me.waliedyassen.tomlrs.util.asValue
@@ -24,7 +25,7 @@ class StructConfig(name: String) : Config(name, SymbolType.STRUCT) {
         node.fields().forEach { (key, value) ->
             val param = context.sym.lookupOrNull(SymbolType.PARAM, key)
             if (param == null) {
-                context.reportError("Unresolved param reference to '${key}'")
+                context.reportError(Span.empty(), "Unresolved param reference to '${key}'")
                 return@forEach
             }
             params[param.id] = value.asValue(param.content!!, context)

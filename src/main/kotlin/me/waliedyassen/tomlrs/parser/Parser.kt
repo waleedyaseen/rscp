@@ -289,7 +289,7 @@ class Parser(
      * Report an error message to the compilation context.
      */
     fun reportError(message: String) {
-        context.reportError(message)
+        context.reportError(parsingPropertySpan ?: Span.empty(), message)
     }
 
     /**

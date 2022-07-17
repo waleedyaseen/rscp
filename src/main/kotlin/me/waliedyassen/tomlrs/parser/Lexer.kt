@@ -280,7 +280,7 @@ class Lexer(private val input: CharArray, private val context: CompilationContex
      * Report an error to the compilation context.
      */
     private fun reportError(span: Span, text: String) {
-        context.reportError(text)
+        context.reportError(span, text)
     }
 
     /**

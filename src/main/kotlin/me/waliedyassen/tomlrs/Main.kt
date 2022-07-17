@@ -16,6 +16,7 @@ import com.github.michaelbull.logging.InlineLogger
 import me.waliedyassen.tomlrs.config.Config
 import me.waliedyassen.tomlrs.config.ParamConfig
 import me.waliedyassen.tomlrs.parser.Parser
+import me.waliedyassen.tomlrs.parser.Span
 import me.waliedyassen.tomlrs.symbol.SymbolTable
 import me.waliedyassen.tomlrs.symbol.SymbolType
 import org.slf4j.Logger
@@ -35,14 +36,14 @@ data class ParsingTomlConfig(override val names: List<String>, override val type
 data class ParsingRsConfig(override val names: List<String>, override val type: SymbolType, val input: String) :
     ParsingConfig()
 
-data class Error(val message: String)
+data class Error(val span: Span, val message: String)
 
 data class CompilationContext(val sym: SymbolTable) {
 
     val errors = mutableListOf<Error>()
 
-    fun reportError(message: String) {
-        errors += Error(message)
+    fun reportError(span: Span, message: String) {
+        errors += Error(span, message)
     }
 }
 
