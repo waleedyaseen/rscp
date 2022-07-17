@@ -11,6 +11,7 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
+import com.github.ajalt.clikt.parameters.types.enum
 import com.github.ajalt.clikt.parameters.types.file
 import com.github.michaelbull.logging.InlineLogger
 import me.waliedyassen.tomlrs.config.Config
@@ -47,6 +48,13 @@ data class CompilationContext(val sym: SymbolTable) {
     }
 }
 
+/**
+ * The kind of information that we want to extract from the compiler.
+ */
+enum class ExtractMode {
+    Errors
+}
+
 object PackTool : CliktCommand() {
 
     private val logger = InlineLogger()
@@ -78,13 +86,14 @@ object PackTool : CliktCommand() {
         .default(File("output"))
 
     /**
-     * A flag option which indicates we are looking to extract the errors only.
+     * When present, the compiler will output JSON string with the information needed. This option has an argument
+     * that tells what kind of information is needed.
      */
-    private val extractErrors by option(
+    private val extract by option(
         "-e",
-        "--extract-errors",
+        "--extract",
         help = "Tells the packer to output the errors in a json format"
-    ).flag()
+    ).enum<ExtractMode>()
 
     /**
      * A flag option which indicates to turn off any logging output.
@@ -121,8 +130,12 @@ object PackTool : CliktCommand() {
                     configs += parser.parseConfigs()
                 }
             }
-            if (extractErrors) {
-                print(jsonMapper { }.writeValueAsString(context.errors))
+            if (extract != null) {
+                val output = when (extract) {
+                    ExtractMode.Errors -> context.errors
+                    else -> error("Unhandled extract mode: $extract")
+                }
+                print(jsonMapper { }.writeValueAsString(output))
                 exitProcess(0)
             }
             if (context.errors.isNotEmpty()) {
