@@ -10,7 +10,7 @@ fun Parser.parseParam(params: MutableMap<Int, Any>) {
     if (paramId == -1) {
         return
     }
-    val param = context.sym.lookupList(SymbolType.Param).lookupById(paramId)!!
+    val param = compiler.sym.lookupList(SymbolType.Param).lookupById(paramId)!!
     parseComma()
     params[paramId] = parseDynamic(param.type)
 }

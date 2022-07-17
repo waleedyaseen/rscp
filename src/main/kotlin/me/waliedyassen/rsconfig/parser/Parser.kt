@@ -1,6 +1,6 @@
 package me.waliedyassen.rsconfig.parser
 
-import me.waliedyassen.rsconfig.CompilerContext
+import me.waliedyassen.rsconfig.Compiler
 import me.waliedyassen.rsconfig.config.Config
 import me.waliedyassen.rsconfig.symbol.SymbolType
 import me.waliedyassen.rsconfig.util.LiteralEnum
@@ -22,18 +22,15 @@ data class SyntaxConfig(val span: Span, val config: Config)
  */
 class Parser(
     private val type: SymbolType<*>,
-    val context: CompilerContext,
+    val compiler: Compiler,
     input: String,
-    /**
-     * Whether we should track the semantic information of the parser
-     */
-    private var trackSemanticInformation: Boolean
+    private var extractSemInfo: Boolean
 ) {
 
     /**
      * The underlying lexer we use for parsing tokens.
      */
-    private val lexer = Lexer(input.toCharArray(), context)
+    private val lexer = Lexer(input.toCharArray(), compiler)
 
     /**
      * The property span we are currently parsing
@@ -276,7 +273,7 @@ class Parser(
             }
             return -1
         }
-        val symbol = context.sym.lookupList(type).lookupByName(identifier.text)
+        val symbol = compiler.sym.lookupList(type).lookupByName(identifier.text)
         if (symbol == null) {
             reportError("Unresolved reference to symbol '${identifier.text}' of type '${type.literal}'")
             return -1
@@ -323,10 +320,10 @@ class Parser(
     }
 
     /**
-     * Report an error message to the compilation context.
+     * Report an error message to the compilation compiler.
      */
     fun reportError(message: String) {
-        context.addError(parsingPropertySpan ?: Span.empty(), message)
+        compiler.addError(parsingPropertySpan ?: Span.empty(), message)
     }
 
     /**
@@ -337,7 +334,7 @@ class Parser(
     }
 
     fun storeSemInfo(span: Span, name: String) {
-        if (!trackSemanticInformation) return
+        if (!extractSemInfo) return
         semInfo += SemanticInfo(name, span)
     }
 }
