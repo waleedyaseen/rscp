@@ -1,22 +1,27 @@
 package me.waliedyassen.tomlrs
 
+import ch.qos.logback.classic.Level
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.dataformat.toml.TomlMapper
 import com.fasterxml.jackson.module.kotlin.KotlinFeature
+import com.fasterxml.jackson.module.kotlin.jsonMapper
 import com.fasterxml.jackson.module.kotlin.kotlinModule
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.options.default
+import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
 import com.github.michaelbull.logging.InlineLogger
 import me.waliedyassen.tomlrs.config.Config
 import me.waliedyassen.tomlrs.config.ParamConfig
 import me.waliedyassen.tomlrs.parser.Parser
-import me.waliedyassen.tomlrs.parser.Span
 import me.waliedyassen.tomlrs.symbol.SymbolTable
 import me.waliedyassen.tomlrs.symbol.SymbolType
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.io.File
+import kotlin.system.exitProcess
 import kotlin.system.measureTimeMillis
 
 abstract class ParsingConfig {
@@ -30,12 +35,14 @@ data class ParsingTomlConfig(override val names: List<String>, override val type
 data class ParsingRsConfig(override val names: List<String>, override val type: SymbolType, val input: String) :
     ParsingConfig()
 
+data class Error(val message: String)
+
 data class CompilationContext(val sym: SymbolTable) {
 
-    val errors = mutableListOf<String>()
+    val errors = mutableListOf<Error>()
 
     fun reportError(message: String) {
-        errors += message
+        errors += Error(message)
     }
 }
 
@@ -43,35 +50,79 @@ object PackTool : CliktCommand() {
 
     private val logger = InlineLogger()
 
+    /**
+     * The directory which contains all the symbols.
+     */
     private val symbolDirectory by option(help = "The symbol directory which contains the symbol table files")
         .file()
         .default(File("symbols"))
 
+    /**
+     * If present, the compiler will attempt to compile all the files within the directory.
+     */
     private val inputDirectory by option(help = "The input directory which contains all the source files")
         .file()
-        .default(File("input"))
 
+    /**
+     * If present the compiler will attempt to compile this file only.
+     */
+    private val inputFile by option(help = "The input file which contains the source code")
+        .file()
+
+    /**
+     * The directory to place the output binaries into.
+     */
     private val outputDirectory by option(help = "The output directory which the binary files will be written to")
         .file()
         .default(File("output"))
 
+    /**
+     * A flag option which indicates we are looking to extract the errors only.
+     */
+    private val extractErrors by option(
+        "-e",
+        "--extract-errors",
+        help = "Tells the packer to output the errors in a json format"
+    ).flag()
+
+    /**
+     * A flag option which indicates to turn off any logging output.
+     */
+    private val silent by option("-s", "--silent", help = "Run in silent mode, prevent any logging output").flag()
 
     override fun run() {
+        if (silent) {
+            val root = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as ch.qos.logback.classic.Logger
+            root.level = Level.OFF
+        }
         val time = measureTimeMillis {
             val table = readSymbolTable()
             val context = CompilationContext(table)
-            logger.info { "Parsing configs from $inputDirectory" }
-            val parsingTomlConfigs = parseTomlConfigs()
-            val parsingRsConfigs = parseRsConfigs()
-            generateConfigId(parsingTomlConfigs + parsingRsConfigs, table)
-            val configs = parsingTomlConfigs.map {
-                val config = it.type.supplier(it.names[0])
-                config.parseToml(it.node, context)
-                it.names[0] to config
-            }.toMutableList()
-            parsingRsConfigs.forEach {
-                val parser = Parser(it.type, context, it.input)
-                configs += parser.parseConfigs()
+            val configs = mutableListOf<Pair<String, Config>>()
+            if (inputDirectory != null) {
+                logger.info { "Parsing configs from $inputDirectory" }
+                val parsingConfigs = parseTomlConfigs(inputDirectory!!) + parseRsConfigs(inputDirectory!!)
+                generateConfigId(parsingConfigs, table)
+                parsingConfigs.forEach {
+                    if (it is ParsingTomlConfig) {
+                        val config = it.type.supplier(it.names[0])
+                        config.parseToml(it.node, context)
+                        configs += it.names[0] to config
+                    } else if (it is ParsingRsConfig) {
+                        val parser = Parser(it.type, context, it.input)
+                        configs += parser.parseConfigs()
+                    }
+                }
+            } else if (inputFile != null) {
+                val parsingConfig = parseRsConfig(inputFile!!)
+                if (parsingConfig != null) {
+                    val parser = Parser(parsingConfig.type, context, parsingConfig.input)
+                    configs += parser.parseConfigs()
+                }
+            }
+            if (extractErrors) {
+                print(jsonMapper { }.writeValueAsString(context.errors))
+                exitProcess(0)
             }
             if (context.errors.isNotEmpty()) {
                 context.errors.forEach { logger.info { it } }
@@ -125,11 +176,11 @@ object PackTool : CliktCommand() {
         }
     }
 
-    private fun parseTomlConfigs(): List<ParsingTomlConfig> {
+    private fun parseTomlConfigs(folder: File): List<ParsingTomlConfig> {
         val regex = Regex("(?:.+\\.)?([^.]+)\\.toml")
         val mapper = createMapper()
         val configs = mutableListOf<ParsingTomlConfig>()
-        inputDirectory.walkTopDown().forEach { file ->
+        folder.walkTopDown().forEach { file ->
             val result = regex.matchEntire(file.name) ?: return@forEach
             val literal = result.groupValues[1]
             val type = SymbolType.lookup(literal)
@@ -142,18 +193,18 @@ object PackTool : CliktCommand() {
         return configs
     }
 
-    private fun parseRsConfigs(): List<ParsingRsConfig> {
-        val configs = mutableListOf<ParsingRsConfig>()
-        inputDirectory.walkTopDown().forEach { file ->
-            val extension = file.extension
-            val type = SymbolType.lookupOrNull(extension) ?: return@forEach
-            val input = file.reader().use { it.readText() }
-            val dummyContext = CompilationContext(SymbolTable())
-            val parser = Parser(type, dummyContext, input)
-            val names = parser.peekConfigs()
-            configs += ParsingRsConfig(names, type, input)
-        }
-        return configs
+    private fun parseRsConfigs(folder: File): List<ParsingRsConfig> {
+        return folder.walkTopDown().map { parseRsConfig(it) }.filterNotNull().toList()
+    }
+
+    private fun parseRsConfig(file: File): ParsingRsConfig? {
+        val extension = file.extension
+        val type = SymbolType.lookupOrNull(extension) ?: return null
+        val input = file.reader().use { it.readText() }
+        val dummyContext = CompilationContext(SymbolTable())
+        val parser = Parser(type, dummyContext, input)
+        val names = parser.peekConfigs()
+        return ParsingRsConfig(names, type, input)
     }
 
     private fun readSymbolTable(): SymbolTable {
