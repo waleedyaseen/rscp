@@ -1,5 +1,6 @@
 package me.waliedyassen.rsconfig.config
 
+import me.waliedyassen.rsconfig.Compiler
 import me.waliedyassen.rsconfig.binary.BinaryEncoder
 import me.waliedyassen.rsconfig.parser.Parser
 import me.waliedyassen.rsconfig.symbol.SymbolType
@@ -7,7 +8,7 @@ import me.waliedyassen.rsconfig.symbol.TypedSymbol
 
 class VarcConfig(name: String) : Config(name, SymbolType.VarClient) {
 
-    lateinit var type: SymbolType<*>
+    var type: SymbolType<*> = SymbolType.Undefined
     var scope = VarLifetime.TEMPORARY
 
     override fun parseProperty(name: String, parser: Parser) {
@@ -19,9 +20,13 @@ class VarcConfig(name: String) : Config(name, SymbolType.VarClient) {
     }
 
     override fun verifyProperties(parser: Parser) {
-        if (!this::type.isInitialized) {
-            parser.reportError("type property must be specified")
+        if (type == SymbolType.Undefined) {
+            parser.reportConfigError("type property must be specified")
         }
+    }
+
+    override fun resolveReferences(compiler: Compiler) {
+        // Do nothing.
     }
 
     override fun createSymbol(id: Int) = TypedSymbol(name, id, type)

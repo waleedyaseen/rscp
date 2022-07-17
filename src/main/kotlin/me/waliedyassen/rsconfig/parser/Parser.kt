@@ -33,6 +33,11 @@ class Parser(
     private val lexer = Lexer(input.toCharArray(), compiler)
 
     /**
+     * The config signature span we are currently parsing
+     */
+    private var parsingSignatureSpan: Span? = null
+
+    /**
      * The property span we are currently parsing
      */
     private var parsingPropertySpan: Span? = null
@@ -46,27 +51,6 @@ class Parser(
      * A list containing all the semantic information that we tracked.
      */
     var semInfo = mutableListOf<SemanticInfo>()
-
-    /**
-     * Quickly run through the source code and collect the names of all defined configurations.
-     */
-    fun peekConfigs(): List<String> {
-        val names = mutableListOf<String>()
-        while (true) {
-            lexer.skipWhitespace()
-            if (lexer.isLBracket() || lexer.isEof()) {
-                break
-            }
-            val sig = parseSignature()
-            if (sig != null) {
-                names += sig.name
-            }
-            while (!lexer.isLBracket() && !lexer.isEof()) {
-                lexer.skipLine()
-            }
-        }
-        return names
-    }
 
     /**
      * Parse a list of all the valid [Config] in the file.
@@ -136,7 +120,9 @@ class Parser(
         val nameId = name as Token.Identifier
         storeSemInfo(name.span, "name")
         val right = parseRBracket()
-        return SyntaxSignature(left.span + right.span, nameId.text)
+        val signature = SyntaxSignature(left.span + right.span, nameId.text)
+        parsingSignatureSpan = signature.span
+        return signature
     }
 
     /**
@@ -208,7 +194,7 @@ class Parser(
             "true", "yes" -> true
             "false", "no" -> false
             else -> {
-                reportError("Unrecognized boolean literal '${identifier.text}'")
+                reportError(identifier.span, "Unrecognized boolean literal '${identifier.text}'")
                 false
             }
         }
@@ -217,7 +203,7 @@ class Parser(
     /**
      * Attempt to parse a valid text value and return 0 if it fails.
      */
-    private fun parseString(): String {
+    fun parseString(): String {
         // TODO(Walied): Not every place allows non quoted string
         if (lexer.isQuotedString()) {
             val token = lexer.lexQuotedString()
@@ -250,7 +236,7 @@ class Parser(
         val identifier = token as Token.Identifier
         val type = SymbolType.lookupOrNull(identifier.text)
         if (type == null) {
-            reportError("Unrecognized type name '${identifier.text}'")
+            reportError(identifier.span, "Unrecognized type name '${identifier.text}'")
             return null
         }
         return type
@@ -260,25 +246,14 @@ class Parser(
      * Attempt to parse a valid configuration symbol name and return the associated id for that symbol.
      * If no valid configuration is found or can be parsed, a -1 will be returned instead.
      */
-    fun parseReference(type: SymbolType<*>, permitNulls: Boolean = true): Int {
+    fun parseReference(type: SymbolType<*>): Reference? {
         val literal = parseIdentifier()
         if (literal is Token.Dummy) {
-            return -1
+            return null
         }
         storeSemInfo(literal.span, "reference")
         val identifier = literal as Token.Identifier
-        if (identifier.text == "null") {
-            if (!permitNulls) {
-                reportError("Null values are not permitted in here")
-            }
-            return -1
-        }
-        val symbol = compiler.sym.lookupList(type).lookupByName(identifier.text)
-        if (symbol == null) {
-            reportError("Unresolved reference to symbol '${identifier.text}' of type '${type.literal}'")
-            return -1
-        }
-        return symbol.id
+        return Reference(type, identifier.span, identifier.text)
     }
 
     /**
@@ -298,7 +273,7 @@ class Parser(
         val value = values.find { it.literal == identifier.text }
         if (value == null) {
             val validValuesMsg = values.joinToString(", ") { "'$it'" }
-            reportError("Unrecognised value. Valid values are ($validValuesMsg)")
+            reportError(identifier.span, "Unrecognised value. Valid values are ($validValuesMsg)")
             return errorValue
         }
         return value
@@ -307,9 +282,9 @@ class Parser(
     /**
      * Attempt to parse a dynamic value based on the given [SymbolType]
      */
-    fun parseDynamic(outputType: SymbolType<*>): Any {
+    fun parseDynamic(outputType: SymbolType<*>): Any? {
         if (outputType.isReference()) {
-            return parseReference(outputType, true)
+            return parseReference(outputType)
         }
         return when (outputType) {
             SymbolType.String -> parseString()
@@ -320,17 +295,31 @@ class Parser(
     }
 
     /**
-     * Report an error message to the compilation compiler.
+     * Report an error message with span of the current property.
      */
-    fun reportError(message: String) {
+    fun reportPropertyError(message: String) {
         compiler.addError(parsingPropertySpan ?: Span.empty(), message)
+    }
+
+    /**
+     * Report an error message with span of the current config signature.
+     */
+    fun reportConfigError(message: String) {
+        reportError(parsingSignatureSpan!!, message)
+    }
+
+    /**
+     * Report an error diagnostic to the compiler.
+     */
+    fun reportError(span: Span, message: String) {
+        compiler.addError(span, message)
     }
 
     /**
      * Report an error indicating the property that is being currently parsed is unknown to the configuration.
      */
     fun unknownProperty() {
-        reportError("Unknown property '${parsingPropertyName!!}'")
+        reportPropertyError("Unknown property '${parsingPropertyName!!}'")
     }
 
     fun storeSemInfo(span: Span, name: String) {

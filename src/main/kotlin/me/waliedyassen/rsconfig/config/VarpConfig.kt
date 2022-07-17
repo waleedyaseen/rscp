@@ -1,5 +1,6 @@
 package me.waliedyassen.rsconfig.config
 
+import me.waliedyassen.rsconfig.Compiler
 import me.waliedyassen.rsconfig.binary.BinaryEncoder
 import me.waliedyassen.rsconfig.parser.Parser
 import me.waliedyassen.rsconfig.symbol.SymbolType
@@ -22,7 +23,7 @@ class VarpConfig(name: String) : Config(name, SymbolType.VarPlayer) {
     /**
      * The `type` attribute of the varp.
      */
-    private var type: SymbolType<*>? = null
+    private var type: SymbolType<*> = SymbolType.Undefined
 
     /**
      * The 'clientcode' attribute of the varp.
@@ -47,7 +48,11 @@ class VarpConfig(name: String) : Config(name, SymbolType.VarPlayer) {
         // Do nothing.
     }
 
-    override fun createSymbol(id: Int) = TypedSymbol(name, id, type!!)
+    override fun resolveReferences(compiler: Compiler) {
+        // Do nothing.
+    }
+
+    override fun createSymbol(id: Int) = TypedSymbol(name, id, type)
 
     override fun encode(): ByteArray {
         val expectedSize = 1 + (if (clientCode != 0) 3 else 0) + if (lifetime != VarLifetime.TEMPORARY) 2 else 0

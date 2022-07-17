@@ -1,5 +1,6 @@
 package me.waliedyassen.rsconfig.config
 
+import me.waliedyassen.rsconfig.Compiler
 import me.waliedyassen.rsconfig.parser.Parser
 import me.waliedyassen.rsconfig.symbol.BasicSymbol
 import me.waliedyassen.rsconfig.symbol.Symbol
@@ -12,14 +13,26 @@ import me.waliedyassen.rsconfig.symbol.SymbolType
  */
 abstract class Config(val name: String, val symbolType: SymbolType<*>) {
 
-    open fun parseProperty(name: String, parser: Parser) {
-        TODO("Unimplemented type: $this")
-    }
+    /**
+     * Parse a property with the specified [name] using the specified [Parser].
+     */
+    abstract fun parseProperty(name: String, parser: Parser)
 
-    open fun verifyProperties(parser: Parser) {
-        TODO("Unimplemented type: $this")
-    }
+    /**
+     * Verify that all the parsed properties are valid and check for any
+     * missing property.
+     */
+    abstract fun verifyProperties(parser: Parser)
 
+    /**
+     * Resolve all of the [me.waliedyassen.rsconfig.parser.Reference] objects
+     * in this [Config] instance
+     */
+    abstract fun resolveReferences(compiler: Compiler)
+
+    /**
+     * Create a [Symbol] object that we can store in the symbol table.
+     */
     open fun createSymbol(id: Int): Symbol = BasicSymbol(name, id)
 
     /**

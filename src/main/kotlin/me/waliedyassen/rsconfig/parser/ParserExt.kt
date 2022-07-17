@@ -6,11 +6,16 @@ import me.waliedyassen.rsconfig.symbol.SymbolType
  * Parse a parameter key and value and store them in the specified [params] map.
  */
 fun Parser.parseParam(params: MutableMap<Int, Any>) {
-    val paramId = parseReference(SymbolType.Param, false)
-    if (paramId == -1) {
-        return
-    }
-    val param = compiler.sym.lookupList(SymbolType.Param).lookupById(paramId)!!
+    val paramValue = parseReference(SymbolType.Param)
+    val paramId = if (paramValue == null) null else compiler.resolveReference(paramValue)
     parseComma()
-    params[paramId] = parseDynamic(param.type)
+    if (paramId != null && paramId != -1) {
+        val param = compiler.sym.lookupList(SymbolType.Param).lookupById(paramId)!!
+        val value = parseDynamic(param.type)
+        if (value != null) {
+            params[paramId] = value
+        }
+    } else {
+        parseString()
+    }
 }

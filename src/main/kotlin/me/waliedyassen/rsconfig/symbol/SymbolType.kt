@@ -1,6 +1,13 @@
 package me.waliedyassen.rsconfig.symbol
 
-import me.waliedyassen.rsconfig.config.*
+import me.waliedyassen.rsconfig.config.Config
+import me.waliedyassen.rsconfig.config.EnumConfig
+import me.waliedyassen.rsconfig.config.InvConfig
+import me.waliedyassen.rsconfig.config.ParamConfig
+import me.waliedyassen.rsconfig.config.StructConfig
+import me.waliedyassen.rsconfig.config.VarbitConfig
+import me.waliedyassen.rsconfig.config.VarcConfig
+import me.waliedyassen.rsconfig.config.VarpConfig
 
 /**
  * A primitive symbol type that cannot be stored in a symbol table.
@@ -15,7 +22,7 @@ open class SymbolType<T : Symbol>(
     val legacyChar: Char,
     val literal: kotlin.String,
     val constructor: (kotlin.String) -> Config = { error("Cannot construct symbol of type: $this") },
-    val serializer: SymbolSerializer<T>
+    val serializer: SymbolSerializer<T>,
 ) {
     /**
      * Checks whether this symbol type can be referenced.
@@ -32,6 +39,7 @@ open class SymbolType<T : Symbol>(
         else -> false
     }
 
+    object Undefined : PrimitiveSymbolType(0.toChar(), "")
     object Int : PrimitiveSymbolType('i', "int")
     object Boolean : PrimitiveSymbolType('1', "boolean")
     object String : PrimitiveSymbolType('s', "string")
@@ -67,7 +75,9 @@ open class SymbolType<T : Symbol>(
         /**
          * A look-up by literal map for [SymbolType].
          */
-        private val lookupByLiteral = values.associateBy { it.literal }
+        private val lookupByLiteral = values
+            .filter { it.literal.isNotBlank() }
+            .associateBy { it.literal }
 
         /**
          * Looks-up for a [SymbolType] with the specified [literal].

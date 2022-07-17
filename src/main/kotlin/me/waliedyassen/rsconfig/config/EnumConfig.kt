@@ -1,7 +1,9 @@
 package me.waliedyassen.rsconfig.config
 
+import me.waliedyassen.rsconfig.Compiler
 import me.waliedyassen.rsconfig.binary.BinaryEncoder
 import me.waliedyassen.rsconfig.parser.Parser
+import me.waliedyassen.rsconfig.parser.Reference
 import me.waliedyassen.rsconfig.symbol.SymbolType
 import me.waliedyassen.rsconfig.symbol.TypedSymbol
 
@@ -15,48 +17,50 @@ class EnumConfig(name: String) : Config(name, SymbolType.Enum) {
     /**
      * The 'inputtype' attribute of the enum type.
      */
-    private lateinit var inputType: SymbolType<*>
+    private var inputType: SymbolType<*> = SymbolType.Undefined
 
     /**
      * The 'outputtype' attribute of the enum type.
      */
-    private lateinit var outputType: SymbolType<*>
+    private var outputType: SymbolType<*> = SymbolType.Undefined
 
     /**
      * The 'default' attribute of the enum type.
      */
-    private lateinit var default: Any
+    private var default: Any? = null
 
     /**
      * The 'val=x,y' attributes of the enum type.
      */
-    private var values = LinkedHashMap<Int, Any>()
+    private var values = LinkedHashMap<Any, Any>()
 
     override fun parseProperty(name: String, parser: Parser) {
         when (name) {
             "inputtype" -> inputType = parser.parseType() ?: return
             "outputtype" -> outputType = parser.parseType() ?: return
             "default" -> {
-                if (!this::outputType.isInitialized) {
-                    parser.reportError("outputtype must be specified before default")
+                if (outputType == SymbolType.Undefined) {
+                    parser.reportPropertyError("outputtype must be specified before default")
                     return
                 }
-                default = parser.parseDynamic(outputType)
+                default = parser.parseDynamic(outputType) ?: return
             }
 
             "val" -> {
-                if (!this::inputType.isInitialized) {
-                    parser.reportError("inputtype must be specified before val")
+                if (inputType == SymbolType.Undefined) {
+                    parser.reportPropertyError("inputtype must be specified before val")
                     return
                 }
-                if (!this::outputType.isInitialized) {
-                    parser.reportError("outputtype must be specified before val")
+                if (outputType == SymbolType.Undefined) {
+                    parser.reportPropertyError("outputtype must be specified before val")
                     return
                 }
-                val key = parser.parseDynamic(inputType) as Int
+                val key = parser.parseDynamic(inputType)
                 parser.parseComma()
                 val value = parser.parseDynamic(outputType)
-                values[key] = value
+                if (key != null && value != null) {
+                    values[key] = value
+                }
             }
 
             else -> parser.unknownProperty()
@@ -64,17 +68,28 @@ class EnumConfig(name: String) : Config(name, SymbolType.Enum) {
     }
 
     override fun verifyProperties(parser: Parser) {
-        if (!this::inputType.isInitialized) {
-            parser.reportError("inputtype property must be specified")
+        if (inputType == SymbolType.Undefined) {
+            parser.reportConfigError("inputtype property must be specified")
             return
         }
-        if (!this::outputType.isInitialized) {
-            parser.reportError("outputtype property must be specified")
+        if (outputType == SymbolType.Undefined) {
+            parser.reportConfigError("outputtype property must be specified")
             return
         }
-        if (!this::default.isInitialized) {
-            parser.reportError("default property must be specified")
+        if (default == null) {
+            parser.reportConfigError("default property must be specified")
             return
+        }
+    }
+
+    override fun resolveReferences(compiler: Compiler) {
+        values.keys.forEach { key ->
+            if (key is Reference) {
+                values[key] = compiler.resolveReference(key)
+            }
+        }
+        if (default is Reference) {
+            default = compiler.resolveReference(default as Reference)
         }
     }
 
@@ -101,7 +116,7 @@ class EnumConfig(name: String) : Config(name, SymbolType.Enum) {
         packet.code(if (stringValues) 5 else 6) {
             write2(values.size)
             values.forEach { (key, value) ->
-                write4(key)
+                write4(key as Int)
                 if (stringValues) {
                     writeString(value as String)
                 } else {

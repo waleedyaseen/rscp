@@ -5,6 +5,7 @@ import me.waliedyassen.rsconfig.config.Config
 import me.waliedyassen.rsconfig.parser.Diagnostic
 import me.waliedyassen.rsconfig.parser.DiagnosticKind
 import me.waliedyassen.rsconfig.parser.Parser
+import me.waliedyassen.rsconfig.parser.Reference
 import me.waliedyassen.rsconfig.parser.SemanticInfo
 import me.waliedyassen.rsconfig.parser.Span
 import me.waliedyassen.rsconfig.symbol.Symbol
@@ -102,6 +103,8 @@ class Compiler(private val extractMode: ExtractMode) {
         if (extractMode == ExtractMode.SemInfo) {
             semanticInfo += parser.semInfo
         }
+        generateSymbols(configs)
+        configs.forEach { it.resolveReferences(this) }
         return configs
     }
 
@@ -144,6 +147,31 @@ class Compiler(private val extractMode: ExtractMode) {
      */
     private fun addDiagnostic(kind: DiagnosticKind, span: Span, message: String) {
         diagnostics += Diagnostic(kind, span, message)
+    }
+
+
+    /**
+     * Attempt to resolve the specified [reference] from the symbol table and return
+     * the symbol id if the resolve was successful otherwise -1.
+     */
+    fun resolveReference(reference: Reference?, permitNulls: Boolean = true): Int {
+        if (reference == null) {
+            return -1
+        }
+        val symbol = sym.lookupSymbol(reference.type, reference.name)
+        if (reference.name == "null") {
+            if (!permitNulls) {
+                addError(reference.span, "Null values are not permitted in here")
+            }
+            return -1
+        }
+        if (symbol == null) {
+            val message = "Unresolved reference to '${reference.name}' of type '${reference.type.literal}'"
+            addError(reference.span, message)
+            return -1
+        }
+        return symbol.id
+
     }
 
     companion object {

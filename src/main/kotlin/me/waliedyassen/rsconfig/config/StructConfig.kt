@@ -1,5 +1,6 @@
 package me.waliedyassen.rsconfig.config
 
+import me.waliedyassen.rsconfig.Compiler
 import me.waliedyassen.rsconfig.binary.BinaryEncoder
 import me.waliedyassen.rsconfig.binary.codeParams
 import me.waliedyassen.rsconfig.parser.Parser
@@ -26,6 +27,10 @@ class StructConfig(name: String) : Config(name, SymbolType.Struct) {
     }
 
     override fun verifyProperties(parser: Parser) {
+        // Do nothing.
+    }
+
+    override fun resolveReferences(compiler: Compiler) {
         // Do nothing.
     }
 
