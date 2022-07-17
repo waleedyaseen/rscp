@@ -12,7 +12,6 @@ import com.github.michaelbull.logging.InlineLogger
 import me.waliedyassen.rsconfig.config.Config
 import me.waliedyassen.rsconfig.parser.Parser
 import me.waliedyassen.rsconfig.parser.SemanticInfo
-import me.waliedyassen.rsconfig.parser.Span
 import me.waliedyassen.rsconfig.symbol.Symbol
 import me.waliedyassen.rsconfig.symbol.SymbolList
 import me.waliedyassen.rsconfig.symbol.SymbolTable
@@ -24,17 +23,6 @@ import kotlin.system.exitProcess
 import kotlin.system.measureTimeMillis
 
 data class ParsingConfig(val names: List<String>, val type: SymbolType<*>, val input: String)
-
-data class Error(val span: Span, val message: String)
-
-data class CompilationContext(val sym: SymbolTable) {
-
-    val errors = mutableListOf<Error>()
-
-    fun reportError(span: Span, message: String) {
-        errors += Error(span, message)
-    }
-}
 
 /**
  * The kind of information that we want to extract from the compiler.
@@ -96,7 +84,7 @@ object PackTool : CliktCommand() {
         }
         val time = measureTimeMillis {
             val table = readSymbolTable()
-            val context = CompilationContext(table)
+            val context = CompilerContext(table)
             val configs = mutableListOf<Pair<String, Config>>()
             var semInfo = mutableListOf<SemanticInfo>()
             if (inputDirectory != null) {
@@ -119,15 +107,15 @@ object PackTool : CliktCommand() {
             }
             if (extract != null) {
                 val output = when (extract) {
-                    ExtractMode.Errors -> context.errors
+                    ExtractMode.Errors -> context.diagnostics
                     ExtractMode.SemInfo -> semInfo
                     else -> error("Unhandled extract mode: $extract")
                 }
                 print(jsonMapper { }.writeValueAsString(output))
                 exitProcess(0)
             }
-            if (context.errors.isNotEmpty()) {
-                context.errors.forEach { logger.info { it } }
+            if (context.diagnostics.isNotEmpty()) {
+                context.diagnostics.forEach { logger.info { it } }
                 return@measureTimeMillis
             }
             // TODO(Walied): This need to be done while we are still parsing
@@ -187,7 +175,7 @@ object PackTool : CliktCommand() {
         val extension = file.extension
         val type = SymbolType.lookupOrNull(extension) ?: return null
         val input = file.reader().use { it.readText() }
-        val dummyContext = CompilationContext(SymbolTable())
+        val dummyContext = CompilerContext(SymbolTable())
         val parser = Parser(type, dummyContext, input, false)
         val names = parser.peekConfigs()
         return ParsingConfig(names, type, input)

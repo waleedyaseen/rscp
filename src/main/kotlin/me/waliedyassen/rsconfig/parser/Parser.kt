@@ -1,6 +1,6 @@
 package me.waliedyassen.rsconfig.parser
 
-import me.waliedyassen.rsconfig.CompilationContext
+import me.waliedyassen.rsconfig.CompilerContext
 import me.waliedyassen.rsconfig.config.Config
 import me.waliedyassen.rsconfig.symbol.SymbolType
 import me.waliedyassen.rsconfig.util.LiteralEnum
@@ -22,7 +22,7 @@ data class SyntaxConfig(val span: Span, val config: Config)
  */
 class Parser(
     private val type: SymbolType<*>,
-    val context: CompilationContext,
+    val context: CompilerContext,
     input: String,
     /**
      * Whether we should track the semantic information of the parser
@@ -326,7 +326,7 @@ class Parser(
      * Report an error message to the compilation context.
      */
     fun reportError(message: String) {
-        context.reportError(parsingPropertySpan ?: Span.empty(), message)
+        context.addError(parsingPropertySpan ?: Span.empty(), message)
     }
 
     /**

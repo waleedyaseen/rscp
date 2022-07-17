@@ -1,6 +1,6 @@
 package me.waliedyassen.rsconfig.parser
 
-import me.waliedyassen.rsconfig.CompilationContext
+import me.waliedyassen.rsconfig.CompilerContext
 
 /**
  * Returns `true` if [this] character is an ascii letter.
@@ -36,7 +36,7 @@ private fun Char.isQuote() = this == '\"'
  * The lowest level of parsing, it takes an array of characters as input and transforms them into
  * meaningful [Token] objects while validating using specific rules.
  */
-class Lexer(private val input: CharArray, private val context: CompilationContext) {
+class Lexer(private val input: CharArray, private val context: CompilerContext) {
 
     /**
      * The current index of source code in the buffer.
@@ -273,7 +273,7 @@ class Lexer(private val input: CharArray, private val context: CompilationContex
      * Report an error to the compilation context.
      */
     private fun reportError(span: Span, text: String) {
-        context.reportError(span, text)
+        context.addError(span, text)
     }
 
     /**
