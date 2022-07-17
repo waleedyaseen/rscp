@@ -7,6 +7,8 @@ import me.waliedyassen.tomlrs.parser.Parser
 import me.waliedyassen.tomlrs.symbol.SymbolType
 import me.waliedyassen.tomlrs.util.LiteralEnum
 import me.waliedyassen.tomlrs.util.asEnumLiteral
+import me.waliedyassen.tomlrs.util.asSymbolType
+import kotlin.math.exp
 
 enum class VarLifetime(val id: Int, override val literal: String) : LiteralEnum {
     TEMPORARY(0, "temp"),
@@ -22,16 +24,24 @@ enum class VarLifetime(val id: Int, override val literal: String) : LiteralEnum 
 class VarpConfig(name: String) : Config(name, SymbolType.VAR_PLAYER) {
 
     /**
-     * The 'clientcode' attribute of the enum type.
+     * The `type` attribute of the varp.
+     */
+    private var type: SymbolType? = null
+
+    /**
+     * The 'clientcode' attribute of the varp.
      */
     private var clientCode = 0
 
     /**
-     * The `lifetime` attribute of the enum type.
+     * The `lifetime` attribute of the varp.
      */
     private var lifetime = VarLifetime.TEMPORARY
 
     override fun parseToml(node: JsonNode, context: CompilationContext) {
+        if (node.has("type")) {
+            type = node["type"].asSymbolType()
+        }
         clientCode = node["clientcode"]?.asInt(-1) ?: 0
         if (node.has("scope"))
             lifetime = node["scope"].asEnumLiteral()
@@ -39,6 +49,7 @@ class VarpConfig(name: String) : Config(name, SymbolType.VAR_PLAYER) {
 
     override fun parseProperty(name: String, parser: Parser) {
         when (name) {
+            "type" -> type = parser.parseType() ?: return
             "clientcode" -> clientCode = parser.parseInteger()
             "scope" -> lifetime = parser.parseEnumLiteral(VarLifetime.TEMPORARY)
             else -> parser.unknownProperty()
@@ -50,8 +61,8 @@ class VarpConfig(name: String) : Config(name, SymbolType.VAR_PLAYER) {
     }
 
     override fun encode(): ByteArray {
-        val packet =
-            BinaryEncoder(1 + (if (clientCode != 0) 3 else 0) + if (lifetime != VarLifetime.TEMPORARY) 2 else 0)
+        val expectedSize = 1 + (if (clientCode != 0) 3 else 0) + if (lifetime != VarLifetime.TEMPORARY) 2 else 0
+        val packet = BinaryEncoder(expectedSize)
         if (lifetime != VarLifetime.TEMPORARY) {
             packet.code(4) {
                 write1(lifetime.id)
