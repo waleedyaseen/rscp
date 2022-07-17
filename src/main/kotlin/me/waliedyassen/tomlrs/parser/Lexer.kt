@@ -281,4 +281,9 @@ class Lexer(private val input: CharArray, private val context: CompilationContex
      * in the source buffer.
      */
     private fun span(begin: Int = index, end: Int = index) = Span(begin, end)
+
+    /**
+     * Returns the current position in the input source code.
+     */
+    fun position() = index
 }

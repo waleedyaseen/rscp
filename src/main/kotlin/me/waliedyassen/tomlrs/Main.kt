@@ -123,7 +123,7 @@ object PackTool : CliktCommand() {
                         configs += it.names[0] to config
                     } else if (it is ParsingRsConfig) {
                         val parser = Parser(it.type, context, it.input, extract == ExtractMode.SemInfo)
-                        configs += parser.parseConfigs()
+                        configs += parser.parseConfigs().map { config -> config.name to config }
                         semInfo += parser.semInfo
                     }
                 }
@@ -131,7 +131,7 @@ object PackTool : CliktCommand() {
                 val parsingConfig = parseRsConfig(inputFile!!)
                 if (parsingConfig != null) {
                     val parser = Parser(parsingConfig.type, context, parsingConfig.input, extract == ExtractMode.SemInfo)
-                    configs += parser.parseConfigs()
+                    configs += parser.parseConfigs().map { config -> config.name to config }
                     semInfo += parser.semInfo
                 }
             }

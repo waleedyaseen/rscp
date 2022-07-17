@@ -13,6 +13,9 @@ data class SemanticInfo(
     val span: Span
 )
 
+data class SyntaxSignature(val span: Span, val name: String)
+data class SyntaxConfig(val span: Span, val config: Config)
+
 /**
  * A higher level of parsing, it takes the output of [Lexer] as input and makes sure the tokens follow
  * a certain set of rules.
@@ -57,9 +60,9 @@ class Parser(
             if (lexer.isLBracket() || lexer.isEof()) {
                 break
             }
-            val name = parseSignature()
-            if (name != null) {
-                names += name
+            val sig = parseSignature()
+            if (sig != null) {
+                names += sig.name
             }
             while (!lexer.isLBracket() && !lexer.isEof()) {
                 lexer.skipLine()
@@ -71,18 +74,15 @@ class Parser(
     /**
      * Parse a list of all the valid [Config] in the file.
      */
-    fun parseConfigs(): List<Pair<String, Config>> {
-        val configs = mutableListOf<Pair<String, Config>>()
+    fun parseConfigs(): List<Config> {
+        val configs = mutableListOf<Config>()
         while (!lexer.isEof()) {
             if (lexer.skipWhitespace()) {
-                // Skip whitespace and try parsing again in-case we hit an eof.
                 continue
             }
-            val (name, config) = parseConfig()
-            if (name == null || config == null) {
-                continue
-            }
-            configs += name to config
+            val config = parseConfig() ?: continue
+            storeSemInfo(config.span, "definition")
+            configs += config.config
         }
         return configs
     }
@@ -90,49 +90,56 @@ class Parser(
     /**
      * Attempt to parse a single [Config] unit.
      */
-    private fun parseConfig(): Pair<String?, Config?> {
-        val name = parseSignature() ?: return null to null
+    private fun parseConfig(): SyntaxConfig? {
+        val (span, name) = parseSignature() ?: return null
         val config = type.supplier(name)
-        // LBracket means we reached another configuration beginning, eof means halt.
+        val begin = lexer.position()
+        var end = lexer.position()
         while (true) {
             lexer.skipWhitespace()
             if (lexer.isLBracket() || lexer.isEof()) {
                 break
             }
             parseProperty(config)
+            end = lexer.position()
         }
         config.verifyProperties(this)
-        return name to config
+        return SyntaxConfig(span + Span(begin, end), config)
     }
 
     /**
      * Attempt to parse a single property or skip the entire line if it is erroneous.
      */
-    private fun parseProperty(config: Config) {
+    private fun parseProperty(config: Config): Span? {
         val propertyNameToken = parseIdentifier()
         if (propertyNameToken is Token.Dummy) {
             lexer.skipLine()
-            return
+            return null
         }
         storeSemInfo(propertyNameToken.span, "property")
         parseEquals()
         parsingPropertyName = (propertyNameToken as Token.Identifier).text
         parsingPropertySpan = propertyNameToken.span
+
+        val valueBegin = lexer.position()
         config.parseProperty(parsingPropertyName!!, this)
+        val valueEnd = lexer.position()
+        return propertyNameToken.span + Span(valueBegin, valueEnd)
     }
 
     /**
      * Attempt to parse a configuration signature and return the parsed name if it is valid otherwise null.
      */
-    private fun parseSignature(): String? {
-        parseLBracket()
+    private fun parseSignature(): SyntaxSignature? {
+        val left = parseLBracket()
         val name = parseIdentifier()
         if (name is Token.Dummy) {
             return null
         }
+        val nameId = name as Token.Identifier
         storeSemInfo(name.span, "name")
-        parseRBracket()
-        return (name as Token.Identifier).text
+        val right = parseRBracket()
+        return SyntaxSignature(left.span + right.span, nameId.text)
     }
 
     /**
