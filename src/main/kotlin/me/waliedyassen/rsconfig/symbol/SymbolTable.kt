@@ -2,73 +2,141 @@ package me.waliedyassen.rsconfig.symbol
 
 import java.io.File
 
-class SymbolList {
+/**
+ * Holds all the symbols relating to a single type.
+ */
+class SymbolList<T : Symbol> {
 
-    private val internalSymbols = LinkedHashMap<String, Symbol>()
-    val symbols get(): Map<String, Symbol> = internalSymbols
+    /**
+     * A look-up by name table for the symbols.
+     */
+    private val tableByName = LinkedHashMap<String, T>()
+
+    /**
+     * A look-up by id table for the symbols.
+     */
+    private val tableById = LinkedHashMap<Int, T>()
+
+    /**
+     * A collection of all the symbols in the list.
+     */
+    val symbols: Collection<T>
+        get() = tableByName.values
+
+    /**
+     * Wheter the symbol list was modified.
+     */
     var modified = false
 
-    operator fun get(name: String) = internalSymbols[name]
-
-    operator fun set(name: String, id: Int) {
-        this += Symbol(name, id)
-    }
-
-    operator fun plusAssign(symbol: Symbol) {
-        internalSymbols[symbol.name] = symbol
+    /**
+     * Adds the specified [symbol] to the list.
+     */
+    fun add(symbol: T) {
+        if (tableByName.containsKey(symbol.name)) {
+            error("Another symbol with the same name of \"${symbol.name}\" exists in the table")
+        }
+        if (tableById.containsKey(symbol.id)) {
+            error("Another symbol with the same id of \"${symbol.id}\" exists in the table")
+        }
+        tableByName[symbol.name] = symbol
+        tableById[symbol.id] = symbol
         modified = true
     }
 
-    fun lookupById(id: Int) = symbols.values.find { it.id == id }
-}
-
-class SymbolTable {
-
-    private val lists = mutableMapOf<SymbolType, SymbolList>()
-
-    fun read(type: SymbolType, file: File) {
-        val regex = Regex(":")
-        val modified = lists[type]?.modified ?: false
-        file.readLines().forEach {
-            if (it.isBlank()) return@forEach
-            val split = it.split(regex, 3)
-            val name = split[0].lowercase()
-            val id = split[1].toInt()
-            val content = if (split.size > 2) SymbolType.lookup(split[2]) else null
-            val list = lists.getOrPut(type) { SymbolList() }
-            list += Symbol(name, id, content)
-        }
-        lists[type]?.modified = modified
+    /**
+     * Removes the specified [symbol] from the list.
+     */
+    fun remove(symbol: T) {
+        tableByName -= symbol.name
+        tableById -= symbol.id
+        modified = true
     }
 
-    fun write(type: SymbolType, file: File) {
-        val list = lists.getOrPut(type) { SymbolList() }
-        file.bufferedWriter().use {
-            list.symbols.entries.sortedBy { it.value.id }.forEach { (_, symbol) ->
-                it.write("${symbol.name}:${symbol.id}")
-                if (symbol.content != null) {
-                    it.write(":${symbol.content!!.literal}")
-                }
-                it.newLine()
+    /**
+     * Returns the symbol of type [T] with name matching the specified [name].
+     */
+    fun lookupByName(name: String): T? = tableByName[name]
+
+    /**
+     * Returns the symbol of type [T] with id matching the specified [id].
+     */
+    fun lookupById(id: Int): T? = tableById[id]
+
+}
+
+/**
+ * A table of all the symbols used by the compiler.
+ */
+class SymbolTable {
+
+    /**
+     * A map of all the symbol lists in this table.
+     */
+    private val lists = mutableMapOf<SymbolType<*>, SymbolList<*>>()
+
+
+    /**
+     * Read the symbol list of the specified [type] from the specified [file].
+     */
+    fun <T> read(type: SymbolType<T>, file: File) where T : Symbol {
+        @Suppress("UNCHECKED_CAST")
+        val list = lists.getOrPut(type) { SymbolList<T>() } as SymbolList<T>
+        file.readLines().forEach { line ->
+            if (line.isBlank()) {
+                return@forEach
+            }
+            val symbol = type.serializer.deserialize(line)
+            list.add(symbol)
+        }
+        list.modified = false
+    }
+
+    /**
+     * Write the symbol list of the specified [type] to the specified [file].
+     */
+    fun <T> write(type: SymbolType<T>, file: File) where T : Symbol {
+        @Suppress("UNCHECKED_CAST")
+        val list = lists.getOrPut(type) { SymbolList<T>() } as SymbolList<T>
+        file.bufferedWriter().use { writer ->
+            list.symbols.sortedBy { it.id }.forEach { symbol: T ->
+                writer.write(type.serializer.serialize(symbol))
+                writer.newLine()
             }
         }
     }
 
-    fun insert(type: SymbolType, name: String, id: Int) {
-        val list = lists.getOrPut(type) { SymbolList() }
-        list += Symbol(name, id)
+    /**
+     * Add the specified [symbol] of type [T] the appropriate symbol list.
+     */
+    fun <T> add(type: SymbolType<T>, symbol: T) where T : Symbol {
+        @Suppress("UNCHECKED_CAST")
+        val list = lists[type]!! as SymbolList<T>
+        list.add(symbol)
     }
 
-    fun lookup(type: SymbolType) =
-        lookupOrNull(type) ?: error("Failed to find me.waliedyassen.tomlrs.symbol list for $type")
 
-    fun lookupOrNull(type: SymbolType, name: String) = lookupOrNull(type)?.get(name);
+    /**
+     * Returns the [SymbolList] for the specified [type].
+     */
+    fun <T> lookupList(type: SymbolType<T>): SymbolList<T> where T : Symbol {
+        @Suppress("UNCHECKED_CAST")
+        return lists.getOrPut(type) { SymbolList<T>() } as SymbolList<T>
+    }
 
-    fun lookupOrNull(type: SymbolType) = lists[type]
 
-    fun generateUniqueId(type: SymbolType): Int {
-        val list = lists.getOrPut(type) { SymbolList() }
-        val highestId = list.symbols.maxOfOrNull { it.value.id } ?: -1
+    /**
+     * Returns the [Symbol] that matches the specified [name] and [type].
+     */
+    fun <T> lookupSymbol(type: SymbolType<T>, name: String): T? where T : Symbol {
+        return lookupList(type).lookupByName(name)
+    }
+
+    /**
+     * Returns the next free id for the specified symbol [type].
+     */
+    fun generateId(type: SymbolType<*>): Int {
+        val list = lookupList(type)
+        val highestId = list.symbols.maxOfOrNull { it.id } ?: -1
         return highestId + 1
     }
 }

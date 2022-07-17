@@ -5,10 +5,10 @@ import me.waliedyassen.rsconfig.CompilationContext
 import me.waliedyassen.rsconfig.binary.BinaryEncoder
 import me.waliedyassen.rsconfig.parser.Parser
 import me.waliedyassen.rsconfig.symbol.SymbolType
+import me.waliedyassen.rsconfig.symbol.TypedSymbol
 import me.waliedyassen.rsconfig.util.LiteralEnum
 import me.waliedyassen.rsconfig.util.asEnumLiteral
 import me.waliedyassen.rsconfig.util.asSymbolType
-import kotlin.math.exp
 
 enum class VarLifetime(val id: Int, override val literal: String) : LiteralEnum {
     TEMPORARY(0, "temp"),
@@ -21,12 +21,12 @@ enum class VarLifetime(val id: Int, override val literal: String) : LiteralEnum 
  *
  * @author Walied K. Yassen
  */
-class VarpConfig(name: String) : Config(name, SymbolType.VAR_PLAYER) {
+class VarpConfig(name: String) : Config(name, SymbolType.VarPlayer) {
 
     /**
      * The `type` attribute of the varp.
      */
-    private var type: SymbolType? = null
+    private var type: SymbolType<*>? = null
 
     /**
      * The 'clientcode' attribute of the varp.
@@ -59,6 +59,8 @@ class VarpConfig(name: String) : Config(name, SymbolType.VAR_PLAYER) {
     override fun verifyProperties(parser: Parser) {
         // Do nothing.
     }
+
+    override fun createSymbol(id: Int) = TypedSymbol(name, id, type!!)
 
     override fun encode(): ByteArray {
         val expectedSize = 1 + (if (clientCode != 0) 3 else 0) + if (lifetime != VarLifetime.TEMPORARY) 2 else 0

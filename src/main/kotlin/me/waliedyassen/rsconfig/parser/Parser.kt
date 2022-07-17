@@ -21,7 +21,7 @@ data class SyntaxConfig(val span: Span, val config: Config)
  * a certain set of rules.
  */
 class Parser(
-    private val type: SymbolType,
+    private val type: SymbolType<*>,
     val context: CompilationContext,
     input: String,
     /**
@@ -92,7 +92,7 @@ class Parser(
      */
     private fun parseConfig(): SyntaxConfig? {
         val (span, name) = parseSignature() ?: return null
-        val config = type.supplier(name)
+        val config = type.constructor(name)
         val begin = lexer.position()
         var end = lexer.position()
         while (true) {
@@ -244,7 +244,7 @@ class Parser(
     /**
      * Attempt to parse a type name literal.
      */
-    fun parseType(): SymbolType? {
+    fun parseType(): SymbolType<*>? {
         val token = parseIdentifier()
         if (token is Token.Dummy) {
             return null
@@ -263,7 +263,7 @@ class Parser(
      * Attempt to parse a valid configuration symbol name and return the associated id for that symbol.
      * If no valid configuration is found or can be parsed, a -1 will be returned instead.
      */
-    fun parseReference(type: SymbolType, permitNulls: Boolean = true): Int {
+    fun parseReference(type: SymbolType<*>, permitNulls: Boolean = true): Int {
         val literal = parseIdentifier()
         if (literal is Token.Dummy) {
             return -1
@@ -276,7 +276,7 @@ class Parser(
             }
             return -1
         }
-        val symbol = context.sym.lookup(type)[identifier.text]
+        val symbol = context.sym.lookupList(type).lookupByName(identifier.text)
         if (symbol == null) {
             reportError("Unresolved reference to symbol '${identifier.text}' of type '${type.literal}'")
             return -1
@@ -310,14 +310,14 @@ class Parser(
     /**
      * Attempt to parse a dynamic value based on the given [SymbolType]
      */
-    fun parseDynamic(outputType: SymbolType): Any {
+    fun parseDynamic(outputType: SymbolType<*>): Any {
         if (outputType.isReference()) {
             return parseReference(outputType, true)
         }
         return when (outputType) {
-            SymbolType.STRING -> parseString()
-            SymbolType.INT -> parseInteger()
-            SymbolType.BOOLEAN -> parseBoolean()
+            SymbolType.String -> parseString()
+            SymbolType.Int -> parseInteger()
+            SymbolType.Boolean -> parseBoolean()
             else -> error("Unexpected symbol type: $outputType")
         }
     }

@@ -5,6 +5,7 @@ import me.waliedyassen.rsconfig.CompilationContext
 import me.waliedyassen.rsconfig.binary.BinaryEncoder
 import me.waliedyassen.rsconfig.parser.Parser
 import me.waliedyassen.rsconfig.symbol.SymbolType
+import me.waliedyassen.rsconfig.symbol.TypedSymbol
 import me.waliedyassen.rsconfig.util.asSymbolType
 import me.waliedyassen.rsconfig.util.asValue
 import me.waliedyassen.rsconfig.util.parseValue
@@ -14,17 +15,17 @@ import me.waliedyassen.rsconfig.util.parseValue
  *
  * @author Walied K. Yassen
  */
-class EnumConfig(name: String) : Config(name, SymbolType.ENUM) {
+class EnumConfig(name: String) : Config(name, SymbolType.Enum) {
 
     /**
      * The 'inputtype' attribute of the enum type.
      */
-    private lateinit var inputType: SymbolType
+    private lateinit var inputType: SymbolType<*>
 
     /**
      * The 'outputtype' attribute of the enum type.
      */
-    private lateinit var outputType: SymbolType
+    private lateinit var outputType: SymbolType<*>
 
     /**
      * The 'default' attribute of the enum type.
@@ -93,13 +94,15 @@ class EnumConfig(name: String) : Config(name, SymbolType.ENUM) {
         }
     }
 
+    override fun createSymbol(id: Int) = TypedSymbol(name, id, outputType)
+
     override fun encode(): ByteArray {
         val packet = BinaryEncoder(32)
         packet.code(1) {
-            write1(inputType.char.code)
+            write1(inputType.legacyChar.code)
         }
         packet.code(2) {
-            write1(outputType.char.code)
+            write1(outputType.legacyChar.code)
         }
         when (default) {
             is String -> packet.code(3) {
@@ -110,7 +113,7 @@ class EnumConfig(name: String) : Config(name, SymbolType.ENUM) {
                 write4(default as Int)
             }
         }
-        val stringValues = outputType == SymbolType.STRING
+        val stringValues = outputType == SymbolType.String
         packet.code(if (stringValues) 5 else 6) {
             write2(values.size)
             values.forEach { (key, value) ->

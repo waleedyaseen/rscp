@@ -5,12 +5,13 @@ import me.waliedyassen.rsconfig.CompilationContext
 import me.waliedyassen.rsconfig.binary.BinaryEncoder
 import me.waliedyassen.rsconfig.parser.Parser
 import me.waliedyassen.rsconfig.symbol.SymbolType
+import me.waliedyassen.rsconfig.symbol.TypedSymbol
 import me.waliedyassen.rsconfig.util.asSymbolType
 import me.waliedyassen.rsconfig.util.asValue
 
-class ParamConfig(name: String) : Config(name, SymbolType.PARAM) {
+class ParamConfig(name: String) : Config(name, SymbolType.Param) {
 
-    var type: SymbolType? = null
+    var type: SymbolType<*>? = null
     private var defaultInt: Int? = null
     private var defaultStr: String? = null
     private var autoDisable: Boolean = true
@@ -19,7 +20,7 @@ class ParamConfig(name: String) : Config(name, SymbolType.PARAM) {
         type = node["type"].asSymbolType()
         if (node.has("default")) {
             val value = node["default"].asValue(type!!, context)
-            if (type == SymbolType.STRING) {
+            if (type == SymbolType.String) {
                 defaultStr = value as String
             } else {
                 defaultInt = value as Int
@@ -39,7 +40,7 @@ class ParamConfig(name: String) : Config(name, SymbolType.PARAM) {
                     return
                 }
                 val value = parser.parseDynamic(type!!)
-                if (type == SymbolType.STRING) {
+                if (type == SymbolType.String) {
                     defaultStr = value as String
                 } else {
                     defaultInt = value as Int
@@ -57,9 +58,11 @@ class ParamConfig(name: String) : Config(name, SymbolType.PARAM) {
         }
     }
 
+    override fun createSymbol(id: Int) = TypedSymbol(name, id, type!!)
+
     override fun encode(): ByteArray {
         val packet = BinaryEncoder(7)
-        packet.code(1) { write1(type!!.char.code) }
+        packet.code(1) { write1(type!!.legacyChar.code) }
         if (defaultInt != null) {
             packet.code(2) { write4(defaultInt!!) }
         }

@@ -15,7 +15,7 @@ import me.waliedyassen.rsconfig.util.asValue
  *
  * @author Walied K. Yassen
  */
-class StructConfig(name: String) : Config(name, SymbolType.STRUCT) {
+class StructConfig(name: String) : Config(name, SymbolType.Struct) {
 
     /**
      * The 'params' attribute of the struct type.
@@ -24,12 +24,12 @@ class StructConfig(name: String) : Config(name, SymbolType.STRUCT) {
 
     override fun parseToml(node: JsonNode, context: CompilationContext) {
         node.fields().forEach { (key, value) ->
-            val param = context.sym.lookupOrNull(SymbolType.PARAM, key)
+            val param = context.sym.lookupSymbol(SymbolType.Param, key)
             if (param == null) {
                 context.reportError(Span.empty(), "Unresolved param reference to '${key}'")
                 return@forEach
             }
-            params[param.id] = value.asValue(param.content!!, context)
+            params[param.id] = value.asValue(param.type, context)
         }
     }
 

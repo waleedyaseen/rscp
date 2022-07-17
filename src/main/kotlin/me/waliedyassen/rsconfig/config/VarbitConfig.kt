@@ -12,7 +12,7 @@ import me.waliedyassen.rsconfig.util.asReference
  *
  * @author Walied K. Yassen
  */
-class VarbitConfig(name: String) : Config(name, SymbolType.VAR_BIT) {
+class VarbitConfig(name: String) : Config(name, SymbolType.VarBit) {
 
     /**
      * The 'startbit' attribute of the enum type.
@@ -32,14 +32,14 @@ class VarbitConfig(name: String) : Config(name, SymbolType.VAR_BIT) {
     override fun parseToml(node: JsonNode, context: CompilationContext) {
         startBit = node["startbit"].asInt()
         endBit = node["endbit"].asInt()
-        baseVar = node["basevar"].asReference(SymbolType.VAR_PLAYER, context)
+        baseVar = node["basevar"].asReference(SymbolType.VarPlayer, context)
     }
 
     override fun parseProperty(name: String, parser: Parser) {
         when (name) {
             "startbit" -> startBit = parser.parseInteger()
             "endbit" -> endBit = parser.parseInteger()
-            "basevar" -> baseVar = parser.parseReference(SymbolType.VAR_PLAYER)
+            "basevar" -> baseVar = parser.parseReference(SymbolType.VarPlayer)
             else -> parser.unknownProperty()
         }
     }

@@ -1,14 +1,12 @@
 package me.waliedyassen.rsconfig.config
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ser.std.ToEmptyObjectSerializer
 import me.waliedyassen.rsconfig.CompilationContext
 import me.waliedyassen.rsconfig.binary.BinaryEncoder
 import me.waliedyassen.rsconfig.parser.Parser
 import me.waliedyassen.rsconfig.symbol.SymbolType
 import me.waliedyassen.rsconfig.util.LiteralEnum
 import me.waliedyassen.rsconfig.util.asEnumLiteral
-import java.awt.Color
 
 enum class InvScope(val id: Int, override val literal: String) : LiteralEnum {
     TEMPORARY(0, "temp"),
@@ -20,7 +18,7 @@ enum class InvScope(val id: Int, override val literal: String) : LiteralEnum {
  *
  * @author Walied K. Yassen
  */
-class InvConfig(name: String) : Config(name, SymbolType.INV) {
+class InvConfig(name: String) : Config(name, SymbolType.Inv) {
 
     var size = 0
     var scope = InvScope.TEMPORARY

@@ -1,7 +1,35 @@
 package me.waliedyassen.rsconfig.symbol
 
 /**
- * Holds information about a single symbol in the system, a symbol represents information about
- * a single configuration entry.
+ * The base class for all the symbols, it holds the shared information between
+ * all the symbols such as [name] and [id].
  */
-data class Symbol(val name: String, val id: Int, var content: SymbolType? = null)
+abstract class Symbol {
+
+    /**
+     * The name of the symbol stripped.
+     */
+    abstract val name: String
+
+    /**
+     * The generated ID of the symbol.
+     */
+    abstract val id: Int
+}
+
+/**
+ * A bare minimum implementation of [Symbol].
+ */
+data class BasicSymbol(
+    override val name: String,
+    override val id: Int,
+) : Symbol()
+
+/**
+ * A [Symbol] implementation that stores an additional [SymbolType].
+ */
+data class TypedSymbol(
+    override val name: String,
+    override val id: Int,
+    val type: SymbolType<*>
+) : Symbol()

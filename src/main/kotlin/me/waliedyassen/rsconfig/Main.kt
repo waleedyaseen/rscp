@@ -15,10 +15,11 @@ import com.github.ajalt.clikt.parameters.types.enum
 import com.github.ajalt.clikt.parameters.types.file
 import com.github.michaelbull.logging.InlineLogger
 import me.waliedyassen.rsconfig.config.Config
-import me.waliedyassen.rsconfig.config.ParamConfig
 import me.waliedyassen.rsconfig.parser.Parser
 import me.waliedyassen.rsconfig.parser.SemanticInfo
 import me.waliedyassen.rsconfig.parser.Span
+import me.waliedyassen.rsconfig.symbol.Symbol
+import me.waliedyassen.rsconfig.symbol.SymbolList
 import me.waliedyassen.rsconfig.symbol.SymbolTable
 import me.waliedyassen.rsconfig.symbol.SymbolType
 import org.slf4j.Logger
@@ -29,13 +30,13 @@ import kotlin.system.measureTimeMillis
 
 abstract class ParsingConfig {
     abstract val names: List<String>
-    abstract val type: SymbolType
+    abstract val type: SymbolType<*>
 }
 
-data class ParsingTomlConfig(override val names: List<String>, override val type: SymbolType, val node: JsonNode) :
+data class ParsingTomlConfig(override val names: List<String>, override val type: SymbolType<*>, val node: JsonNode) :
     ParsingConfig()
 
-data class ParsingRsConfig(override val names: List<String>, override val type: SymbolType, val input: String) :
+data class ParsingRsConfig(override val names: List<String>, override val type: SymbolType<*>, val input: String) :
     ParsingConfig()
 
 data class Error(val span: Span, val message: String)
@@ -115,10 +116,10 @@ object PackTool : CliktCommand() {
             if (inputDirectory != null) {
                 logger.info { "Parsing configs from $inputDirectory" }
                 val parsingConfigs = parseTomlConfigs(inputDirectory!!) + parseRsConfigs(inputDirectory!!)
-                generateConfigId(parsingConfigs, table)
+                assignPreParseSymbol(parsingConfigs, table)
                 parsingConfigs.forEach {
                     if (it is ParsingTomlConfig) {
-                        val config = it.type.supplier(it.names[0])
+                        val config = it.type.constructor(it.names[0])
                         config.parseToml(it.node, context)
                         configs += it.names[0] to config
                     } else if (it is ParsingRsConfig) {
@@ -130,7 +131,8 @@ object PackTool : CliktCommand() {
             } else if (inputFile != null) {
                 val parsingConfig = parseRsConfig(inputFile!!)
                 if (parsingConfig != null) {
-                    val parser = Parser(parsingConfig.type, context, parsingConfig.input, extract == ExtractMode.SemInfo)
+                    val parser =
+                        Parser(parsingConfig.type, context, parsingConfig.input, extract == ExtractMode.SemInfo)
                     configs += parser.parseConfigs().map { config -> config.name to config }
                     semInfo += parser.semInfo
                 }
@@ -149,7 +151,7 @@ object PackTool : CliktCommand() {
                 return@measureTimeMillis
             }
             // TODO(Walied): This need to be done while we are still parsing
-            assignContentType(configs.map { it.second }.toList(), table)
+            assignPostParseSymbol(configs.map { it.second }.toList(), table)
             if (configs.isNotEmpty()) {
                 check(outputDirectory.exists() || outputDirectory.mkdirs()) { "Failed to create the output directory '$outputDirectory'" }
                 logger.info { "Writing ${configs.size} configs to $outputDirectory" }
@@ -159,7 +161,7 @@ object PackTool : CliktCommand() {
                     val type = config.symbolType
                     val directory = outputDirectory.resolve(type.literal)
                     check(directory.exists() || directory.mkdirs()) { "Failed to create the output directory '$directory'" }
-                    val file = directory.resolve("${table.lookupOrNull(type, name)!!.id}")
+                    val file = directory.resolve("${table.lookupSymbol(type, name)!!.id}")
                     file.writeBytes(config.encode())
                 }
             }
@@ -168,31 +170,32 @@ object PackTool : CliktCommand() {
         logger.info { "Finished. Took $time ms" }
     }
 
-    private fun generateConfigId(parsingConfigs: List<ParsingConfig>, table: SymbolTable) {
-        parsingConfigs.forEach { config ->
-            val type = config.type
-            config.names.forEach { name ->
-                if (table.lookupOrNull(type, name) == null) {
-                    table.insert(type, name, table.generateUniqueId(type))
-                }
-            }
-        }
+    private fun assignPreParseSymbol(parsingConfigs: List<ParsingConfig>, table: SymbolTable) {
+//        parsingConfigs.forEach { config ->
+//            val type = config.type
+//            config.names.forEach { name ->
+//                if (table.lookupOrNull(type, name) == null) {
+//                    val symbol = BasicSymbol(name, table.generateUniqueId(type))
+//                    table.add(type, symbol)
+//                }
+//            }
+//        }
     }
 
-    private fun assignContentType(configs: List<Config>, table: SymbolTable) {
+    private fun assignPostParseSymbol(configs: List<Config>, table: SymbolTable) {
         configs.forEach { config ->
             val type = config.symbolType
             val name = config.name
-            val sym = table.lookupOrNull(type, name)!!
-            val content = when (config) {
-                is ParamConfig -> config.type
-                else -> null
+            val old = table.lookupSymbol(type, name)
+            val id = old?.id ?: table.generateId(type)
+            val new = config.createSymbol(id)
+            if (old != new) {
+                val list = table.lookupList(type) as SymbolList<Symbol>
+                if (old != null) {
+                    list.remove(old)
+                }
+                list.add(new)
             }
-            if (sym.content != content) {
-                sym.content = content
-                table.lookup(type).modified = true
-            }
-
         }
     }
 
@@ -236,14 +239,14 @@ object PackTool : CliktCommand() {
             val literal = result.groupValues[1]
             val type = SymbolType.lookup(literal)
             table.read(type, file)
-            logger.info { "Parsed a total of ${table.lookup(type).symbols.size} '$literal' symbol entries" }
+            logger.info { "Parsed a total of ${table.lookupList(type).symbols.size} '$literal' symbol entries" }
         }
         return table
     }
 
     private fun writeSymbolTable(table: SymbolTable) {
-        for (type in SymbolType.values()) {
-            val list = table.lookupOrNull(type) ?: continue
+        for (type in SymbolType.values) {
+            val list = table.lookupList(type)
             if (list.modified) {
                 logger.info { "Writing symbol table changes for '${type.literal}'" }
                 table.write(type, symbolDirectory.resolve("${type.literal}.sym"))
