@@ -22,6 +22,7 @@ enum class SymbolType(
     VAR_BIT('\u0000', "varbit", ::VarbitConfig),
     PARAM('\u0000', "param", ::ParamConfig),
     VARC('\u0000', "varc", ::VarcConfig),
+    OBJ('\u0000', "obj")
     ;
 
     fun isReference() = when (this) {
@@ -31,7 +32,8 @@ enum class SymbolType(
         STRUCT,
         VAR_BIT,
         PARAM,
-        VARC -> true
+        VARC,
+        OBJ -> true
 
         else -> false
     }
