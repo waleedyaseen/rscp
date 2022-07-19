@@ -79,13 +79,10 @@ object PackTool : CliktCommand() {
         val time = measureTimeMillis {
             val compiler = Compiler(extract)
             compiler.readSymbols(symbolDirectory)
-            val configs = if (inputDirectory != null) {
-                compiler.compileDirectory(inputDirectory!!)
-            } else if (inputFile != null) {
+            val configs = if (inputFile != null) {
                 compiler.compileFile(inputFile!!)
             } else {
-                println("No input files provided")
-                exitProcess(1)
+                compiler.compileDirectory(inputDirectory)
             }
             performExtraction(compiler)
             if (compiler.diagnostics.isNotEmpty()) {
