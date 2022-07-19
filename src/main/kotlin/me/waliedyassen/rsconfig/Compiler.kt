@@ -84,7 +84,17 @@ class Compiler(private val extractMode: ExtractMode) {
      */
     fun compileDirectory(directory: File): List<Config> {
         logger.info { "Compiling configs from directory $directory" }
-        return directory.walkTopDown().flatMap { compileFile(it) }.toList()
+        val parsers = directory.walkTopDown().map { createParser(it) }.filterNotNull().toList()
+        val configs = mutableListOf<Config>()
+        for (parser in parsers) {
+            configs += parser.parseConfigs()
+            if (extractMode == ExtractMode.SemInfo) {
+                semanticInfo += parser.semInfo
+            }
+        }
+        generateSymbols(configs)
+        configs.forEach { it.resolveReferences(this) }
+        return configs
     }
 
     /**
