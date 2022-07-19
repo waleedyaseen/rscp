@@ -82,11 +82,13 @@ class EnumConfig(name: String) : Config(name, SymbolType.Enum) {
     }
 
     override fun resolveReferences(compiler: Compiler) {
-        values.keys.forEach { key ->
-            if (key is Reference) {
-                values[key] = compiler.resolveReference(key)
-            }
-        }
+        val transformedValues = values.map { (key, value) ->
+            val transformedKey = if (key is Reference) compiler.resolveReference(key) else key
+            val transformedValue = if (value is Reference) compiler.resolveReference(value) else value
+            transformedKey to transformedValue
+        }.toMap()
+        values.clear()
+        values += transformedValues
         if (default is Reference) {
             default = compiler.resolveReference(default as Reference)
         }

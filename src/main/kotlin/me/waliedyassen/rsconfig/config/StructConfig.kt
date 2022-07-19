@@ -4,6 +4,7 @@ import me.waliedyassen.rsconfig.Compiler
 import me.waliedyassen.rsconfig.binary.BinaryEncoder
 import me.waliedyassen.rsconfig.binary.codeParams
 import me.waliedyassen.rsconfig.parser.Parser
+import me.waliedyassen.rsconfig.parser.Reference
 import me.waliedyassen.rsconfig.parser.parseParam
 import me.waliedyassen.rsconfig.symbol.SymbolType
 
@@ -31,7 +32,12 @@ class StructConfig(name: String) : Config(name, SymbolType.Struct) {
     }
 
     override fun resolveReferences(compiler: Compiler) {
-        // Do nothing.
+        val newParams = params.map { (key, value) ->
+            val transformedValue = if (value is Reference) compiler.resolveReference(value) else value
+            key to transformedValue
+        }.toMap()
+        params.clear()
+        params += newParams
     }
 
     override fun encode(): ByteArray {
