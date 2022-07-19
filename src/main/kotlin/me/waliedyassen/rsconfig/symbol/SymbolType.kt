@@ -50,7 +50,7 @@ open class SymbolType<T : Symbol>(
     object VarBit : SymbolType<BasicSymbol>('\u0000', "varbit", ::VarbitConfig, BasicSymbolSerializer)
     object Param : SymbolType<TypedSymbol>('\u0000', "param", ::ParamConfig, TypedSymbolSerializer)
     object Inv : SymbolType<BasicSymbol>('v', "inv", ::InvConfig, BasicSymbolSerializer)
-    object Struct : SymbolType<BasicSymbol>('j', "struct", ::StructConfig, BasicSymbolSerializer)
+    object Struct : SymbolType<BasicSymbol>('J', "struct", ::StructConfig, BasicSymbolSerializer)
 
 
     companion object {
