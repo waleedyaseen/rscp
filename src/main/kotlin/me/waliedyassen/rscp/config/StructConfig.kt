@@ -1,12 +1,12 @@
-package me.waliedyassen.rsconfig.config
+package me.waliedyassen.rscp.config
 
-import me.waliedyassen.rsconfig.Compiler
-import me.waliedyassen.rsconfig.binary.BinaryEncoder
-import me.waliedyassen.rsconfig.binary.codeParams
-import me.waliedyassen.rsconfig.parser.Parser
-import me.waliedyassen.rsconfig.parser.Reference
-import me.waliedyassen.rsconfig.parser.parseParam
-import me.waliedyassen.rsconfig.symbol.SymbolType
+import me.waliedyassen.rscp.Compiler
+import me.waliedyassen.rscp.binary.BinaryEncoder
+import me.waliedyassen.rscp.binary.codeParams
+import me.waliedyassen.rscp.parser.Parser
+import me.waliedyassen.rscp.parser.Reference
+import me.waliedyassen.rscp.parser.parseParam
+import me.waliedyassen.rscp.symbol.SymbolType
 
 /**
  * Implementation for 'struct' type configuration.

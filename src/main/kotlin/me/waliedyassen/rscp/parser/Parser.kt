@@ -1,9 +1,9 @@
-package me.waliedyassen.rsconfig.parser
+package me.waliedyassen.rscp.parser
 
-import me.waliedyassen.rsconfig.Compiler
-import me.waliedyassen.rsconfig.config.Config
-import me.waliedyassen.rsconfig.symbol.SymbolType
-import me.waliedyassen.rsconfig.util.LiteralEnum
+import me.waliedyassen.rscp.Compiler
+import me.waliedyassen.rscp.config.Config
+import me.waliedyassen.rscp.symbol.SymbolType
+import me.waliedyassen.rscp.util.LiteralEnum
 
 /**
  * Semantic information is essentially a span of text that holds a special meaning.

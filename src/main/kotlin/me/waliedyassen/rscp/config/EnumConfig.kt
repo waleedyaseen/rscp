@@ -1,11 +1,11 @@
-package me.waliedyassen.rsconfig.config
+package me.waliedyassen.rscp.config
 
-import me.waliedyassen.rsconfig.Compiler
-import me.waliedyassen.rsconfig.binary.BinaryEncoder
-import me.waliedyassen.rsconfig.parser.Parser
-import me.waliedyassen.rsconfig.parser.Reference
-import me.waliedyassen.rsconfig.symbol.SymbolType
-import me.waliedyassen.rsconfig.symbol.TypedSymbol
+import me.waliedyassen.rscp.Compiler
+import me.waliedyassen.rscp.binary.BinaryEncoder
+import me.waliedyassen.rscp.parser.Parser
+import me.waliedyassen.rscp.parser.Reference
+import me.waliedyassen.rscp.symbol.SymbolType
+import me.waliedyassen.rscp.symbol.TypedSymbol
 
 /**
  * Implementation for 'enum' type configuration.

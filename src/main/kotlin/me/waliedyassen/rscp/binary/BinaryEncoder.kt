@@ -1,4 +1,4 @@
-package me.waliedyassen.rsconfig.binary
+package me.waliedyassen.rscp.binary
 
 /**
  * An encoder that takes primitive data types and encodes them into byte data form.

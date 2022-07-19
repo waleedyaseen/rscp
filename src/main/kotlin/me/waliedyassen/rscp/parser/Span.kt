@@ -1,4 +1,4 @@
-package me.waliedyassen.rsconfig.parser
+package me.waliedyassen.rscp.parser
 
 import kotlin.math.max
 import kotlin.math.min

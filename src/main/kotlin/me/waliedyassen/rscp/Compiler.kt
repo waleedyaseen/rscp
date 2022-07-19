@@ -1,17 +1,17 @@
-package me.waliedyassen.rsconfig
+package me.waliedyassen.rscp
 
 import com.github.michaelbull.logging.InlineLogger
-import me.waliedyassen.rsconfig.config.Config
-import me.waliedyassen.rsconfig.parser.Diagnostic
-import me.waliedyassen.rsconfig.parser.DiagnosticKind
-import me.waliedyassen.rsconfig.parser.Parser
-import me.waliedyassen.rsconfig.parser.Reference
-import me.waliedyassen.rsconfig.parser.SemanticInfo
-import me.waliedyassen.rsconfig.parser.Span
-import me.waliedyassen.rsconfig.symbol.Symbol
-import me.waliedyassen.rsconfig.symbol.SymbolList
-import me.waliedyassen.rsconfig.symbol.SymbolTable
-import me.waliedyassen.rsconfig.symbol.SymbolType
+import me.waliedyassen.rscp.config.Config
+import me.waliedyassen.rscp.parser.Diagnostic
+import me.waliedyassen.rscp.parser.DiagnosticKind
+import me.waliedyassen.rscp.parser.Parser
+import me.waliedyassen.rscp.parser.Reference
+import me.waliedyassen.rscp.parser.SemanticInfo
+import me.waliedyassen.rscp.parser.Span
+import me.waliedyassen.rscp.symbol.Symbol
+import me.waliedyassen.rscp.symbol.SymbolList
+import me.waliedyassen.rscp.symbol.SymbolTable
+import me.waliedyassen.rscp.symbol.SymbolType
 import java.io.File
 
 class Compiler(private val extractMode: ExtractMode) {

@@ -1,4 +1,4 @@
-package me.waliedyassen.rsconfig.symbol
+package me.waliedyassen.rscp.symbol
 
 import java.io.File
 

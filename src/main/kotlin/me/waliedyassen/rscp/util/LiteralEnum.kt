@@ -1,4 +1,4 @@
-package me.waliedyassen.rsconfig.util
+package me.waliedyassen.rscp.util
 
 interface LiteralEnum {
     val literal: String

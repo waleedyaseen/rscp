@@ -1,6 +1,6 @@
-package me.waliedyassen.rsconfig.parser
+package me.waliedyassen.rscp.parser
 
-import me.waliedyassen.rsconfig.symbol.SymbolType
+import me.waliedyassen.rscp.symbol.SymbolType
 
 /**
  * Parse a parameter key and value and store them in the specified [params] map.

@@ -1,10 +1,10 @@
-package me.waliedyassen.rsconfig.config
+package me.waliedyassen.rscp.config
 
-import me.waliedyassen.rsconfig.Compiler
-import me.waliedyassen.rsconfig.binary.BinaryEncoder
-import me.waliedyassen.rsconfig.parser.Parser
-import me.waliedyassen.rsconfig.symbol.SymbolType
-import me.waliedyassen.rsconfig.util.LiteralEnum
+import me.waliedyassen.rscp.Compiler
+import me.waliedyassen.rscp.binary.BinaryEncoder
+import me.waliedyassen.rscp.parser.Parser
+import me.waliedyassen.rscp.symbol.SymbolType
+import me.waliedyassen.rscp.util.LiteralEnum
 
 enum class InvScope(val id: Int, override val literal: String) : LiteralEnum {
     TEMPORARY(0, "temp"),

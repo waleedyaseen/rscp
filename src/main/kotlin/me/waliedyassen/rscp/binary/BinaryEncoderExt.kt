@@ -1,4 +1,4 @@
-package me.waliedyassen.rsconfig.binary
+package me.waliedyassen.rscp.binary
 
 /**
  * Encode the specified [params] map and write it to the buffer.

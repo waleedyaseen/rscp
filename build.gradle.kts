@@ -3,7 +3,7 @@ plugins {
     id("com.github.johnrengelman.shadow") version ("6.1.0")
 }
 
-group = "me.waliedyassen.rsconfig"
+group = "me.waliedyassen.rscp"
 version = "1.0-SNAPSHOT"
 
 repositories {
@@ -22,7 +22,7 @@ dependencies {
 tasks {
     jar {
         manifest {
-            attributes["Main-Class"] = "me.waliedyassen.rsconfig.MainKt"
+            attributes["Main-Class"] = "me.waliedyassen.rscp.MainKt"
         }
     }
     shadowJar {

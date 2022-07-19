@@ -1,10 +1,10 @@
-package me.waliedyassen.rsconfig.config
+package me.waliedyassen.rscp.config
 
-import me.waliedyassen.rsconfig.Compiler
-import me.waliedyassen.rsconfig.parser.Parser
-import me.waliedyassen.rsconfig.symbol.BasicSymbol
-import me.waliedyassen.rsconfig.symbol.Symbol
-import me.waliedyassen.rsconfig.symbol.SymbolType
+import me.waliedyassen.rscp.Compiler
+import me.waliedyassen.rscp.parser.Parser
+import me.waliedyassen.rscp.symbol.BasicSymbol
+import me.waliedyassen.rscp.symbol.Symbol
+import me.waliedyassen.rscp.symbol.SymbolType
 
 /**
  * The base class for all the configuration in the system.
@@ -25,7 +25,7 @@ abstract class Config(val name: String, val symbolType: SymbolType<*>) {
     abstract fun verifyProperties(parser: Parser)
 
     /**
-     * Resolve all of the [me.waliedyassen.rsconfig.parser.Reference] objects
+     * Resolve all of the [me.waliedyassen.rscp.parser.Reference] objects
      * in this [Config] instance
      */
     abstract fun resolveReferences(compiler: Compiler)

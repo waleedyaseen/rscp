@@ -1,6 +1,6 @@
-package me.waliedyassen.rsconfig.parser
+package me.waliedyassen.rscp.parser
 
-import me.waliedyassen.rsconfig.symbol.SymbolType
+import me.waliedyassen.rscp.symbol.SymbolType
 
 /**
  * Represents a reference to a configuration symbol that is yet to be resolved.

@@ -1,6 +1,6 @@
-package me.waliedyassen.rsconfig.parser
+package me.waliedyassen.rscp.parser
 
-import me.waliedyassen.rsconfig.Compiler
+import me.waliedyassen.rscp.Compiler
 
 /**
  * Returns `true` if [this] character is an ascii letter.

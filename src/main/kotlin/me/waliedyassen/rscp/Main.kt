@@ -1,4 +1,4 @@
-package me.waliedyassen.rsconfig
+package me.waliedyassen.rscp
 
 import ch.qos.logback.classic.Level
 import com.fasterxml.jackson.module.kotlin.jsonMapper

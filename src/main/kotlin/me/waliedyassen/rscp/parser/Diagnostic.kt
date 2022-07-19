@@ -1,4 +1,4 @@
-package me.waliedyassen.rsconfig.parser
+package me.waliedyassen.rscp.parser
 
 /**
  * Used for distinguishing between different diagnostics.

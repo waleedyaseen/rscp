@@ -1,4 +1,4 @@
-package me.waliedyassen.rsconfig.symbol
+package me.waliedyassen.rscp.symbol
 
 /**
  * The base class for all the symbols, it holds the shared information between
