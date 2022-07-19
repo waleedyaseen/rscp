@@ -31,34 +31,38 @@ object PackTool : CliktCommand() {
     /**
      * The directory which contains all the symbols.
      */
-    private val symbolDirectory by option(help = "The symbol directory which contains the symbol table files")
-        .file()
-        .default(File("symbols"))
+    private val symbolDirectory by option(
+        "--symbols",
+        help = "Path to the directory with all the *.sym files for symbols"
+    ).file().default(File("sym"))
 
     /**
      * If present, the compiler will attempt to compile all the files within the directory.
      */
-    private val inputDirectory by option(help = "The input directory which contains all the source files")
+    private val inputDirectory by option("-i", "--input", help = "Path to a directory of source files to compile")
         .file()
+        .default(File("src"))
 
     /**
      * If present the compiler will attempt to compile this file only.
      */
-    private val inputFile by option(help = "The input file which contains the source code")
+    private val inputFile by option("--input-file", help = "Path to a single source file to compile")
         .file()
 
     /**
      * The directory to place the output binaries into.
      */
-    private val outputDirectory by option(help = "The output directory which the binary files will be written to")
-        .file()
-        .default(File("output"))
+    private val outputDirectory by option(
+        "-o",
+        "--output",
+        help = "The path to the directory which the generated binaries will be placed into"
+    ).file().default(File("bin"))
 
     /**
      * When present, the compiler will output JSON string with the information needed. This option has an argument
      * that tells what kind of information is needed.
      */
-    private val extract by option("--extract")
+    private val extract by option("-e", "--extract")
         .enum<ExtractMode>()
         .default(ExtractMode.None)
 
