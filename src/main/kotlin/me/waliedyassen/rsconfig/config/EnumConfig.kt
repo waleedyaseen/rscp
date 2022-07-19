@@ -57,7 +57,7 @@ class EnumConfig(name: String) : Config(name, SymbolType.Enum) {
                     return
                 }
                 val key = parser.parseDynamic(inputType) ?: return parser.skipProperty()
-                parser.parseComma() ?: parser.skipProperty()
+                parser.parseComma() ?: return parser.skipProperty()
                 val value = parser.parseDynamic(outputType) ?: return parser.skipProperty()
                 values[key] = value
             }
