@@ -283,8 +283,8 @@ class Parser(
         val values = enumValues<T>()
         val value = values.find { it.literal == identifier.text }
         if (value == null) {
-            val validValuesMsg = values.joinToString(", ") { "'$it'" }
-            reportError(identifier.span, "Unrecognised value. Valid values are ($validValuesMsg)")
+            val validValuesMsg = values.joinToString(", ") { "'${it.literal}'" }
+            reportError(identifier.span, "Unrecognised value. Acceptable values are ($validValuesMsg)")
             return null
         }
         return value
