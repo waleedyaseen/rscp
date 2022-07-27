@@ -13,9 +13,6 @@ data class SemanticInfo(
     val span: Span
 )
 
-data class SyntaxSignature(val span: Span, val name: String)
-data class SyntaxConfig(val span: Span, val config: Config)
-
 /**
  * A functional interface for handling error report call backs.
  */
@@ -85,7 +82,7 @@ class Parser(
     /**
      * Attempt to parse a single [Config] unit.
      */
-    private fun parseConfig(): SyntaxConfig? {
+    private fun parseConfig(): Syntax.Config? {
         val (span, name) = parseSignature() ?: return null
         val config = type.constructor(name)
         val begin = lexer.position()
@@ -99,7 +96,7 @@ class Parser(
             end = lexer.position()
         }
         config.verifyProperties(this)
-        return SyntaxConfig(span + Span(begin, end), config)
+        return Syntax.Config(span + Span(begin, end), config)
     }
 
     /**
@@ -125,7 +122,7 @@ class Parser(
     /**
      * Attempt to parse a configuration signature and return the parsed name if it is valid otherwise null.
      */
-    private fun parseSignature(): SyntaxSignature? {
+    private fun parseSignature(): Syntax.Signature? {
         val left = parseLBracket() ?: return null
         val name = parseIdentifier() ?: return null
         if (name is Token.Dummy) {
@@ -134,7 +131,7 @@ class Parser(
         val nameId = name as Token.Identifier
         storeSemInfo(name.span, "name")
         val right = parseRBracket() ?: return null
-        val signature = SyntaxSignature(left.span + right.span, nameId.text)
+        val signature = Syntax.Signature(left.span + right.span, nameId.text)
         parsingSignatureSpan = signature.span
         return signature
     }
