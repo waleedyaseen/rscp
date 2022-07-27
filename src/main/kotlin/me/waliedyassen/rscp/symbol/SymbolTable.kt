@@ -109,8 +109,7 @@ class SymbolTable {
      * Add the specified [symbol] of type [T] the appropriate symbol list.
      */
     fun <T> add(type: SymbolType<T>, symbol: T) where T : Symbol {
-        @Suppress("UNCHECKED_CAST")
-        val list = lists[type]!! as SymbolList<T>
+        val list = lookupList(type)
         list.add(symbol)
     }
 
