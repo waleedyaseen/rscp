@@ -33,3 +33,12 @@ data class TypedSymbol(
     override val id: Int,
     val type: SymbolType<*>
 ) : Symbol()
+
+/**
+ * A [Symbol] implementation for constants, which store the value as is, in string form.
+ */
+data class ConstantSymbol(
+    override val name: String,
+    override val id: Int,
+    val value: String,
+) : Symbol()

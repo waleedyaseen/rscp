@@ -46,3 +46,19 @@ object TypedSymbolSerializer : SymbolSerializer<TypedSymbol>() {
 
     override fun serialize(symbol: TypedSymbol) = "${symbol.name}:${symbol.id}:${symbol.type.literal}"
 }
+
+/**
+ * A [SymbolSerializer] implementation for [ConstantSymbol] type.
+ */
+object ConstantSymbolSerializer : SymbolSerializer<ConstantSymbol>() {
+
+    override fun deserialize(line: String): ConstantSymbol {
+        val parts = line.split(":", limit = 3)
+        val name = parts[0]
+        val id = parts[1].toInt()
+        val value = parts[2]
+        return ConstantSymbol(name, id, value)
+    }
+
+    override fun serialize(symbol: ConstantSymbol) = "${symbol.name}:${symbol.id}:${symbol.value}"
+}

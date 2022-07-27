@@ -8,6 +8,7 @@ import me.waliedyassen.rscp.config.StructConfig
 import me.waliedyassen.rscp.config.VarbitConfig
 import me.waliedyassen.rscp.config.VarcConfig
 import me.waliedyassen.rscp.config.VarpConfig
+import me.waliedyassen.rscp.config.value.ConstantValue
 
 /**
  * A primitive symbol type that cannot be stored in a symbol table.
@@ -51,6 +52,7 @@ open class SymbolType<T : Symbol>(
     object Param : SymbolType<TypedSymbol>('\u0000', "param", ::ParamConfig, TypedSymbolSerializer)
     object Inv : SymbolType<BasicSymbol>('v', "inv", ::InvConfig, BasicSymbolSerializer)
     object Struct : SymbolType<BasicSymbol>('J', "struct", ::StructConfig, BasicSymbolSerializer)
+    object Constant : SymbolType<ConstantSymbol>('^', "constant", ::ConstantValue, ConstantSymbolSerializer)
 
 
     companion object {
@@ -69,7 +71,8 @@ open class SymbolType<T : Symbol>(
             VarBit,
             Param,
             Inv,
-            Struct
+            Struct,
+            Constant,
         )
 
         /**

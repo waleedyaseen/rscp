@@ -188,6 +188,18 @@ class Parser(
     }
 
     /**
+     * Skip all the whitespace and attempt to parse a [Token.Caret] token.
+     */
+    private fun parseCaret(): Token? {
+        lexer.skipWhitespace()
+        val comma = lexer.lexCaret()
+        if (comma is Token.Dummy) {
+            return null
+        }
+        return comma
+    }
+
+    /**
      * Attempt to parse an [Token.Identifier] and falls back to [Token.Dummy] if something occurs.
      * This will eliminate any preceding whitespace to the token.
      */
@@ -201,9 +213,40 @@ class Parser(
     }
 
     /**
+     * Attempt to parse a constant expression (^identifier) then try to convert the value of that expression
+     * to an acceptable value, The function responsible for converting is provided as [block].
+     */
+    private fun <T> parseConstantReference(block: (Parser) -> T?): T? {
+        // TODO(Walied): Handle circular references (for example ^a = ^b and ^b = ^a)
+        val caret = parseCaret() ?: return null
+        val name = parseIdentifier() ?: return null
+        val nameText = (name as Token.Identifier).text
+        storeSemInfo(caret.span + name.span, "constant")
+        val constant = compiler.sym.lookupSymbol(SymbolType.Constant, nameText)
+        if (constant == null) {
+            reportError(name.span, "Could not resolve '${nameText}' to a constant")
+            return null
+        }
+        val messages = mutableListOf<String>()
+        val parser = Parser(SymbolType.Undefined, compiler, constant.value, extractSemInfo)
+        parser.errorReportHandler = { _, message -> messages += message }
+        parser.lexer.errorReportHandler = { _, message -> messages += message }
+        val result = block(parser)
+        if (messages.isNotEmpty()) {
+            val reasons = messages.joinToString("\n") { "    ^ $it" }
+            val message = "Inconvertible value '${constant.value}' of constant '${nameText}'.\n$reasons"
+            reportError(name.span, message)
+        }
+        return result
+    }
+
+    /**
      * Attempt to parse a valid numerical value and return 0 if it fails.
      */
     fun parseInteger(): Int? {
+        if (lexer.isCaret()) {
+            return parseConstantReference(Parser::parseInteger)
+        }
         val token = lexer.lexInteger()
         if (token is Token.Dummy) {
             return null

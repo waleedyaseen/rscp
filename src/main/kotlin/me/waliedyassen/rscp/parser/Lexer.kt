@@ -122,6 +122,23 @@ class Lexer(private val input: CharArray, var errorReportHandler: ErrorReportHan
     }
 
     /**
+     * Returns `true` if a [Token.Comma] can be parsed next.
+     */
+    fun isCaret() = peek() == '^'
+
+    /**
+     * Attempts to parse a [Token.Comma] and returns [Token.Dummy] if it fails.
+     */
+    fun lexCaret(): Token {
+        if (!isCaret()) {
+            return unexpectedCharacter("^")
+        }
+        val start = index
+        advance()
+        return Token.Caret(Span(start, index))
+    }
+
+    /**
      * Attempts to parse a [Token.Identifier] and returns [Token.Dummy] if it fails.
      */
     fun lexIdentifier(): Token {

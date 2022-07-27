@@ -37,6 +37,11 @@ abstract class Token {
     data class Comma(override val span: Span) : Token()
 
     /**
+     * A token representing the '^' character.
+     */
+    data class Caret(override val span: Span) : Token()
+
+    /**
      * A token representing a valid string.
      */
     data class Text(override val span: Span, val text: String) : Token()
