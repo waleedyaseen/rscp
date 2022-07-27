@@ -20,7 +20,7 @@ private fun Char.isAsciiLetterOrDigit() = isAsciiLetter() || isAsciiDigit()
 /**
  * Returns `true` if [this] character is suitable to be part of an identifier.
  */
-private fun Char.isIdentifierPart() = isAsciiLetterOrDigit() || this == '_' || this == '+'
+private fun Char.isIdentifierPart() = isAsciiLetterOrDigit() || this == '_' || this == '+' || this == ':'
 
 /**
  * Returns `true` if [this] character is a line feed character.
