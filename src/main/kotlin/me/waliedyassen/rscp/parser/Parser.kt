@@ -309,7 +309,7 @@ class Parser(
      * Report an error message with span of the current property.
      */
     fun reportPropertyError(message: String) {
-        compiler.addError(parsingPropertySpan ?: Span.empty(), message)
+        reportError(parsingPropertySpan ?: Span.empty(), message)
     }
 
     /**
