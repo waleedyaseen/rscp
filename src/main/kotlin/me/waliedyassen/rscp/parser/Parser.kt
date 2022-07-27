@@ -17,6 +17,11 @@ data class SyntaxSignature(val span: Span, val name: String)
 data class SyntaxConfig(val span: Span, val config: Config)
 
 /**
+ * A functional interface for handling error report call backs.
+ */
+typealias ErrorReportHandler = (Span, String) -> Unit
+
+/**
  * A higher level of parsing, it takes the output of [Lexer] as input and makes sure the tokens follow
  * a certain set of rules.
  */
@@ -28,9 +33,18 @@ class Parser(
 ) {
 
     /**
+     * The error report handler function, by default it is equivalent to [Compiler.addError]
+     */
+    var errorReportHandler: ErrorReportHandler = compiler::addError
+        set(value) {
+            field = value
+            lexer.errorReportHandler = value
+        }
+
+    /**
      * The underlying lexer we use for parsing tokens.
      */
-    private val lexer = Lexer(input.toCharArray(), compiler)
+    private val lexer = Lexer(input.toCharArray(), errorReportHandler)
 
     /**
      * The config signature span we are currently parsing
@@ -199,7 +213,6 @@ class Parser(
         return integer.value
     }
 
-
     /**
      * Attempt to parse a valid boolean value and return false if it fails.
      */
@@ -323,7 +336,7 @@ class Parser(
      * Report an error diagnostic to the compiler.
      */
     fun reportError(span: Span, message: String) {
-        compiler.addError(span, message)
+        errorReportHandler(span, message)
     }
 
     /**

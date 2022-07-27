@@ -36,7 +36,7 @@ private fun Char.isQuote() = this == '\"'
  * The lowest level of parsing, it takes an array of characters as input and transforms them into
  * meaningful [Token] objects while validating using specific rules.
  */
-class Lexer(private val input: CharArray, private val compiler: Compiler) {
+class Lexer(private val input: CharArray, var errorReportHandler: ErrorReportHandler) {
 
     /**
      * The current index of source code in the buffer.
@@ -273,7 +273,7 @@ class Lexer(private val input: CharArray, private val compiler: Compiler) {
      * Report an error to the compilation compiler.
      */
     private fun reportError(span: Span, text: String) {
-        compiler.addError(span, text)
+        errorReportHandler(span, text)
     }
 
     /**
