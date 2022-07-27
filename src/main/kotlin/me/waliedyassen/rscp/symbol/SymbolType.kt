@@ -52,7 +52,7 @@ open class SymbolType<T : Symbol>(
     object Param : SymbolType<TypedSymbol>('\u0000', "param", ::ParamConfig, TypedSymbolSerializer)
     object Inv : SymbolType<BasicSymbol>('v', "inv", ::InvConfig, BasicSymbolSerializer)
     object Struct : SymbolType<BasicSymbol>('J', "struct", ::StructConfig, BasicSymbolSerializer)
-    object Constant : SymbolType<ConstantSymbol>('^', "constant", ::ConstantValue, ConstantSymbolSerializer)
+    object Constant : SymbolType<ConstantSymbol>('^', "constant", { error("") }, ConstantSymbolSerializer)
 
 
     companion object {

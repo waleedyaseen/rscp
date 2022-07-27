@@ -2,6 +2,7 @@ package me.waliedyassen.rscp.parser
 
 import me.waliedyassen.rscp.Compiler
 import me.waliedyassen.rscp.config.Config
+import me.waliedyassen.rscp.config.value.Constant
 import me.waliedyassen.rscp.symbol.SymbolType
 import me.waliedyassen.rscp.util.LiteralEnum
 
@@ -23,7 +24,7 @@ typealias ErrorReportHandler = (Span, String) -> Unit
  * a certain set of rules.
  */
 class Parser(
-    private val type: SymbolType<*>,
+    val type: SymbolType<*>,
     val compiler: Compiler,
     input: String,
     private var extractSemInfo: Boolean
@@ -77,6 +78,22 @@ class Parser(
             configs += config.config
         }
         return configs
+    }
+
+    /**
+     * Parse a list of all the valid [Config] in the file.
+     */
+    fun parseConstants(): List<Constant> {
+        val constants = mutableListOf<Constant>()
+        while (!lexer.isEof()) {
+            if (lexer.skipWhitespace()) {
+                continue
+            }
+            val constant = parseConstantDeclaration() ?: continue
+            storeSemInfo(constant.span, "constant")
+            constants += Constant(constant.name, constant.value)
+        }
+        return constants
     }
 
     /**
@@ -134,6 +151,25 @@ class Parser(
         val signature = Syntax.Signature(left.span + right.span, nameId.text)
         parsingSignatureSpan = signature.span
         return signature
+    }
+
+    /**
+     * Attempt to parse a single constant declaration.
+     */
+    private fun parseConstantDeclaration(): Syntax.Constant? {
+        val caret = parseCaret() ?: return skipConstantDeclaration()
+        val identifier = parseIdentifier() ?: return skipConstantDeclaration()
+        val equals = parseEquals() ?: return skipConstantDeclaration()
+        val value = parseString()
+        return Syntax.Constant(collectSpans(caret, identifier), (identifier as Token.Identifier).text, value)
+    }
+
+    /**
+     * Skip the remaining of the current constant declaration.
+     */
+    private fun skipConstantDeclaration(): Syntax.Constant? {
+        lexer.skipLine()
+        return null
     }
 
     /**
@@ -394,8 +430,15 @@ class Parser(
         lexer.skipLine()
     }
 
+    /**
+     * Collect and merge the spans of the given [tokens] into one single [Span] that covers all the soruce
+     * code range of the [tokens].
+     */
+    private fun collectSpans(vararg tokens: Token) = tokens.map { it.span }.reduce { a, b -> a + b }
+
     fun storeSemInfo(span: Span, name: String) {
         if (!extractSemInfo) return
         semInfo += SemanticInfo(name, span)
     }
+
 }

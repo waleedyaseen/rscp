@@ -24,4 +24,9 @@ sealed class Syntax {
      * A single configuration entity.
      */
     data class Config(override val span: Span, val config: me.waliedyassen.rscp.config.Config) : Unit()
+
+    /**
+     *  A single constant declaration entity.
+     */
+    data class Constant(override val span: Span, val name: String, val value: String) : Unit()
 }

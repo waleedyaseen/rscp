@@ -9,6 +9,7 @@ import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.enum
 import com.github.ajalt.clikt.parameters.types.file
 import com.github.michaelbull.logging.InlineLogger
+import me.waliedyassen.rscp.config.Config
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -79,7 +80,7 @@ object PackTool : CliktCommand() {
         val time = measureTimeMillis {
             val compiler = Compiler(extract)
             compiler.readSymbols(symbolDirectory)
-            val configs = if (inputFile != null) {
+            val units = if (inputFile != null) {
                 compiler.compileFile(inputFile!!)
             } else {
                 compiler.compileDirectory(inputDirectory)
@@ -89,8 +90,7 @@ object PackTool : CliktCommand() {
                 compiler.diagnostics.forEach { logger.info { it } }
                 return@measureTimeMillis
             }
-            compiler.generateSymbols(configs)
-            compiler.generateCode(configs, outputDirectory)
+            compiler.generateCode(units.filterIsInstance<Config>(), outputDirectory)
             compiler.writeSymbols(symbolDirectory)
         }
         logger.info { "Finished. Took $time ms" }

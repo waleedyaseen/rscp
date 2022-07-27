@@ -2,6 +2,7 @@ package me.waliedyassen.rscp
 
 import com.github.michaelbull.logging.InlineLogger
 import me.waliedyassen.rscp.config.Config
+import me.waliedyassen.rscp.config.value.Constant
 import me.waliedyassen.rscp.parser.Diagnostic
 import me.waliedyassen.rscp.parser.DiagnosticKind
 import me.waliedyassen.rscp.parser.Parser
@@ -9,6 +10,7 @@ import me.waliedyassen.rscp.parser.Reference
 import me.waliedyassen.rscp.parser.SemanticInfo
 import me.waliedyassen.rscp.parser.Span
 import me.waliedyassen.rscp.symbol.Symbol
+import me.waliedyassen.rscp.symbol.SymbolContributor
 import me.waliedyassen.rscp.symbol.SymbolList
 import me.waliedyassen.rscp.symbol.SymbolTable
 import me.waliedyassen.rscp.symbol.SymbolType
@@ -61,13 +63,13 @@ class Compiler(private val extractMode: ExtractMode) {
     /**
      * Generate the symbol table information for the specified list of [Config].
      */
-    fun generateSymbols(configs: List<Config>) {
-        configs.forEach { config ->
-            val type = config.symbolType
-            val name = config.name
+    fun generateSymbols(contribs: List<SymbolContributor>) {
+        contribs.forEach { contrib ->
+            val type = contrib.symbolType
+            val name = contrib.name
             val old = sym.lookupSymbol(type, name)
             val id = old?.id ?: sym.generateId(type)
-            val new = config.createSymbol(id)
+            val new = contrib.createSymbol(id)
             if (old != new) {
                 @Suppress("UNCHECKED_CAST")
                 val list = sym.lookupList(type) as SymbolList<Symbol>
@@ -82,11 +84,22 @@ class Compiler(private val extractMode: ExtractMode) {
     /**
      * Compile all the configs within the specified [directory].
      */
-    fun compileDirectory(directory: File): List<Config> {
+    fun compileDirectory(directory: File): List<SymbolContributor> {
         logger.info { "Compiling configs from directory $directory" }
-        val parsers = directory.walkTopDown().map { createParser(it) }.filterNotNull().toList()
+        val parsers = directory.walkTopDown().map { createParser(it) }.filterNotNull()
+        val (constantParsers, configParsers) = parsers.partition { it.type == SymbolType.Constant }
         val configs = mutableListOf<Config>()
-        for (parser in parsers) {
+        val constants = mutableListOf<Constant>()
+        // TODO(Walied): Right now constants are evaluated at parse time, so we need to parse and register all
+        // of the constants before we parse configs.
+        for (parser in constantParsers) {
+            constants += parser.parseConstants()
+            if (extractMode == ExtractMode.SemInfo) {
+                semanticInfo += parser.semInfo
+            }
+        }
+        generateSymbols(constants)
+        for (parser in configParsers) {
             configs += parser.parseConfigs()
             if (extractMode == ExtractMode.SemInfo) {
                 semanticInfo += parser.semInfo
@@ -94,13 +107,13 @@ class Compiler(private val extractMode: ExtractMode) {
         }
         generateSymbols(configs)
         configs.forEach { it.resolveReferences(this) }
-        return configs
+        return configs + constants
     }
 
     /**
      * Compile the specified config [file].
      */
-    fun compileFile(file: File): List<Config> {
+    fun compileFile(file: File): List<SymbolContributor> {
         val parser = createParser(file) ?: return emptyList()
         return runParser(parser)
     }
@@ -108,14 +121,16 @@ class Compiler(private val extractMode: ExtractMode) {
     /**
      * Run the parse operation of the specified [Parser].
      */
-    private fun runParser(parser: Parser): List<Config> {
-        val configs = parser.parseConfigs()
+    private fun runParser(parser: Parser): List<SymbolContributor> {
+        val units = if (parser.type == SymbolType.Constant) parser.parseConstants() else parser.parseConfigs()
         if (extractMode == ExtractMode.SemInfo) {
             semanticInfo += parser.semInfo
         }
-        generateSymbols(configs)
-        configs.forEach { it.resolveReferences(this) }
-        return configs
+        generateSymbols(units)
+        if (parser.type != SymbolType.Constant) {
+            units.forEach { (it as Config).resolveReferences(this) }
+        }
+        return units
     }
 
     /**
