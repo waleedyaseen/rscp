@@ -1,10 +1,10 @@
 package me.waliedyassen.rscp.format.handler
 
 import me.waliedyassen.rscp.Compiler
+import me.waliedyassen.rscp.SymbolContributor
 import me.waliedyassen.rscp.format.config.Config
 import me.waliedyassen.rscp.format.value.Constant
 import me.waliedyassen.rscp.parser.Parser
-import me.waliedyassen.rscp.symbol.SymbolContributor
 import me.waliedyassen.rscp.symbol.SymbolType
 import java.io.File
 

@@ -11,7 +11,6 @@ import me.waliedyassen.rscp.parser.Reference
 import me.waliedyassen.rscp.parser.SemanticInfo
 import me.waliedyassen.rscp.parser.Span
 import me.waliedyassen.rscp.symbol.Symbol
-import me.waliedyassen.rscp.symbol.SymbolContributor
 import me.waliedyassen.rscp.symbol.SymbolList
 import me.waliedyassen.rscp.symbol.SymbolTable
 import me.waliedyassen.rscp.symbol.SymbolType
@@ -63,27 +62,6 @@ class Compiler(private val extractMode: ExtractMode) {
     }
 
     /**
-     * Generate the symbol table information for the specified list of [Config].
-     */
-    fun generateSymbols(contribs: List<SymbolContributor>) {
-        contribs.forEach { contrib ->
-            val type = contrib.symbolType
-            val name = contrib.name
-            val old = sym.lookupSymbol(type, name)
-            val id = old?.id ?: sym.generateId(type)
-            val new = contrib.createSymbol(id)
-            if (old != new) {
-                @Suppress("UNCHECKED_CAST")
-                val list = sym.lookupList(type) as SymbolList<Symbol>
-                if (old != null) {
-                    list.remove(old)
-                }
-                list.add(new)
-            }
-        }
-    }
-
-    /**
      * Compile all the configs within the specified [directory].
      */
     fun compileDirectory(directory: File): List<SymbolContributor> {
@@ -118,8 +96,15 @@ class Compiler(private val extractMode: ExtractMode) {
         return configs + constants
     }
 
-    private fun <T :SymbolContributor> ParseResult<T>.runValidateCode() {
+    private fun <T : SymbolContributor> ParseResult<T>.runValidateCode() {
         type.validate(this@Compiler, this)
+    }
+
+    /**
+     * Generate the symbol table information for the specified list of [Config].
+     */
+    private fun generateSymbols(contributors: List<SymbolContributor>) {
+        contributors.forEach { contributor -> contributor.contributeSymbols(sym) }
     }
 
     /**
