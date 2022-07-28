@@ -1,8 +1,8 @@
 package me.waliedyassen.rscp.parser
 
 import me.waliedyassen.rscp.Compiler
-import me.waliedyassen.rscp.config.Config
-import me.waliedyassen.rscp.config.value.Constant
+import me.waliedyassen.rscp.format.config.Config
+import me.waliedyassen.rscp.format.value.Constant
 import me.waliedyassen.rscp.symbol.SymbolType
 import me.waliedyassen.rscp.util.LiteralEnum
 

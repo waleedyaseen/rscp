@@ -1,8 +1,8 @@
 package me.waliedyassen.rscp
 
 import com.github.michaelbull.logging.InlineLogger
-import me.waliedyassen.rscp.config.Config
-import me.waliedyassen.rscp.config.value.Constant
+import me.waliedyassen.rscp.format.config.Config
+import me.waliedyassen.rscp.format.value.Constant
 import me.waliedyassen.rscp.parser.Diagnostic
 import me.waliedyassen.rscp.parser.DiagnosticKind
 import me.waliedyassen.rscp.parser.Parser

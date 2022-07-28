@@ -1,4 +1,4 @@
-package me.waliedyassen.rscp.config
+package me.waliedyassen.rscp.format.config
 
 import me.waliedyassen.rscp.Compiler
 import me.waliedyassen.rscp.binary.BinaryEncoder

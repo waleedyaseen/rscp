@@ -9,7 +9,7 @@ import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.enum
 import com.github.ajalt.clikt.parameters.types.file
 import com.github.michaelbull.logging.InlineLogger
-import me.waliedyassen.rscp.config.Config
+import me.waliedyassen.rscp.format.config.Config
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File

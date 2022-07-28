@@ -1,13 +1,13 @@
 package me.waliedyassen.rscp.symbol
 
-import me.waliedyassen.rscp.config.Config
-import me.waliedyassen.rscp.config.EnumConfig
-import me.waliedyassen.rscp.config.InvConfig
-import me.waliedyassen.rscp.config.ParamConfig
-import me.waliedyassen.rscp.config.StructConfig
-import me.waliedyassen.rscp.config.VarbitConfig
-import me.waliedyassen.rscp.config.VarcConfig
-import me.waliedyassen.rscp.config.VarpConfig
+import me.waliedyassen.rscp.format.config.Config
+import me.waliedyassen.rscp.format.config.EnumConfig
+import me.waliedyassen.rscp.format.config.InvConfig
+import me.waliedyassen.rscp.format.config.ParamConfig
+import me.waliedyassen.rscp.format.config.StructConfig
+import me.waliedyassen.rscp.format.config.VarbitConfig
+import me.waliedyassen.rscp.format.config.VarcConfig
+import me.waliedyassen.rscp.format.config.VarpConfig
 
 /**
  * A primitive symbol type that cannot be stored in a symbol table.

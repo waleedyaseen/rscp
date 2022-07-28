@@ -1,4 +1,4 @@
-package me.waliedyassen.rscp.config.value
+package me.waliedyassen.rscp.format.value
 
 import me.waliedyassen.rscp.symbol.ConstantSymbol
 import me.waliedyassen.rscp.symbol.SymbolContributor

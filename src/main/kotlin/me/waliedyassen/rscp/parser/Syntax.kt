@@ -23,7 +23,7 @@ sealed class Syntax {
     /**
      * A single configuration entity.
      */
-    data class Config(override val span: Span, val config: me.waliedyassen.rscp.config.Config) : Unit()
+    data class Config(override val span: Span, val config: me.waliedyassen.rscp.format.config.Config) : Unit()
 
     /**
      *  A single constant declaration entity.
