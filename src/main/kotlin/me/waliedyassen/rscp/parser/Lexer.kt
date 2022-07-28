@@ -13,6 +13,11 @@ private fun Char.isAsciiLetter() = this in 'A'..'Z' || this in 'a'..'z'
 private fun Char.isAsciiDigit() = this in '0'..'9'
 
 /**
+ * Returns `true` if [this] character is an ascii digit.
+ */
+private fun Char.isAsciiHexDigit() = this in '0'..'9' || this in 'a'..'f' || this in 'A'..'F'
+
+/**
  * Returns `true` if [this] character is either an ascii digit or an ascii letter.
  */
 private fun Char.isAsciiLetterOrDigit() = isAsciiLetter() || isAsciiDigit()
@@ -58,15 +63,6 @@ class Lexer(private val input: CharArray, var errorReportHandler: ErrorReportHan
         val start = index
         advance()
         return Token.LBracket(Span(start, index))
-    }
-
-    private fun unexpectedCharacter(expected: String): Token {
-        val start = index
-        val found = if (isEof()) "EOF" else peek()
-        advance()
-        val token = Token.Dummy(Span(start, index))
-        reportError(token.span, "Unexpected character '${found}'. Expected '$expected'")
-        return token
     }
 
     /**
@@ -213,24 +209,29 @@ class Lexer(private val input: CharArray, var errorReportHandler: ErrorReportHan
      * A [Token.Number] will be returned if the parsing is successful otherwise a [Token.Dummy] will be returned.
      */
     fun lexInteger(): Token {
-        if (!peek().isAsciiDigit()) {
-            return unexpectedCharacter("digit")
-        }
         val builder = StringBuilder()
         val start = index
-        if (peek() == '+' || peek() == '-') {
-            builder.append(peek())
+        val radix: Int = if (peek() == '0' && peek(1) == 'x') {
             advance()
+            advance()
+            builder.append("0x")
+            16
+        } else {
+            if (peek() == '+' || peek() == '-') {
+                builder.append(peek())
+                advance()
+            }
+            10
         }
-        if (!peek().isAsciiDigit()) {
+        if (!if (radix == 10) peek().isAsciiDigit() else peek().isAsciiHexDigit()) {
             reportError(Span(index, index), "Expected a digit but received '${peek()}'")
             return Token.Dummy(Span(index, index))
         }
-        while (peek().isAsciiDigit()) {
+        while (if (radix == 10) peek().isAsciiDigit() else peek().isAsciiHexDigit()) {
             builder.append(peek())
             advance()
         }
-        val integer = builder.toString().toIntOrNull()
+        val integer = (builder.substring(if (radix == 16) 2 else 0)).toIntOrNull(radix)
         if (integer == null) {
             reportError(Span(index, index), "Could not convert '${builder}' to a valid 32-bit number")
             return Token.Dummy(Span(index, index))
@@ -272,8 +273,8 @@ class Lexer(private val input: CharArray, var errorReportHandler: ErrorReportHan
     /**
      * Returns the current character in the source code without advancing.
      */
-    private fun peek(): Char {
-        return if (index == input.size) 0.toChar() else input[index]
+    private fun peek(offset: Int = 0): Char {
+        return if (index + offset >= input.size) 0.toChar() else input[index + offset]
     }
 
     /**
@@ -303,4 +304,14 @@ class Lexer(private val input: CharArray, var errorReportHandler: ErrorReportHan
      * Returns the current position in the input source code.
      */
     fun position() = index
+
+
+    private fun unexpectedCharacter(expected: String): Token {
+        val start = index
+        val found = if (isEof()) "EOF" else peek()
+        advance()
+        val token = Token.Dummy(Span(start, index))
+        reportError(token.span, "Unexpected character '${found}'. Expected '$expected'")
+        return token
+    }
 }
