@@ -1,4 +1,4 @@
-package me.waliedyassen.rscp.format.handler
+package me.waliedyassen.rscp.format
 
 import me.waliedyassen.rscp.Compiler
 import me.waliedyassen.rscp.SymbolContributor

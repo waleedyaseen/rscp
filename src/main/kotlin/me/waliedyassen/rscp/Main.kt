@@ -90,7 +90,7 @@ object PackTool : CliktCommand() {
                 compiler.diagnostics.forEach { logger.info { it } }
                 return@measureTimeMillis
             }
-            compiler.generateCode(units.filterIsInstance<Config>(), outputDirectory)
+            compiler.generateCode(units.filterIsInstance<CodeGenerator>(), outputDirectory)
             compiler.writeSymbols(symbolDirectory)
         }
         logger.info { "Finished. Took $time ms" }
