@@ -42,3 +42,12 @@ data class ConstantSymbol(
     override val id: Int,
     val value: String,
 ) : Symbol()
+
+/**
+ * A [Symbol] implementation for constants, which store the value as is, in string form.
+ */
+data class ClientScriptSymbol(
+    override val name: String,
+    override val id: Int,
+    val arguments: List<SymbolType<*>>,
+) : Symbol()

@@ -20,7 +20,7 @@ abstract class SymbolSerializer<T : Symbol> {
  * A [SymbolSerializer] implementation for [BasicSymbol] type.
  */
 object BasicSymbolSerializer : SymbolSerializer<BasicSymbol>() {
-    
+
     override fun deserialize(line: String): BasicSymbol {
         val parts = line.split(":")
         val name = parts[0]
@@ -61,4 +61,21 @@ object ConstantSymbolSerializer : SymbolSerializer<ConstantSymbol>() {
     }
 
     override fun serialize(symbol: ConstantSymbol) = "${symbol.name}:${symbol.id}:${symbol.value}"
+}
+
+/**
+ * A [SymbolSerializer] implementation for [ClientScriptSymbol] type.
+ */
+object ClientScriptSymbolSerializer : SymbolSerializer<ClientScriptSymbol>() {
+
+    override fun deserialize(line: String): ClientScriptSymbol {
+        val parts = line.split(":", limit = 3)
+        val name = parts[0]
+        val id = parts[1].toInt()
+        val arguments = if(parts[2].isBlank()) emptyList() else parts[2].split(",").map { SymbolType.lookup(it) }.toList()
+        return ClientScriptSymbol(name, id, arguments)
+    }
+
+    override fun serialize(symbol: ClientScriptSymbol) =
+        "${symbol.name}:${symbol.id}:${symbol.arguments.joinToString(",") { it.literal }}"
 }

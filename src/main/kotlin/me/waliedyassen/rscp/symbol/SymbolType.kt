@@ -28,6 +28,7 @@ open class SymbolType<T : Symbol>(
      * Checks whether this symbol type can be referenced.
      */
     fun isReference() = when (this) {
+        ClientScript,
         Seq,
         LocShape,
         Stat,
@@ -46,7 +47,9 @@ open class SymbolType<T : Symbol>(
     }
 
     object Undefined : PrimitiveSymbolType(0.toChar(), "")
-    object ClientScript : PrimitiveSymbolType(0.toChar(), "")
+    object ClientScript :
+        SymbolType<ClientScriptSymbol>(0.toChar(), "clientscript", { error("") }, ClientScriptSymbolSerializer)
+
     object Int : PrimitiveSymbolType('i', "int")
     object Boolean : PrimitiveSymbolType('1', "boolean")
     object Seq : PrimitiveSymbolType('A', "seq")
@@ -74,6 +77,7 @@ open class SymbolType<T : Symbol>(
          * A list of all the existing [SymbolType] instances.
          */
         val values = listOf(
+            ClientScript,
             Int,
             Boolean,
             Seq,
