@@ -23,6 +23,7 @@ open class SymbolType<T : Symbol>(
     val literal: kotlin.String,
     val constructor: ((kotlin.String) -> Config)? = null,
     val serializer: SymbolSerializer<T>,
+    val extension: kotlin.String? = literal
 ) {
     /**
      * Checks whether this symbol type can be referenced.
@@ -145,6 +146,17 @@ open class SymbolType<T : Symbol>(
         private val lookupByLiteral = values
             .filter { it.literal.isNotBlank() }
             .associateBy { it.literal }
+        /**
+         * A look-up by literal map for [SymbolType].
+         */
+        private val lookupByExtension = values
+            .filter { it.extension != null }
+            .associateBy { it.extension!! }
+
+        /**
+         * Looks-up for a [SymbolType] with the specified [extension].
+         */
+        fun lookupByExtensionOrNull(extension: kotlin.String): SymbolType<*>? = lookupByExtension[extension]
 
         /**
          * Looks-up for a [SymbolType] with the specified [literal].

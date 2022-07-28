@@ -41,8 +41,8 @@ sealed class FileType<T : SymbolContributor> {
          * Returns the [FileType] for the specified [extension] or null if there is no matching file type.
          */
         fun find(extension: String): FileType<*>? {
-            val type = SymbolType.lookupOrNull(extension) ?: return null
-            if (type.constructor != null) {
+            val type = SymbolType.lookupByExtensionOrNull(extension)
+            if (type?.constructor != null) {
                 return ConfigFileType(type)
             }
             return when (extension) {
