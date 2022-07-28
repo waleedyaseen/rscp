@@ -246,7 +246,7 @@ class Parser(
     /**
      * Skip all the whitespace and attempt to parse a [Token.Equals] token.
      */
-    private fun parseEquals(): Token? {
+    fun parseEquals(): Token? {
         lexer.skipWhitespace()
         val equals = lexer.lexEquals()
         if (equals is Token.Dummy) {

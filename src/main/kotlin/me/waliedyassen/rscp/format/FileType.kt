@@ -3,8 +3,13 @@ package me.waliedyassen.rscp.format
 import me.waliedyassen.rscp.Compiler
 import me.waliedyassen.rscp.SymbolContributor
 import me.waliedyassen.rscp.format.config.Config
+import me.waliedyassen.rscp.format.iftype.Component
+import me.waliedyassen.rscp.format.iftype.Interface
+import me.waliedyassen.rscp.format.iftype.InterfaceType
 import me.waliedyassen.rscp.format.value.Constant
 import me.waliedyassen.rscp.parser.Parser
+import me.waliedyassen.rscp.parser.Span
+import me.waliedyassen.rscp.parser.Token
 import me.waliedyassen.rscp.symbol.SymbolType
 import java.io.File
 
@@ -47,6 +52,7 @@ sealed class FileType<T : SymbolContributor> {
             }
             return when (extension) {
                 "constant" -> return ConstantFileType
+                "if3" -> return InterfaceFileType
                 else -> null
             }
         }
@@ -82,6 +88,71 @@ object ConstantFileType : FileType<Constant>() {
 
     override fun validate(compiler: Compiler, result: ParseResult<Constant>) {
         // Do nothing.
+    }
+
+    override fun createParser(compiler: Compiler, file: File, extractSemInfo: Boolean): Parser {
+        return Parser(compiler, file.readText(), extractSemInfo)
+    }
+}
+
+/**
+ * [FileType] implementation that only handles the constant file type.
+ */
+object InterfaceFileType : FileType<Interface>() {
+
+    override fun parse(parser: Parser): ParseResult<Interface> {
+        var name: String? = null
+        var type: InterfaceType? = null
+        while (true) {
+            // TODO(Walied): Find a better way around this, we do not need to use peekIdentifier()
+            //  perhaps implement isIdentifier() function to avoid this.
+            parser.peekIdentifier() ?: break
+            val identifier = parser.parseIdentifier()!!
+            parser.storeSemInfo(identifier.span, "property")
+            if (parser.parseEquals() == null) {
+                parser.skipProperty()
+                continue
+            }
+            when (val propertyName = (identifier as Token.Identifier).text) {
+                "name" -> {
+                    name = (parser.parseIdentifier() as? Token.Identifier)?.text
+                }
+
+                "type" -> {
+                    type = parser.parseEnumLiteral()
+                }
+
+                else -> {
+                    parser.reportPropertyError("Unknown interface property '${propertyName}'")
+                    parser.skipProperty()
+                }
+            }
+        }
+        if (name == null) {
+            parser.reportError(Span(0, 0), "Missing interface 'name' property")
+        }
+        if (type == null) {
+            parser.reportError(Span(0, 0), "Missing interface 'type' property")
+        }
+        val components = parser.parseConfigs(SymbolType.Component)
+        if (name == null || type == null) {
+            return ParseResult(this, emptyList())
+        }
+        val config = Interface(type, name, components.map { it as Component })
+        return ParseResult(this, listOf(config))
+    }
+
+    override fun validate(compiler: Compiler, result: ParseResult<Interface>) {
+        result.units.forEach { inter ->
+            val prefix = "${inter.name}:"
+            inter.components.forEach {
+                if (!it.name.startsWith(prefix)) {
+                    // TODO(Walied): Move this else where or or make it have the correct span
+                    compiler.addError(Span(0, 0), "The component name must start with '$prefix'")
+                }
+                it.resolveReferences(compiler)
+            }
+        }
     }
 
     override fun createParser(compiler: Compiler, file: File, extractSemInfo: Boolean): Parser {

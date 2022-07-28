@@ -33,6 +33,11 @@ class BinaryEncoder(expectedSize: Int) {
     }
 
     /**
+     * Write a boolean value to the buffer (either 1 or 0).
+     */
+    fun writeBoolean(value: Boolean) = write1(if (value) 1 else 0)
+
+    /**
      * Write a 1-byte integer to the buffer.
      */
     fun write1(value: Int) {

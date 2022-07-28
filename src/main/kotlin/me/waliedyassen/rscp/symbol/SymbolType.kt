@@ -8,6 +8,7 @@ import me.waliedyassen.rscp.format.config.StructConfig
 import me.waliedyassen.rscp.format.config.VarbitConfig
 import me.waliedyassen.rscp.format.config.VarcConfig
 import me.waliedyassen.rscp.format.config.VarpConfig
+import me.waliedyassen.rscp.format.iftype.Component
 
 /**
  * A primitive symbol type that cannot be stored in a symbol table.
@@ -57,7 +58,7 @@ open class SymbolType<T : Symbol>(
     object Boolean : PrimitiveSymbolType('1', "boolean")
     object Seq : PrimitiveSymbolType('A', "seq")
     object LocShape : PrimitiveSymbolType('H', "locshape")
-    object Component : PrimitiveSymbolType('I', "component")
+    object Component : SymbolType<BasicSymbol>('I', "component", ::Component, BasicSymbolSerializer, extension = null)
     object NamedObj : PrimitiveSymbolType('O', "namedobj")
     object Synth : PrimitiveSymbolType('P', "synth")
     object Area : PrimitiveSymbolType('R', "area")
