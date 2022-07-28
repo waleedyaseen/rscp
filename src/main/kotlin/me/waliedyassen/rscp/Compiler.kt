@@ -2,10 +2,11 @@ package me.waliedyassen.rscp
 
 import com.github.michaelbull.logging.InlineLogger
 import me.waliedyassen.rscp.format.config.Config
-import me.waliedyassen.rscp.format.value.Constant
+import me.waliedyassen.rscp.format.handler.ConstantFileType
+import me.waliedyassen.rscp.format.handler.FileType
+import me.waliedyassen.rscp.format.handler.ParseResult
 import me.waliedyassen.rscp.parser.Diagnostic
 import me.waliedyassen.rscp.parser.DiagnosticKind
-import me.waliedyassen.rscp.parser.Parser
 import me.waliedyassen.rscp.parser.Reference
 import me.waliedyassen.rscp.parser.SemanticInfo
 import me.waliedyassen.rscp.parser.Span
@@ -87,61 +88,53 @@ class Compiler(private val extractMode: ExtractMode) {
      */
     fun compileDirectory(directory: File): List<SymbolContributor> {
         logger.info { "Compiling configs from directory $directory" }
-        val parsers = directory.walkTopDown().map { createParser(it) }.filterNotNull()
-        val (constantParsers, configParsers) = parsers.partition { it.type == SymbolType.Constant }
-        val configs = mutableListOf<Config>()
-        val constants = mutableListOf<Constant>()
+        val handlers = directory.walkTopDown()
+            .mapNotNull { file -> FileType.find(file.extension)?.let { type -> file to type } }
+
+        val (constantHandlers, configHandlers) = handlers.partition { it.second is ConstantFileType }
+        val configResults = mutableListOf<ParseResult<*>>()
+        val constantResults = mutableListOf<ParseResult<*>>()
         // TODO(Walied): Right now constants are evaluated at parse time, so we need to parse and register all
         // of the constants before we parse configs.
-        for (parser in constantParsers) {
-            constants += parser.parseConstants()
+        for ((file, handler) in constantHandlers) {
+            val parser = handler.createParser(this, file, extractMode == ExtractMode.SemInfo)
+            constantResults += handler.parse(parser)
             if (extractMode == ExtractMode.SemInfo) {
                 semanticInfo += parser.semInfo
             }
         }
-        generateSymbols(constants)
-        for (parser in configParsers) {
-            configs += parser.parseConfigs()
+        val constants = constantResults.flatMap { it.units }
+        generateSymbols(constantResults.flatMap { it.units })
+        for ((file, handler) in configHandlers) {
+            val parser = handler.createParser(this, file, extractMode == ExtractMode.SemInfo)
+            configResults += handler.parse(parser)
             if (extractMode == ExtractMode.SemInfo) {
                 semanticInfo += parser.semInfo
             }
         }
-        generateSymbols(configs)
-        configs.forEach { it.resolveReferences(this) }
+        val configs = configResults.flatMap { it.units }
+        generateSymbols(configResults.flatMap { it.units })
+        configResults.forEach { it.runValidateCode() }
         return configs + constants
+    }
+
+    private fun <T :SymbolContributor> ParseResult<T>.runValidateCode() {
+        type.validate(this@Compiler, this)
     }
 
     /**
      * Compile the specified config [file].
      */
     fun compileFile(file: File): List<SymbolContributor> {
-        val parser = createParser(file) ?: return emptyList()
-        return runParser(parser)
-    }
-
-    /**
-     * Run the parse operation of the specified [Parser].
-     */
-    private fun runParser(parser: Parser): List<SymbolContributor> {
-        val units = if (parser.type == SymbolType.Constant) parser.parseConstants() else parser.parseConfigs()
+        val fileType = FileType.find(file.extension) ?: return emptyList()
+        val parser = fileType.createParser(this, file, extractMode == ExtractMode.SemInfo)
+        val result = fileType.parse(parser)
         if (extractMode == ExtractMode.SemInfo) {
             semanticInfo += parser.semInfo
         }
-        generateSymbols(units)
-        if (parser.type != SymbolType.Constant) {
-            units.forEach { (it as Config).resolveReferences(this) }
-        }
-        return units
-    }
-
-    /**
-     * Attempt to create a [Parser] object for the specified [file].
-     */
-    private fun createParser(file: File): Parser? {
-        val extension = file.extension
-        val type = SymbolType.lookupOrNull(extension) ?: return null
-        val input = file.reader().use { it.readText() }
-        return Parser(type, this, input, extractMode == ExtractMode.SemInfo)
+        generateSymbols(result.units)
+        result.runValidateCode()
+        return result.units
     }
 
     /**

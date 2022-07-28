@@ -101,7 +101,7 @@ class Parser(
      */
     private fun parseConfig(): Syntax.Config? {
         val (span, name) = parseSignature() ?: return null
-        val config = type.constructor(name)
+        val config = type.constructor!!(name)
         val begin = lexer.position()
         var end = lexer.position()
         while (true) {

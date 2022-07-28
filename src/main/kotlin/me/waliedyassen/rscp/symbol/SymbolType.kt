@@ -21,7 +21,7 @@ open class PrimitiveSymbolType(legacyChar: kotlin.Char, literal: kotlin.String) 
 open class SymbolType<T : Symbol>(
     val legacyChar: kotlin.Char,
     val literal: kotlin.String,
-    val constructor: (kotlin.String) -> Config = { error("Cannot construct symbol of type: $this") },
+    val constructor: ((kotlin.String) -> Config)? = null,
     val serializer: SymbolSerializer<T>,
 ) {
     /**
@@ -50,7 +50,7 @@ open class SymbolType<T : Symbol>(
 
     object Undefined : PrimitiveSymbolType(0.toChar(), "")
     object ClientScript :
-        SymbolType<ClientScriptSymbol>(0.toChar(), "clientscript", { error("") }, ClientScriptSymbolSerializer)
+        SymbolType<ClientScriptSymbol>(0.toChar(), "clientscript", null, ClientScriptSymbolSerializer)
 
     object Int : PrimitiveSymbolType('i', "int")
     object Boolean : PrimitiveSymbolType('1', "boolean")
@@ -89,7 +89,7 @@ open class SymbolType<T : Symbol>(
     object Param : SymbolType<TypedSymbol>('\u0000', "param", ::ParamConfig, TypedSymbolSerializer)
     object Struct : SymbolType<BasicSymbol>('J', "struct", ::StructConfig, BasicSymbolSerializer)
     object DbRow : PrimitiveSymbolType('Ð', "dbrow")
-    object Constant : SymbolType<ConstantSymbol>('^', "constant", { error("") }, ConstantSymbolSerializer)
+    object Constant : SymbolType<ConstantSymbol>('^', "constant", null, ConstantSymbolSerializer)
 
 
     companion object {
