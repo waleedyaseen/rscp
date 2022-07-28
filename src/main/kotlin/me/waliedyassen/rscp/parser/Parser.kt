@@ -310,6 +310,23 @@ class Parser(
     }
 
     /**
+     * Attempt to parse a valid graphic value and null if it fails.
+     */
+    fun parseGraphic(): Reference? {
+        val token = if (lexer.isQuotedString()) lexer.lexQuotedString() else parseIdentifier()
+        if (token == null || token is Token.Dummy) {
+            return null
+        }
+        storeSemInfo(token.span, "reference")
+        val text = when(token) {
+            is Token.Text -> token.text
+            is Token.Identifier -> token.text
+            else -> error("Unrecognized type: ${type::class}")
+        }
+        return Reference(SymbolType.Graphic, token.span, text)
+    }
+
+    /**
      * Attempt to parse a valid text value and return 0 if it fails.
      */
     fun parseString(): String {
@@ -390,6 +407,7 @@ class Parser(
             SymbolType.String -> parseString()
             SymbolType.Int -> parseInteger()
             SymbolType.Boolean -> parseBoolean()
+            SymbolType.Graphic -> parseGraphic()
             else -> error("Unexpected symbol type: $outputType")
         }
     }

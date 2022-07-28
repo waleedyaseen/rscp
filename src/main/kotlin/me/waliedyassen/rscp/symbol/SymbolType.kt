@@ -46,14 +46,16 @@ open class SymbolType<T : Symbol>(
     }
 
     object Undefined : PrimitiveSymbolType(0.toChar(), "")
+    object ClientScript : PrimitiveSymbolType(0.toChar(), "")
     object Int : PrimitiveSymbolType('i', "int")
     object Boolean : PrimitiveSymbolType('1', "boolean")
     object Seq : PrimitiveSymbolType('A', "seq")
     object LocShape : PrimitiveSymbolType('H', "loc_shape")
     object Stat : PrimitiveSymbolType('S', "stat")
     object NpcStat : PrimitiveSymbolType('T', "npc_stat")
-    object String : PrimitiveSymbolType('s', "string")
     object Obj : PrimitiveSymbolType('o', "obj")
+    object String : PrimitiveSymbolType('s', "string")
+    object Graphic : PrimitiveSymbolType('d', "graphic")
     object FontMetrics : PrimitiveSymbolType('f', "fontmetrics")
     object Model : PrimitiveSymbolType('m', "model")
     object Enum : SymbolType<TypedSymbol>('g', "enum", ::EnumConfig, TypedSymbolSerializer)
@@ -78,8 +80,9 @@ open class SymbolType<T : Symbol>(
             LocShape,
             Stat,
             NpcStat,
-            String,
             Obj,
+            String,
+            Graphic,
             FontMetrics,
             Model,
             Enum,
