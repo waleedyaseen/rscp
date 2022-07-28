@@ -277,6 +277,26 @@ class Parser(
     }
 
     /**
+     * Checks whether the next letter can be parsed as a [Token.Quote].
+     */
+    fun isQuote(): Boolean {
+        // TODO(Walied): We need to check for leading whitespace.
+        return lexer.isQuote()
+    }
+
+    /**
+     * Skip all the whitespace and attempt to parse a [Token.Quote] token.
+     */
+    fun parseQuote(): Token? {
+        lexer.skipWhitespace()
+        val quote = lexer.lexQuote()
+        if (quote is Token.Dummy) {
+            return null
+        }
+        return quote
+    }
+
+    /**
      * Skip all the whitespace and attempt to parse a [Token.Caret] token.
      */
     private fun parseCaret(): Token? {

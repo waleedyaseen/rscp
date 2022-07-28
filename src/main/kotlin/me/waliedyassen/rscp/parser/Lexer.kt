@@ -1,7 +1,5 @@
 package me.waliedyassen.rscp.parser
 
-import me.waliedyassen.rscp.Compiler
-
 /**
  * Returns `true` if [this] character is an ascii letter.
  */
@@ -182,6 +180,24 @@ class Lexer(private val input: CharArray, var errorReportHandler: ErrorReportHan
         val start = index
         advance()
         return Token.Comma(Span(start, index))
+    }
+
+
+    /**
+     * Returns `true` if a [Token.Quote] can be parsed next.
+     */
+    fun isQuote() = peek() == '"'
+
+    /**
+     * Attempts to parse a [Token.Quote] and returns [Token.Dummy] if it fails.
+     */
+    fun lexQuote(): Token {
+        if (!isQuote()) {
+            return unexpectedCharacter("")
+        }
+        val start = index
+        advance()
+        return Token.Quote(Span(start, index))
     }
 
     /**
