@@ -8,7 +8,6 @@ import me.waliedyassen.rscp.config.StructConfig
 import me.waliedyassen.rscp.config.VarbitConfig
 import me.waliedyassen.rscp.config.VarcConfig
 import me.waliedyassen.rscp.config.VarpConfig
-import me.waliedyassen.rscp.config.value.ConstantValue
 
 /**
  * A primitive symbol type that cannot be stored in a symbol table.
@@ -29,22 +28,34 @@ open class SymbolType<T : Symbol>(
      * Checks whether this symbol type can be referenced.
      */
     fun isReference() = when (this) {
-        Enum -> true
-        Inv -> true
+        Seq,
+        LocShape,
+        Stat,
+        NpcStat,
+        Obj,
+        FontMetrics,
+        Model,
+        Enum,
+        VarPlayer,
+        VarClient,
+        VarBit,
+        Param,
+        Inv,
         Struct -> true
-        VarPlayer -> true
-        VarClient -> true
-        VarBit -> true
-        Param -> true
-        Obj -> true
         else -> false
     }
 
     object Undefined : PrimitiveSymbolType(0.toChar(), "")
     object Int : PrimitiveSymbolType('i', "int")
     object Boolean : PrimitiveSymbolType('1', "boolean")
+    object Seq : PrimitiveSymbolType('A', "seq")
+    object LocShape : PrimitiveSymbolType('H', "loc_shape")
+    object Stat : PrimitiveSymbolType('S', "stat")
+    object NpcStat : PrimitiveSymbolType('T', "npc_stat")
     object String : PrimitiveSymbolType('s', "string")
     object Obj : PrimitiveSymbolType('o', "obj")
+    object FontMetrics : PrimitiveSymbolType('f', "fontmetrics")
+    object Model : PrimitiveSymbolType('m', "model")
     object Enum : SymbolType<TypedSymbol>('g', "enum", ::EnumConfig, TypedSymbolSerializer)
     object VarPlayer : SymbolType<TypedSymbol>('\u0000', "varp", ::VarpConfig, TypedSymbolSerializer)
     object VarClient : SymbolType<TypedSymbol>('\u0000', "varc", ::VarcConfig, TypedSymbolSerializer)
@@ -63,8 +74,14 @@ open class SymbolType<T : Symbol>(
         val values = listOf(
             Int,
             Boolean,
+            Seq,
+            LocShape,
+            Stat,
+            NpcStat,
             String,
             Obj,
+            FontMetrics,
+            Model,
             Enum,
             VarPlayer,
             VarClient,
