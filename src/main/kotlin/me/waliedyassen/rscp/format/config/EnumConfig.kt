@@ -68,15 +68,15 @@ class EnumConfig(name: String) : Config(name, SymbolType.Enum) {
 
     override fun verifyProperties(parser: Parser) {
         if (inputType == SymbolType.Undefined) {
-            parser.reportConfigError("inputtype property must be specified")
+            parser.reportUnitError("inputtype property must be specified")
             return
         }
         if (outputType == SymbolType.Undefined) {
-            parser.reportConfigError("outputtype property must be specified")
+            parser.reportUnitError("outputtype property must be specified")
             return
         }
         if (default == null) {
-            parser.reportConfigError("default property must be specified")
+            parser.reportUnitError("default property must be specified")
             return
         }
     }

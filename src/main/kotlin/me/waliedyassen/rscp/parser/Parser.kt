@@ -47,7 +47,7 @@ class Parser(
     /**
      * The config signature span we are currently parsing
      */
-    private var parsingSignatureSpan: Span? = null
+    private var parsingSignatureSpan: Span = Span(lexer.position(), lexer.position())
 
     /**
      * The property span we are currently parsing
@@ -547,8 +547,8 @@ class Parser(
     /**
      * Report an error message with span of the current config signature.
      */
-    fun reportConfigError(message: String) {
-        reportError(parsingSignatureSpan!!, message)
+    fun reportUnitError(message: String) {
+        reportError(parsingSignatureSpan, message)
     }
 
     /**

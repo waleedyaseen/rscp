@@ -21,7 +21,7 @@ class VarcConfig(name: String) : Config(name, SymbolType.VarClient) {
 
     override fun verifyProperties(parser: Parser) {
         if (type == SymbolType.Undefined) {
-            parser.reportConfigError("type property must be specified")
+            parser.reportUnitError("type property must be specified")
         }
     }
 

@@ -35,7 +35,7 @@ class ParamConfig(name: String) : Config(name, SymbolType.Param) {
 
     override fun verifyProperties(parser: Parser) {
         if (type == SymbolType.Undefined) {
-            parser.reportConfigError("type property must be specified")
+            parser.reportUnitError("type property must be specified")
             return
         }
     }
