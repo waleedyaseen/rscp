@@ -267,9 +267,9 @@ class Lexer(private val input: CharArray, var errorReportHandler: ErrorReportHan
         if (!peek().isQuote()) {
             return unexpectedCharacter("string")
         }
+        val start = index
         advance()
         val builder = StringBuilder()
-        val start = index
         while (true) {
             if (isEof() || peek().isLineDelimiter() || peek().isQuote()) {
                 break
