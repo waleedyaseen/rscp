@@ -322,6 +322,23 @@ class Parser(
     }
 
     /**
+     * Same as [parseIdentifier] except it does not change the current lexer position or report errors.
+     */
+    fun peekIdentifier(): Token? {
+        val errorReporter = lexer.errorReportHandler
+        val position = lexer.position()
+        lexer.errorReportHandler = { _, _ -> }
+        lexer.skipWhitespace()
+        val identifier = lexer.lexIdentifier()
+        lexer.index = position
+        lexer.errorReportHandler = errorReporter
+        if (identifier is Token.Dummy) {
+            return null
+        }
+        return identifier
+    }
+
+    /**
      * Attempt to parse a constant expression (^identifier) then try to convert the value of that expression
      * to an acceptable value, The function responsible for converting is provided as [block].
      */

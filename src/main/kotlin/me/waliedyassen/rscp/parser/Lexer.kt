@@ -44,7 +44,7 @@ class Lexer(private val input: CharArray, var errorReportHandler: ErrorReportHan
     /**
      * The current index of source code in the buffer.
      */
-    private var index = 0
+    var index = 0
 
     /**
      * Returns `true` if a [Token.LBracket] can be parsed next.
