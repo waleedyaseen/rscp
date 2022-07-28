@@ -107,7 +107,7 @@ class Lexer(private val input: CharArray, var errorReportHandler: ErrorReportHan
     /**
      * Returns `true` if a [Token.Comma] can be parsed next.
      */
-    private fun isComma() = peek() == ','
+    fun isComma() = peek() == ','
 
     /**
      * Attempts to parse a [Token.Comma] and returns [Token.Dummy] if it fails.

@@ -209,6 +209,14 @@ class Parser(
     }
 
     /**
+     * Checks whether the next letter can be parsed as a [Token.Comma].
+     */
+    fun isComma(): Boolean {
+        // TODO(Walied): We need to check for leading whitespace.
+        return lexer.isComma()
+    }
+
+    /**
      * Skip all the whitespace and attempt to parse a [Token.Comma] token.
      */
     fun parseComma(): Token? {
@@ -394,6 +402,38 @@ class Parser(
             return null
         }
         return value
+    }
+
+
+    /**
+     * Attempt to parse a list of the given enum literal type [T]. The list will at-least contain one element,
+     * if the parser fails to parse any element, a null will be returned instead.
+     */
+    inline fun <reified T> parseEnumLiteralList(): List<T>? where T : Enum<T>, T : LiteralEnum {
+        val values = enumValues<T>()
+        val result = mutableListOf<T>()
+        var erroneous = false
+        while(true) {
+            val literal = parseIdentifier() ?: return null
+            storeSemInfo(literal.span, "literal")
+            val identifier = literal as Token.Identifier
+            val value = values.find { it.literal == identifier.text }
+            if (value == null) {
+                val validValuesMsg = values.joinToString(", ") { "'${it.literal}'" }
+                reportError(identifier.span, "Unrecognised value. Acceptable values are ($validValuesMsg)")
+                erroneous = true
+            } else {
+                result += value
+            }
+            if (!isComma()) {
+                break
+            }
+            parseComma()
+        }
+        if (erroneous) {
+            return null
+        }
+        return result
     }
 
     /**
