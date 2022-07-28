@@ -1,2 +1,2 @@
-rootProject.name = "osrs-format-packer"
+rootProject.name = "rscp"
 
