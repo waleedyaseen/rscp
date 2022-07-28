@@ -12,14 +12,14 @@ import me.waliedyassen.rscp.config.VarpConfig
 /**
  * A primitive symbol type that cannot be stored in a symbol table.
  */
-open class PrimitiveSymbolType(legacyChar: Char, literal: kotlin.String) :
+open class PrimitiveSymbolType(legacyChar: kotlin.Char, literal: kotlin.String) :
     SymbolType<BasicSymbol>(legacyChar, literal, serializer = BasicSymbolSerializer)
 
 /**
  * The base symbol type.
  */
 open class SymbolType<T : Symbol>(
-    val legacyChar: Char,
+    val legacyChar: kotlin.Char,
     val literal: kotlin.String,
     val constructor: (kotlin.String) -> Config = { error("Cannot construct symbol of type: $this") },
     val serializer: SymbolSerializer<T>,
@@ -31,6 +31,7 @@ open class SymbolType<T : Symbol>(
         ClientScript,
         Seq,
         LocShape,
+        Component,
         Stat,
         NpcStat,
         Obj,
@@ -43,6 +44,7 @@ open class SymbolType<T : Symbol>(
         Param,
         Inv,
         Struct -> true
+
         else -> false
     }
 
@@ -53,21 +55,40 @@ open class SymbolType<T : Symbol>(
     object Int : PrimitiveSymbolType('i', "int")
     object Boolean : PrimitiveSymbolType('1', "boolean")
     object Seq : PrimitiveSymbolType('A', "seq")
-    object LocShape : PrimitiveSymbolType('H', "loc_shape")
+    object LocShape : PrimitiveSymbolType('H', "locshape")
+    object Component : PrimitiveSymbolType('I', "component")
+    object NamedObj : PrimitiveSymbolType('O', "namedobj")
+    object Synth : PrimitiveSymbolType('P', "synth")
+    object Area : PrimitiveSymbolType('R', "area")
     object Stat : PrimitiveSymbolType('S', "stat")
     object NpcStat : PrimitiveSymbolType('T', "npc_stat")
-    object Obj : PrimitiveSymbolType('o', "obj")
-    object String : PrimitiveSymbolType('s', "string")
+    object MapArea : PrimitiveSymbolType('`', "wma")
+    object CoordGrid : PrimitiveSymbolType('c', "coord")
     object Graphic : PrimitiveSymbolType('d', "graphic")
     object FontMetrics : PrimitiveSymbolType('f', "fontmetrics")
-    object Model : PrimitiveSymbolType('m', "model")
     object Enum : SymbolType<TypedSymbol>('g', "enum", ::EnumConfig, TypedSymbolSerializer)
+    object Loc : PrimitiveSymbolType('l', "loc")
+    object Model : PrimitiveSymbolType('m', "model")
+    object Npc : PrimitiveSymbolType('n', "npc")
+    object Obj : PrimitiveSymbolType('o', "obj")
+    object String : PrimitiveSymbolType('s', "string")
+    object Spotanim : PrimitiveSymbolType('t', "spotanim")
+    object NpcUid : PrimitiveSymbolType('u', "npc_uid")
+    object Inv : SymbolType<BasicSymbol>('v', "inv", ::InvConfig, BasicSymbolSerializer)
+    object Category : PrimitiveSymbolType('y', "category")
+    object Char : PrimitiveSymbolType('z', "char")
+    object MapElement : PrimitiveSymbolType('µ', "mapelement")
+    object Interface : PrimitiveSymbolType('a', "interface")
+    object TopLevelInterface : PrimitiveSymbolType('F', "toplevelinterface")
+    object OverlayInterface : PrimitiveSymbolType('L', "overlayinterface")
+    object ClientInterface : PrimitiveSymbolType('©', "clientinterface")
+    object NewVar : PrimitiveSymbolType('-', "newvar")
     object VarPlayer : SymbolType<TypedSymbol>('\u0000', "varp", ::VarpConfig, TypedSymbolSerializer)
     object VarClient : SymbolType<TypedSymbol>('\u0000', "varc", ::VarcConfig, TypedSymbolSerializer)
     object VarBit : SymbolType<BasicSymbol>('\u0000', "varbit", ::VarbitConfig, BasicSymbolSerializer)
     object Param : SymbolType<TypedSymbol>('\u0000', "param", ::ParamConfig, TypedSymbolSerializer)
-    object Inv : SymbolType<BasicSymbol>('v', "inv", ::InvConfig, BasicSymbolSerializer)
     object Struct : SymbolType<BasicSymbol>('J', "struct", ::StructConfig, BasicSymbolSerializer)
+    object DbRow : PrimitiveSymbolType('Ð', "dbrow")
     object Constant : SymbolType<ConstantSymbol>('^', "constant", { error("") }, ConstantSymbolSerializer)
 
 
@@ -82,20 +103,39 @@ open class SymbolType<T : Symbol>(
             Boolean,
             Seq,
             LocShape,
+            Component,
+            NamedObj,
+            Synth,
+            Area,
             Stat,
             NpcStat,
-            Obj,
-            String,
+            MapArea,
+            CoordGrid,
             Graphic,
             FontMetrics,
-            Model,
             Enum,
+            Loc,
+            Model,
+            Npc,
+            Obj,
+            String,
+            Spotanim,
+            NpcUid,
+            Inv,
+            Category,
+            Char,
+            MapElement,
+            Interface,
+            TopLevelInterface,
+            OverlayInterface,
+            ClientInterface,
+            NewVar,
             VarPlayer,
             VarClient,
             VarBit,
             Param,
-            Inv,
             Struct,
+            DbRow,
             Constant,
         )
 
