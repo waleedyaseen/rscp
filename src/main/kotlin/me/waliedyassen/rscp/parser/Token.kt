@@ -27,6 +27,16 @@ abstract class Token {
     data class RBracket(override val span: Span) : Token()
 
     /**
+     * A token representing the '(' character.
+     */
+    data class LParen(override val span: Span) : Token()
+
+    /**
+     * A token representing the ')' character.
+     */
+    data class RParen(override val span: Span) : Token()
+
+    /**
      * A token representing the '=' character.
      */
     data class Equals(override val span: Span) : Token()

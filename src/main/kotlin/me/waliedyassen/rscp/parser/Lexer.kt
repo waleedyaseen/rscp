@@ -82,6 +82,40 @@ class Lexer(private val input: CharArray, var errorReportHandler: ErrorReportHan
         return Token.RBracket(Span(start, index))
     }
 
+    /**
+     * Returns `true` if a [Token.LParen] can be parsed next.
+     */
+    fun isLParen() = peek() == '('
+
+    /**
+     * Attempts to parse a [Token.LParen] and returns [Token.Dummy] if it fails.
+     */
+    fun lexLParen(): Token {
+        if (!isLParen()) {
+            return unexpectedCharacter("(")
+        }
+        val start = index
+        advance()
+        return Token.LParen(Span(start, index))
+    }
+
+    /**
+     * Returns `true` if a [Token.RParen] can be parsed next.
+     */
+    private fun isRParen() = peek() == ')'
+
+    /**
+     * Attempts to parse a [Token.RParen] and returns [Token.Dummy] if it fails.
+     */
+    fun lexRParen(): Token {
+        if (!isRParen()) {
+            return unexpectedCharacter(")")
+        }
+        val start = index
+        advance()
+        return Token.RParen(Span(start, index))
+    }
+
 
     /**
      * Returns `true` if a [Token.Equals] can be parsed next.

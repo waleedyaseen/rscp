@@ -197,6 +197,30 @@ class Parser(
     }
 
     /**
+     * Skip all the whitespace and attempt to parse a [Token.LParen] token.
+     */
+    fun parseLParen(): Token? {
+        lexer.skipWhitespace()
+        val paren = lexer.lexLParen()
+        if (paren is Token.Dummy) {
+            return null
+        }
+        return paren
+    }
+
+    /**
+     * Skip all the whitespace and attempt to parse a [Token.RParen] token.
+     */
+    fun parseRParen(): Token? {
+        lexer.skipWhitespace()
+        val paren = lexer.lexRParen()
+        if (paren is Token.Dummy) {
+            return null
+        }
+        return paren
+    }
+
+    /**
      * Skip all the whitespace and attempt to parse a [Token.Equals] token.
      */
     private fun parseEquals(): Token? {
