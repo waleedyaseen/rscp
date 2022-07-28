@@ -221,6 +221,30 @@ class Parser(
     }
 
     /**
+     * Skip all the whitespace and attempt to parse a [Token.LBrace] token.
+     */
+    fun parseLBrace(): Token? {
+        lexer.skipWhitespace()
+        val brace = lexer.lexLBrace()
+        if (brace is Token.Dummy) {
+            return null
+        }
+        return brace
+    }
+
+    /**
+     * Skip all the whitespace and attempt to parse a [Token.RBrace] token.
+     */
+    fun parseRBrace(): Token? {
+        lexer.skipWhitespace()
+        val brace = lexer.lexRBrace()
+        if (brace is Token.Dummy) {
+            return null
+        }
+        return brace
+    }
+
+    /**
      * Skip all the whitespace and attempt to parse a [Token.Equals] token.
      */
     private fun parseEquals(): Token? {

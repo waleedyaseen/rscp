@@ -116,7 +116,40 @@ class Lexer(private val input: CharArray, var errorReportHandler: ErrorReportHan
         return Token.RParen(Span(start, index))
     }
 
+    /**
+     * Returns `true` if a [Token.LBrace] can be parsed next.
+     */
+    fun isLBrace() = peek() == '{'
 
+    /**
+     * Attempts to parse a [Token.LBrace] and returns [Token.Dummy] if it fails.
+     */
+    fun lexLBrace(): Token {
+        if (!isLBrace()) {
+            return unexpectedCharacter("{")
+        }
+        val start = index
+        advance()
+        return Token.LBrace(Span(start, index))
+    }
+
+    /**
+     * Returns `true` if a [Token.RBrace] can be parsed next.
+     */
+    private fun isRBrace() = peek() == '}'
+
+    /**
+     * Attempts to parse a [Token.RBrace] and returns [Token.Dummy] if it fails.
+     */
+    fun lexRBrace(): Token {
+        if (!isRBrace()) {
+            return unexpectedCharacter("}")
+        }
+        val start = index
+        advance()
+        return Token.RBrace(Span(start, index))
+    }
+    
     /**
      * Returns `true` if a [Token.Equals] can be parsed next.
      */
