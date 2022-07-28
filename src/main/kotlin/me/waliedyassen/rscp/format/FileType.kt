@@ -59,7 +59,7 @@ sealed class FileType<T : SymbolContributor> {
 class ConfigFileType(private val type: SymbolType<*>) : FileType<Config>() {
 
     override fun parse(parser: Parser): ParseResult<Config> {
-        return ParseResult(this, parser.parseConfigs())
+        return ParseResult(this, parser.parseConfigs(type))
     }
 
     override fun validate(compiler: Compiler, result: ParseResult<Config>) {
@@ -67,7 +67,7 @@ class ConfigFileType(private val type: SymbolType<*>) : FileType<Config>() {
     }
 
     override fun createParser(compiler: Compiler, file: File, extractSemInfo: Boolean): Parser {
-        return Parser(type, compiler, file.readText(), extractSemInfo)
+        return Parser(compiler, file.readText(), extractSemInfo)
     }
 }
 
@@ -85,6 +85,6 @@ object ConstantFileType : FileType<Constant>() {
     }
 
     override fun createParser(compiler: Compiler, file: File, extractSemInfo: Boolean): Parser {
-        return Parser(SymbolType.Constant, compiler, file.readText(), extractSemInfo)
+        return Parser(compiler, file.readText(), extractSemInfo)
     }
 }

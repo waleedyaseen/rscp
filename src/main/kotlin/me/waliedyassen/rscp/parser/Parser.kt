@@ -24,7 +24,6 @@ typealias ErrorReportHandler = (Span, String) -> Unit
  * a certain set of rules.
  */
 class Parser(
-    val type: SymbolType<*>,
     val compiler: Compiler,
     input: String,
     private var extractSemInfo: Boolean
@@ -67,13 +66,13 @@ class Parser(
     /**
      * Parse a list of all the valid [Config] in the file.
      */
-    fun parseConfigs(): List<Config> {
+    fun parseConfigs(type: SymbolType<*>): List<Config> {
         val configs = mutableListOf<Config>()
         while (!lexer.isEof()) {
             if (lexer.skipWhitespace()) {
                 continue
             }
-            val config = parseConfig() ?: continue
+            val config = parseConfig(type) ?: continue
             storeSemInfo(config.span, "definition")
             configs += config.config
         }
@@ -99,7 +98,7 @@ class Parser(
     /**
      * Attempt to parse a single [Config] unit.
      */
-    private fun parseConfig(): Syntax.Config? {
+    private fun parseConfig(type: SymbolType<*>): Syntax.Config? {
         val (span, name) = parseSignature() ?: return null
         val config = type.constructor!!(name)
         val begin = lexer.position()
@@ -354,7 +353,7 @@ class Parser(
             return null
         }
         val messages = mutableListOf<String>()
-        val parser = Parser(SymbolType.Undefined, compiler, constant.value, extractSemInfo)
+        val parser = Parser(compiler, constant.value, extractSemInfo)
         parser.errorReportHandler = { _, message -> messages += message }
         parser.lexer.errorReportHandler = { _, message -> messages += message }
         val result = block(parser)
@@ -414,7 +413,7 @@ class Parser(
         val text = when(token) {
             is Token.Text -> token.text
             is Token.Identifier -> token.text
-            else -> error("Unrecognized type: ${type::class}")
+            else -> error("Unrecognized type: ${token::class}")
         }
         return Reference(SymbolType.Graphic, token.span, text)
     }
