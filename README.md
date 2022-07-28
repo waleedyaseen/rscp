@@ -35,7 +35,7 @@ The following table contains all the current possible configurations that come w
 
 | Type | Extension | Support |
 | :--: | :--: | :--: |
-| Constants | `constants`,`macro` | Not Started |
+| Constants | `constants` | Complete |
 | Database Tables | `dbtable` | Not Started |
 | Database Rows | `dbrow` | Not Started |
 | Enum | `enum` | Complete |
@@ -44,7 +44,7 @@ The following table contains all the current possible configurations that come w
 | Headbar | `headbar` | Not Started |
 | Hitmark | `hitmark` | Not Started |
 | IdentityKit | `idk` | Not Started |
-| Interface v3 | `if3` | Not Started |
+| Interface v3 | `if3` | Complete |
 | Inventory | `inv` | Complete |
 | Location | `loc` | Not Started |
 | Map Element | `mel` | Not Started |
