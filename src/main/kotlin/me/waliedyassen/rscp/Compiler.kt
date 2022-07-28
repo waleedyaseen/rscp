@@ -15,6 +15,7 @@ import me.waliedyassen.rscp.symbol.SymbolList
 import me.waliedyassen.rscp.symbol.SymbolTable
 import me.waliedyassen.rscp.symbol.SymbolType
 import java.io.File
+import kotlin.reflect.KMutableProperty0
 
 class Compiler(private val extractMode: ExtractMode) {
 
@@ -197,6 +198,33 @@ class Compiler(private val extractMode: ExtractMode) {
         }
         return symbol.id
 
+    }
+
+
+    /**
+     * Attempt to resolve the specified [reference] from the symbol table and return
+     * the symbol id if the resolve was successful otherwise -1.
+     */
+    fun resolveReference(reference: KMutableProperty0<Any?>, permitNulls: Boolean = true) {
+        val current = reference()
+        if (current == null) {
+            reference.set(-1)
+        } else if (current is Reference) {
+            reference.set(resolveReference(current, permitNulls))
+        }
+    }
+
+
+    /**
+     * Attempt to resolve the specified [reference] from the symbol table and return
+     * the symbol id if the resolve was successful otherwise -1.
+     */
+    @JvmName("resolveReference1")
+    fun resolveReference(reference: KMutableProperty0<Any>, permitNulls: Boolean = true) {
+        val current = reference()
+        if (current is Reference) {
+            reference.set(resolveReference(current, permitNulls))
+        }
     }
 
     companion object {

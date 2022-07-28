@@ -3,7 +3,6 @@ package me.waliedyassen.rscp.config
 import me.waliedyassen.rscp.Compiler
 import me.waliedyassen.rscp.binary.BinaryEncoder
 import me.waliedyassen.rscp.parser.Parser
-import me.waliedyassen.rscp.parser.Reference
 import me.waliedyassen.rscp.symbol.SymbolType
 import me.waliedyassen.rscp.symbol.TypedSymbol
 
@@ -42,9 +41,7 @@ class ParamConfig(name: String) : Config(name, SymbolType.Param) {
     }
 
     override fun resolveReferences(compiler: Compiler) {
-        if (defaultInt is Reference)  {
-            defaultInt = compiler.resolveReference(defaultInt as Reference)
-        }
+        compiler.resolveReference(::defaultInt)
     }
     override fun createSymbol(id: Int) = TypedSymbol(name, id, type)
 

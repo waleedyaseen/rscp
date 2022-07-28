@@ -3,7 +3,6 @@ package me.waliedyassen.rscp.config
 import me.waliedyassen.rscp.Compiler
 import me.waliedyassen.rscp.binary.BinaryEncoder
 import me.waliedyassen.rscp.parser.Parser
-import me.waliedyassen.rscp.parser.Reference
 import me.waliedyassen.rscp.symbol.SymbolType
 
 /**
@@ -26,7 +25,7 @@ class VarbitConfig(name: String) : Config(name, SymbolType.VarBit) {
     /**
      * The 'basevar' attribute of the enum type.
      */
-    private var baseVar: Any = -1
+    private var baseVar: Any? = -1
 
     override fun parseProperty(name: String, parser: Parser) {
         when (name) {
@@ -42,9 +41,7 @@ class VarbitConfig(name: String) : Config(name, SymbolType.VarBit) {
     }
 
     override fun resolveReferences(compiler: Compiler) {
-        if (baseVar is Reference) {
-            baseVar = compiler.resolveReference(baseVar as Reference)
-        }
+        compiler.resolveReference(::baseVar)
     }
 
     override fun encode(): ByteArray {

@@ -89,9 +89,7 @@ class EnumConfig(name: String) : Config(name, SymbolType.Enum) {
         }.toMap()
         values.clear()
         values += transformedValues
-        if (default is Reference) {
-            default = compiler.resolveReference(default as Reference)
-        }
+        compiler.resolveReference(::default)
     }
 
     override fun createSymbol(id: Int) = TypedSymbol(name, id, outputType)
