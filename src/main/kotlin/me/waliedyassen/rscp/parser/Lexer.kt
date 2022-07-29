@@ -314,7 +314,7 @@ class Lexer(private val input: CharArray, var errorReportHandler: ErrorReportHan
             builder.append(peek())
             advance()
         }
-        val integer = (builder.substring(if (radix == 16) 2 else 0)).toIntOrNull(radix)
+        val integer = (builder.substring(if (radix == 16) 2 else 0)).toUIntOrNull(radix)?.toInt()
         if (integer == null) {
             reportError(Span(index, index), "Could not convert '${builder}' to a valid 32-bit number")
             return Token.Dummy(Span(index, index))
