@@ -48,6 +48,24 @@ object TypedSymbolSerializer : SymbolSerializer<TypedSymbol>() {
 }
 
 /**
+ * A [SymbolSerializer] implementation for [TypedSymbol] type.
+ */
+object ConfigSymbolSerializer : SymbolSerializer<ConfigSymbol>() {
+
+    override fun deserialize(line: String): ConfigSymbol {
+        val parts = line.split("!", limit = 4)
+        val name = parts[0]
+        val id = parts[1].toInt()
+        val type = SymbolType.lookup(parts[2])
+        val transmit = parts[3].toBooleanStrict()
+        return ConfigSymbol(name, id, type, transmit)
+    }
+
+    override fun serialize(symbol: ConfigSymbol) =
+        "${symbol.name}!${symbol.id}!${symbol.type.literal}!${symbol.transmit}"
+}
+
+/**
  * A [SymbolSerializer] implementation for [ConstantSymbol] type.
  */
 object ConstantSymbolSerializer : SymbolSerializer<ConstantSymbol>() {

@@ -35,6 +35,17 @@ data class TypedSymbol(
 ) : Symbol()
 
 /**
+ * A [Symbol] implementation that stores an additional [SymbolType] and transmit
+ * boolean property.
+ */
+data class ConfigSymbol(
+    override val name: String,
+    override val id: Int,
+    val type: SymbolType<*>,
+    val transmit: Boolean
+) : Symbol()
+
+/**
  * A [Symbol] implementation for constants, which store the value as is, in string form.
  */
 data class ConstantSymbol(
