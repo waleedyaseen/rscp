@@ -88,7 +88,7 @@ open class SymbolType<T : Symbol>(
     object VarPlayer : SymbolType<TypedSymbol>('\u0000', "varp", ::VarpConfig, TypedSymbolSerializer)
     object VarClient : SymbolType<TypedSymbol>('\u0000', "varc", ::VarcConfig, TypedSymbolSerializer)
     object VarBit : SymbolType<BasicSymbol>('\u0000', "varbit", ::VarbitConfig, BasicSymbolSerializer)
-    object Param : SymbolType<TypedSymbol>('\u0000', "param", ::ParamConfig, TypedSymbolSerializer)
+    object Param : SymbolType<ConfigSymbol>('\u0000', "param", ::ParamConfig, ConfigSymbolSerializer)
     object Struct : SymbolType<BasicSymbol>('J', "struct", ::StructConfig, BasicSymbolSerializer)
     object DbRow : PrimitiveSymbolType('Ð', "dbrow")
     object Constant : SymbolType<ConstantSymbol>('^', "constant", null, ConstantSymbolSerializer)

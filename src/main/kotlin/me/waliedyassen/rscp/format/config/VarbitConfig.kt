@@ -1,8 +1,10 @@
 package me.waliedyassen.rscp.format.config
 
 import me.waliedyassen.rscp.Compiler
+import me.waliedyassen.rscp.Side
 import me.waliedyassen.rscp.binary.BinaryEncoder
 import me.waliedyassen.rscp.parser.Parser
+import me.waliedyassen.rscp.symbol.SymbolTable
 import me.waliedyassen.rscp.symbol.SymbolType
 
 /**
@@ -45,12 +47,14 @@ class VarbitConfig(name: String) : Config(name, SymbolType.VarBit) {
         compiler.resolveReference(::baseVar)
     }
 
-    override fun encode(): ByteArray {
+    override fun encode(side: Side, sym: SymbolTable): ByteArray {
         val packet = BinaryEncoder(6)
-        packet.code(1) {
-            write2(baseVar as Int)
-            write1(startBit)
-            write1(endBit)
+        if (side == Side.Server || transmit) {
+            packet.code(1) {
+                write2(baseVar as Int)
+                write1(startBit)
+                write1(endBit)
+            }
         }
         packet.terminateCode()
         return packet.toByteArray()

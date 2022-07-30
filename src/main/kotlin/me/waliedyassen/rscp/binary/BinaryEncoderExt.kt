@@ -1,12 +1,23 @@
 package me.waliedyassen.rscp.binary
 
+import me.waliedyassen.rscp.Side
+import me.waliedyassen.rscp.symbol.SymbolTable
+import me.waliedyassen.rscp.symbol.SymbolType
+
 /**
  * Encode the specified [params] map and write it to the buffer.
  */
-fun BinaryEncoder.codeParams(params: Map<Int, Any>) {
+fun BinaryEncoder.codeParams(side: Side, sym: SymbolTable, params: Map<Int, Any>) {
     code(249) {
-        write1(params.size)
-        params.forEach { (key, value) ->
+        val filteredParams = if (side == Side.Server) {
+            params
+        } else {
+            params.filter { (id, _) ->
+                sym.lookupList(SymbolType.Param).lookupById(id)!!.transmit
+            }
+        }
+        write1(filteredParams.size)
+        filteredParams.forEach { (key, value) ->
             val stringValue = value is String
             write1(if (stringValue) 1 else 0)
             write3(key)

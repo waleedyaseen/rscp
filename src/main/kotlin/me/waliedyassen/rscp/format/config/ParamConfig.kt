@@ -1,10 +1,12 @@
 package me.waliedyassen.rscp.format.config
 
 import me.waliedyassen.rscp.Compiler
+import me.waliedyassen.rscp.Side
 import me.waliedyassen.rscp.binary.BinaryEncoder
 import me.waliedyassen.rscp.parser.Parser
+import me.waliedyassen.rscp.symbol.ConfigSymbol
+import me.waliedyassen.rscp.symbol.SymbolTable
 import me.waliedyassen.rscp.symbol.SymbolType
-import me.waliedyassen.rscp.symbol.TypedSymbol
 
 class ParamConfig(name: String) : Config(name, SymbolType.Param) {
 
@@ -44,19 +46,21 @@ class ParamConfig(name: String) : Config(name, SymbolType.Param) {
     override fun resolveReferences(compiler: Compiler) {
         compiler.resolveReference(::defaultInt)
     }
-    override fun createSymbol(id: Int) = TypedSymbol(name, id, type)
+    override fun createSymbol(id: Int) = ConfigSymbol(name, id, type, transmit)
 
-    override fun encode(): ByteArray {
+    override fun encode(side: Side, sym: SymbolTable): ByteArray {
         val packet = BinaryEncoder(7)
-        packet.code(1) { write1(type.legacyChar.code) }
-        if (defaultInt != null) {
-            packet.code(2) { write4(defaultInt as Int) }
-        }
-        if (!autoDisable) {
-            packet.code(4)
-        }
-        if (defaultStr != null) {
-            packet.code(5) { writeString(defaultStr!!) }
+        if (side == Side.Server || transmit) {
+            packet.code(1) { write1(type.legacyChar.code) }
+            if (defaultInt != null) {
+                packet.code(2) { write4(defaultInt as Int) }
+            }
+            if (!autoDisable) {
+                packet.code(4)
+            }
+            if (defaultStr != null) {
+                packet.code(5) { writeString(defaultStr!!) }
+            }
         }
         packet.terminateCode()
         return packet.toByteArray()

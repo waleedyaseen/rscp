@@ -1,7 +1,7 @@
 package me.waliedyassen.rscp.format.value
 
-import me.waliedyassen.rscp.symbol.ConstantSymbol
 import me.waliedyassen.rscp.SymbolContributor
+import me.waliedyassen.rscp.symbol.ConstantSymbol
 import me.waliedyassen.rscp.symbol.SymbolType
 
 /**

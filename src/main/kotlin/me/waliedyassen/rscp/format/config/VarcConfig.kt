@@ -1,8 +1,10 @@
 package me.waliedyassen.rscp.format.config
 
 import me.waliedyassen.rscp.Compiler
+import me.waliedyassen.rscp.Side
 import me.waliedyassen.rscp.binary.BinaryEncoder
 import me.waliedyassen.rscp.parser.Parser
+import me.waliedyassen.rscp.symbol.SymbolTable
 import me.waliedyassen.rscp.symbol.SymbolType
 import me.waliedyassen.rscp.symbol.TypedSymbol
 
@@ -32,10 +34,12 @@ class VarcConfig(name: String) : Config(name, SymbolType.VarClient) {
 
     override fun createSymbol(id: Int) = TypedSymbol(name, id, type)
 
-    override fun encode(): ByteArray {
+    override fun encode(side: Side, sym: SymbolTable): ByteArray {
         val packet = BinaryEncoder(6)
-        packet.code(1) {
-            write1(type.legacyChar.code)
+        if (side == Side.Server) {
+            packet.code(1) {
+                write1(type.legacyChar.code)
+            }
         }
         if (scope == VarLifetime.PERMANENT) {
             packet.code(2) {}

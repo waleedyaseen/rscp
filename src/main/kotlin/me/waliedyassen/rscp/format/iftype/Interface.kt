@@ -1,8 +1,10 @@
 package me.waliedyassen.rscp.format.iftype
 
 import me.waliedyassen.rscp.CodeGenerator
-import me.waliedyassen.rscp.symbol.BasicSymbol
+import me.waliedyassen.rscp.Side
 import me.waliedyassen.rscp.SymbolContributor
+import me.waliedyassen.rscp.format.iftype.InterfaceType.Interface
+import me.waliedyassen.rscp.symbol.BasicSymbol
 import me.waliedyassen.rscp.symbol.SymbolTable
 import me.waliedyassen.rscp.symbol.SymbolType
 import me.waliedyassen.rscp.util.LiteralEnum
@@ -43,15 +45,15 @@ class Interface(val type: InterfaceType, override val name: String, val componen
         additions.forEach { componentList.add(it) }
     }
 
-    override fun generateCode(outputFolder: File, sym: SymbolTable) {
-        val interfaceDirectory = outputFolder.resolve("ifs").resolve(name)
+    override fun generateCode(outputFolder: File, sym: SymbolTable, side: Side) {
+        val interfaceDirectory = outputFolder.resolve("ifs").resolve(sym.lookupSymbol(type.symbolType, name)!!.id.toString())
         check(interfaceDirectory.exists() || interfaceDirectory.mkdirs())
         interfaceDirectory.listFiles()?.forEach { it.delete() }
         components.forEach {
             val symbol = sym.lookupSymbol(SymbolType.Component, it.name)!!
-            val id = symbol.id
+            val id = symbol.id and 0xffff
             val componentFile = interfaceDirectory.resolve(id.toString())
-            componentFile.writeBytes(it.encode())
+            componentFile.writeBytes(it.encode(side, sym))
         }
     }
 }

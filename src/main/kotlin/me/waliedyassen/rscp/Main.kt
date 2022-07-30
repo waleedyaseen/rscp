@@ -6,10 +6,10 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
+import com.github.ajalt.clikt.parameters.options.split
 import com.github.ajalt.clikt.parameters.types.enum
 import com.github.ajalt.clikt.parameters.types.file
 import com.github.michaelbull.logging.InlineLogger
-import me.waliedyassen.rscp.format.config.Config
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -23,6 +23,14 @@ enum class ExtractMode {
     None,
     Errors,
     SemInfo
+}
+
+/**
+ * Controls which sides the compiler will generate sides for.
+ */
+enum class Side {
+    Server,
+    Client
 }
 
 object PackTool : CliktCommand() {
@@ -68,6 +76,15 @@ object PackTool : CliktCommand() {
         .default(ExtractMode.None)
 
     /**
+     * When present, the compiler will output JSON string with the information needed. This option has an argument
+     * that tells what kind of information is needed.
+     */
+    private val sides by option("--sides")
+        .enum<Side>()
+        .split(",")
+        .default(listOf(Side.Server))
+
+    /**
      * A flag option which indicates to turn off any logging output.
      */
     private val silent by option("-s", "--silent", help = "Run in silent mode, prevent any logging output").flag()
@@ -87,10 +104,14 @@ object PackTool : CliktCommand() {
             }
             performExtraction(compiler)
             if (compiler.diagnostics.isNotEmpty()) {
-                compiler.diagnostics.forEach { logger.info { it } }
+                compiler.diagnostics.forEach { logger.info { it.message } }
                 return@measureTimeMillis
             }
-            compiler.generateCode(units.filterIsInstance<CodeGenerator>(), outputDirectory)
+            val unitsGenerating = units.filterIsInstance<CodeGenerator>()
+            sides.forEach { side ->
+                val dir = outputDirectory.resolve(side.name.lowercase())
+                compiler.generateCode(unitsGenerating, dir, side)
+            }
             compiler.writeSymbols(symbolDirectory)
         }
         logger.info { "Finished. Took $time ms" }

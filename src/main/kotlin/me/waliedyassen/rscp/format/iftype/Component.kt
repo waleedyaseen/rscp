@@ -1,11 +1,13 @@
 package me.waliedyassen.rscp.format.iftype
 
 import me.waliedyassen.rscp.Compiler
+import me.waliedyassen.rscp.Side
 import me.waliedyassen.rscp.binary.BinaryEncoder
 import me.waliedyassen.rscp.format.config.Config
 import me.waliedyassen.rscp.parser.Parser
 import me.waliedyassen.rscp.parser.Reference
 import me.waliedyassen.rscp.parser.Token
+import me.waliedyassen.rscp.symbol.SymbolTable
 import me.waliedyassen.rscp.symbol.SymbolType
 import kotlin.reflect.KMutableProperty0
 
@@ -348,7 +350,7 @@ class Component(name: String) : Config(name, SymbolType.Component) {
         }
     }
 
-    override fun encode(): ByteArray {
+    override fun encode(side: Side, sym: SymbolTable): ByteArray {
         val encoder = BinaryEncoder(6)
         encoder.write1(-1)
         encoder.write1(type)
@@ -361,7 +363,7 @@ class Component(name: String) : Config(name, SymbolType.Component) {
         encoder.write1(vSizeMode)
         encoder.write1(hPosMode)
         encoder.write1(vPosMode)
-        encoder.write2(if (layer ==null) -1 else (layer as Int) and 0xffff)
+        encoder.write2(if (layer == null) -1 else (layer as Int) and 0xffff)
         encoder.writeBoolean(hide)
         when (type) {
             0 -> {

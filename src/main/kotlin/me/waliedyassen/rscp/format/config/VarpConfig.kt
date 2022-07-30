@@ -1,12 +1,15 @@
 package me.waliedyassen.rscp.format.config
 
 import me.waliedyassen.rscp.Compiler
+import me.waliedyassen.rscp.Side
 import me.waliedyassen.rscp.binary.BinaryEncoder
 import me.waliedyassen.rscp.parser.Parser
+import me.waliedyassen.rscp.symbol.SymbolTable
 import me.waliedyassen.rscp.symbol.SymbolType
 import me.waliedyassen.rscp.symbol.TypedSymbol
 import me.waliedyassen.rscp.util.LiteralEnum
 
+@Suppress("unused")
 enum class VarLifetime(val id: Int, override val literal: String) : LiteralEnum {
     TEMPORARY(0, "temp"),
     PERMANENT(1, "perm"),
@@ -54,12 +57,14 @@ class VarpConfig(name: String) : Config(name, SymbolType.VarPlayer) {
 
     override fun createSymbol(id: Int) = TypedSymbol(name, id, type)
 
-    override fun encode(): ByteArray {
+    override fun encode(side: Side, sym: SymbolTable): ByteArray {
         val expectedSize = 1 + (if (clientCode != 0) 3 else 0) + if (lifetime != VarLifetime.TEMPORARY) 2 else 0
         val packet = BinaryEncoder(expectedSize)
-        if (lifetime != VarLifetime.TEMPORARY) {
-            packet.code(4) {
-                write1(lifetime.id)
+        if (side == Side.Server) {
+            if (lifetime != VarLifetime.TEMPORARY) {
+                packet.code(4) {
+                    write1(lifetime.id)
+                }
             }
         }
         if (clientCode != 0) {

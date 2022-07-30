@@ -1,9 +1,11 @@
 package me.waliedyassen.rscp.format.config
 
 import me.waliedyassen.rscp.Compiler
+import me.waliedyassen.rscp.Side
 import me.waliedyassen.rscp.binary.BinaryEncoder
 import me.waliedyassen.rscp.parser.Parser
 import me.waliedyassen.rscp.parser.Reference
+import me.waliedyassen.rscp.symbol.SymbolTable
 import me.waliedyassen.rscp.symbol.SymbolType
 import me.waliedyassen.rscp.symbol.TypedSymbol
 
@@ -95,32 +97,34 @@ class EnumConfig(name: String) : Config(name, SymbolType.Enum) {
 
     override fun createSymbol(id: Int) = TypedSymbol(name, id, outputType)
 
-    override fun encode(): ByteArray {
+    override fun encode(side: Side, sym: SymbolTable): ByteArray {
         val packet = BinaryEncoder(32)
-        packet.code(1) {
-            write1(inputType.legacyChar.code)
-        }
-        packet.code(2) {
-            write1(outputType.legacyChar.code)
-        }
-        when (default) {
-            is String -> packet.code(3) {
-                writeString(default as String)
+        if (side == Side.Server || transmit) {
+            packet.code(1) {
+                write1(inputType.legacyChar.code)
             }
+            packet.code(2) {
+                write1(outputType.legacyChar.code)
+            }
+            when (default) {
+                is String -> packet.code(3) {
+                    writeString(default as String)
+                }
 
-            is Int -> packet.code(4) {
-                write4(default as Int)
+                is Int -> packet.code(4) {
+                    write4(default as Int)
+                }
             }
-        }
-        val stringValues = outputType == SymbolType.String
-        packet.code(if (stringValues) 5 else 6) {
-            write2(values.size)
-            values.forEach { (key, value) ->
-                write4(key as Int)
-                if (stringValues) {
-                    writeString(value as String)
-                } else {
-                    write4(value as Int)
+            val stringValues = outputType == SymbolType.String
+            packet.code(if (stringValues) 5 else 6) {
+                write2(values.size)
+                values.forEach { (key, value) ->
+                    write4(key as Int)
+                    if (stringValues) {
+                        writeString(value as String)
+                    } else {
+                        write4(value as Int)
+                    }
                 }
             }
         }

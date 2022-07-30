@@ -1,11 +1,13 @@
 package me.waliedyassen.rscp.format.config
 
 import me.waliedyassen.rscp.Compiler
+import me.waliedyassen.rscp.Side
 import me.waliedyassen.rscp.binary.BinaryEncoder
 import me.waliedyassen.rscp.binary.codeParams
 import me.waliedyassen.rscp.parser.Parser
 import me.waliedyassen.rscp.parser.Reference
 import me.waliedyassen.rscp.parser.parseParam
+import me.waliedyassen.rscp.symbol.SymbolTable
 import me.waliedyassen.rscp.symbol.SymbolType
 
 /**
@@ -19,6 +21,7 @@ class StructConfig(name: String) : Config(name, SymbolType.Struct) {
      * The 'params' attribute of the struct type.
      */
     private var params = LinkedHashMap<Int, Any>()
+
 
     override fun parseProperty(name: String, parser: Parser) {
         when (name) {
@@ -41,9 +44,11 @@ class StructConfig(name: String) : Config(name, SymbolType.Struct) {
         params += newParams
     }
 
-    override fun encode(): ByteArray {
+    override fun encode(side: Side, sym: SymbolTable): ByteArray {
         val packet = BinaryEncoder(32)
-        packet.codeParams(params)
+        if (side == Side.Server || transmit) {
+            packet.codeParams(side, sym, params)
+        }
         packet.terminateCode()
         return packet.toByteArray()
     }
