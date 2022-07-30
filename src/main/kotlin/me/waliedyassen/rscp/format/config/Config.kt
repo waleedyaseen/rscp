@@ -19,6 +19,11 @@ abstract class Config(override val name: String, override val symbolType: Symbol
     CodeGenerator {
 
     /**
+     * Whether the configuration should be transmitted to the client side.
+     */
+    var transmit = true
+
+    /**
      * Parse a property with the specified [name] using the specified [Parser].
      */
     abstract fun parseProperty(name: String, parser: Parser)

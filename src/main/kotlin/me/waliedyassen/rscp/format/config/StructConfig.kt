@@ -23,6 +23,7 @@ class StructConfig(name: String) : Config(name, SymbolType.Struct) {
     override fun parseProperty(name: String, parser: Parser) {
         when (name) {
             "param" -> parser.parseParam(params)
+            "transmit" -> transmit = parser.parseBoolean()
             else -> parser.unknownProperty()
         }
     }

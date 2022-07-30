@@ -15,6 +15,7 @@ class VarcConfig(name: String) : Config(name, SymbolType.VarClient) {
         when (name) {
             "type" -> type = parser.parseType() ?: return parser.skipProperty()
             "scope" -> scope = parser.parseEnumLiteral() ?: return parser.skipProperty()
+            "transmit" -> transmit = parser.parseBoolean()
             else -> parser.unknownProperty()
         }
     }

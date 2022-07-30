@@ -32,6 +32,7 @@ class VarbitConfig(name: String) : Config(name, SymbolType.VarBit) {
             "startbit" -> startBit = parser.parseInteger() ?: return parser.skipProperty()
             "endbit" -> endBit = parser.parseInteger() ?: return parser.skipProperty()
             "basevar" -> baseVar = parser.parseReference(SymbolType.VarPlayer) ?: return parser.skipProperty()
+            "transmit" -> transmit = parser.parseBoolean()
             else -> parser.unknownProperty()
         }
     }

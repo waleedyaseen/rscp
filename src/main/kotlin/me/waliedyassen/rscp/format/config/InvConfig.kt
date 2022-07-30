@@ -25,6 +25,7 @@ class InvConfig(name: String) : Config(name, SymbolType.Inv) {
         when (name) {
             "size" -> size = parser.parseInteger() ?: return parser.skipProperty()
             "scope" -> scope = parser.parseEnumLiteral() ?: return parser.skipProperty()
+            "transmit" -> transmit = parser.parseBoolean()
             else -> parser.unknownProperty()
         }
     }

@@ -62,6 +62,7 @@ class EnumConfig(name: String) : Config(name, SymbolType.Enum) {
                 values[key] = value
             }
 
+            "transmit" -> transmit = parser.parseBoolean()
             else -> parser.unknownProperty()
         }
     }

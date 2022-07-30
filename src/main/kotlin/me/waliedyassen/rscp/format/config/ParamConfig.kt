@@ -30,6 +30,7 @@ class ParamConfig(name: String) : Config(name, SymbolType.Param) {
             }
 
             "autodisable" -> autoDisable = parser.parseBoolean()
+            "transmit" -> transmit = parser.parseBoolean()
         }
     }
 
