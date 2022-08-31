@@ -286,7 +286,7 @@ class Component(name: String) : Config(name, SymbolType.Component) {
         parser.parseRParen() ?: return parser.skipProperty()
         // Parse to transmit list which looks like: (expression (, expression)+)
         val transmits = mutableListOf<Any>()
-        if (transmitType != null) {
+        if (transmitType != null && parser.isLBrace()) {
             parser.parseLBrace() ?: return parser.skipProperty()
             while (true) {
                 transmits += parser.parseDynamic(transmitType) ?: return parser.skipProperty()

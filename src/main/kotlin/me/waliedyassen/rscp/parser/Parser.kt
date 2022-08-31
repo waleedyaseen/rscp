@@ -220,6 +220,14 @@ class Parser(
     }
 
     /**
+     * Checks whether the next letter can be parsed as a [Token.Quote].
+     */
+    fun isLBrace(): Boolean {
+        // TODO(Walied): We need to check for leading whitespace.
+        return lexer.isLBrace()
+    }
+
+    /**
      * Skip all the whitespace and attempt to parse a [Token.LBrace] token.
      */
     fun parseLBrace(): Token? {
