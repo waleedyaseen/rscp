@@ -239,7 +239,6 @@ class Component(name: String) : Config(name, SymbolType.Component) {
     }
 
     private fun parseHook(parser: Parser, hook: KMutableProperty0<Hook?>, transmitType: SymbolType<*>? = null) {
-        parser.parseQuote() ?: parser.skipProperty()
         val reference = parser.parseReference(SymbolType.ClientScript) ?: return parser.skipProperty()
         val symbol = parser.compiler.sym.lookupSymbol(SymbolType.ClientScript, reference.name)
         if (symbol == null) {
@@ -298,8 +297,6 @@ class Component(name: String) : Config(name, SymbolType.Component) {
             }
             parser.parseRBrace() ?: return parser.skipProperty()
         }
-
-        parser.parseQuote() ?: return parser.skipProperty()
         hook.set(Hook(reference, arguments.toTypedArray(), transmits.toTypedArray()))
     }
 
