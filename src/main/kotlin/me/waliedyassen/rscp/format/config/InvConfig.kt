@@ -43,9 +43,11 @@ class InvConfig(name: String) : Config(name, SymbolType.Inv) {
     override fun encode(side: Side, sym: SymbolTable): ByteArray {
         val packet = BinaryEncoder(1 + if (size != 0) 3 else 0)
         if (side == Side.Server || transmit) {
-            if (scope != InvScope.TEMPORARY) {
-                packet.code(1) {
-                    write1(scope.id)
+            if (side == Side.Server) {
+                if (scope != InvScope.TEMPORARY) {
+                    packet.code(1) {
+                        write1(scope.id)
+                    }
                 }
             }
             if (size != 0) {
