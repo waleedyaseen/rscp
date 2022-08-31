@@ -15,7 +15,7 @@ class BinaryEncoder(expectedSize: Int) {
     /**
      * The position of the data used within the array.
      */
-    private var pos = 0
+    var pos = 0
 
     /**
      * Write a termination code.
