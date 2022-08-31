@@ -294,15 +294,18 @@ class Lexer(private val input: CharArray, var errorReportHandler: ErrorReportHan
     fun lexInteger(): Token {
         val builder = StringBuilder()
         val start = index
+        var sign = 1
         val radix: Int = if (peek() == '0' && peek(1) == 'x') {
             advance()
             advance()
             builder.append("0x")
             16
         } else {
-            if (peek() == '+' || peek() == '-') {
-                builder.append(peek())
+            if (peek() == '+') {
                 advance()
+            } else if (peek() == '-') {
+                advance()
+                sign = -1
             }
             10
         }
@@ -314,12 +317,12 @@ class Lexer(private val input: CharArray, var errorReportHandler: ErrorReportHan
             builder.append(peek())
             advance()
         }
-        val integer = (builder.substring(if (radix == 16) 2 else 0)).toUIntOrNull(radix)?.toInt()
+        val integer = (builder.substring(if (radix == 16) 2 else 0)).toUIntOrNull(radix)
         if (integer == null) {
             reportError(Span(index, index), "Could not convert '${builder}' to a valid 32-bit number")
             return Token.Dummy(Span(index, index))
         }
-        return Token.Number(Span(start, index), integer)
+        return Token.Number(Span(start, index), integer.toInt() * sign)
 
     }
 
