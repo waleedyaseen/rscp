@@ -11,7 +11,7 @@ You can download the latest compiler JAR file from GitHub [releases](https://git
  page.
 
 ### Usage
-To compile all of the source files within a directory you can use the following example: `java.exe -jar packer.jar -i src -o bin --symbols sym`
+To compile all the source files within a directory you can use the following example: `java.exe -jar packer.jar -i src -o bin --symbols sym`
 
 Upon executing, the compiler will collect all supported configuration files from `src` folder and place the compiled binary files into `bin`. Upon every sucessful compilation, the compiler will automatically update the symbols in the `sym` directory.
 
@@ -20,12 +20,15 @@ Upon executing, the compiler will collect all supported configuration files from
 Options:
   --symbols PATH                   Path to the directory with all the *.sym
                                    files for symbols
+  -g, --graphics PATH              Path to the directory with all the PNG
+                                   files for graphics
   -i, --input PATH                 Path to a directory of source files to
                                    compile
   --input-file PATH                Path to a single source file to compile
   -o, --output PATH                The path to the directory which the
                                    generated binaries will be placed into
   -e, --extract [None|Errors|SemInfo]
+  --sides [Server|Client]
   -s, --silent                     Run in silent mode, prevent any logging
                                    output
   -h, --help                       Show this message and exit
@@ -57,3 +60,4 @@ The following table contains all the current possible configurations that come w
 | Var Bit | `varbit` | Complete |
 | Var Client | `varc` | Complete |
 | Var Player | `varp` | Complete |
+| Graphic | `graphic` | Complete |

@@ -8,6 +8,7 @@ import me.waliedyassen.rscp.format.config.StructConfig
 import me.waliedyassen.rscp.format.config.VarbitConfig
 import me.waliedyassen.rscp.format.config.VarcConfig
 import me.waliedyassen.rscp.format.config.VarpConfig
+import me.waliedyassen.rscp.format.graphic.GraphicConfig
 import me.waliedyassen.rscp.format.iftype.Component
 
 /**
@@ -66,7 +67,7 @@ open class SymbolType<T : Symbol>(
     object NpcStat : PrimitiveSymbolType('T', "npc_stat")
     object MapArea : PrimitiveSymbolType('`', "wma")
     object CoordGrid : PrimitiveSymbolType('c', "coord")
-    object Graphic : PrimitiveSymbolType('d', "graphic")
+    object Graphic : SymbolType<BasicSymbol>('d', "graphic", ::GraphicConfig, BasicSymbolSerializer)
     object FontMetrics : PrimitiveSymbolType('f', "fontmetrics")
     object Enum : SymbolType<TypedSymbol>('g', "enum", ::EnumConfig, TypedSymbolSerializer)
     object Loc : PrimitiveSymbolType('l', "loc")

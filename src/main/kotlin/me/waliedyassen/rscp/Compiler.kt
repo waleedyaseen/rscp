@@ -15,7 +15,7 @@ import me.waliedyassen.rscp.symbol.SymbolType
 import java.io.File
 import kotlin.reflect.KMutableProperty0
 
-class Compiler(private val extractMode: ExtractMode) {
+class Compiler(private val extractMode: ExtractMode, val graphicsDirectory: File) {
 
     /**
      * The symbol table of the compiler.
@@ -40,7 +40,7 @@ class Compiler(private val extractMode: ExtractMode) {
         directory.listFiles()?.forEach { file ->
             val result = SYMBOL_FILE_REGEX.matchEntire(file.name) ?: return@forEach
             val literal = result.groupValues[1]
-            val type = SymbolType.lookup(literal)
+            val type = SymbolType.lookupOrNull(literal) ?: return@forEach
             sym.read(type, file)
             logger.info { "Parsed a total of ${sym.lookupList(type).symbols.size} '$literal' symbol entries" }
         }
@@ -80,7 +80,9 @@ class Compiler(private val extractMode: ExtractMode) {
             }
         }
         val constants = constantResults.flatMap { it.units }
-        generateSymbols(constantResults.flatMap { it.units })
+        if (diagnostics.none { it.kind == DiagnosticKind.Error }) {
+            generateSymbols(constantResults.flatMap { it.units })
+        }
         for ((file, handler) in otherHandlers) {
             val parser = handler.createParser(this, file, extractMode == ExtractMode.SemInfo)
             otherResults += handler.parse(parser)
@@ -89,7 +91,9 @@ class Compiler(private val extractMode: ExtractMode) {
             }
         }
         val others = otherResults.flatMap { it.units }
-        generateSymbols(otherResults.flatMap { it.units })
+        if (diagnostics.none { it.kind == DiagnosticKind.Error }) {
+            generateSymbols(otherResults.flatMap { it.units })
+        }
         otherResults.forEach { it.runValidateCode() }
         return others + constants
     }

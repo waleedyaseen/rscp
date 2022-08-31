@@ -46,6 +46,15 @@ object PackTool : CliktCommand() {
     ).file().default(File("sym"))
 
     /**
+     * The directory which contains all the graphics.
+     */
+    private val graphicsDirectory by option(
+        "-g",
+        "--graphics",
+        help = "Path to the directory with all the PNG files for graphics"
+    ).file().default(File("graphic"))
+
+    /**
      * If present, the compiler will attempt to compile all the files within the directory.
      */
     private val inputDirectory by option("-i", "--input", help = "Path to a directory of source files to compile")
@@ -95,7 +104,7 @@ object PackTool : CliktCommand() {
             root.level = Level.OFF
         }
         val time = measureTimeMillis {
-            val compiler = Compiler(extract)
+            val compiler = Compiler(extract, graphicsDirectory)
             compiler.readSymbols(symbolDirectory)
             val units = if (inputFile != null) {
                 compiler.compileFile(inputFile!!)
