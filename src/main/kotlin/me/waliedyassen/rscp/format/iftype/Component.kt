@@ -78,7 +78,7 @@ class Component(name: String) : Config(name, SymbolType.Component) {
     private var modelOrtho = false
     private var modelViewportWidth = 0
     private var modelViewportHeight = 0
-    private var lineWidth = 0
+    private var lineWidth = 1
     private var lineLeading = false
     private var pauseButton = false
     private var tgtObj = false
