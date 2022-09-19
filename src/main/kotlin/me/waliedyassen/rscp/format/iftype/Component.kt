@@ -486,6 +486,10 @@ class Component(name: String) : Config(name, SymbolType.Component) {
                     encoder.write1(0)
                     encoder.write4(value)
                 }
+                is Boolean -> {
+                    encoder.write1(0)
+                    encoder.write4(if (value) 1 else 0)
+                }
 
                 is String -> {
                     encoder.write1(1)
