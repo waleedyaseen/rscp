@@ -3,6 +3,7 @@ package me.waliedyassen.rscp.symbol
 import me.waliedyassen.rscp.format.config.Config
 import me.waliedyassen.rscp.format.config.EnumConfig
 import me.waliedyassen.rscp.format.config.InvConfig
+import me.waliedyassen.rscp.format.config.LocConfig
 import me.waliedyassen.rscp.format.config.ParamConfig
 import me.waliedyassen.rscp.format.config.StructConfig
 import me.waliedyassen.rscp.format.config.VarbitConfig
@@ -46,6 +47,8 @@ open class SymbolType<T : Symbol>(
         VarBit,
         Param,
         Inv,
+        Texture,
+        Synth,
         Struct -> true
 
         else -> false
@@ -70,7 +73,7 @@ open class SymbolType<T : Symbol>(
     object Graphic : SymbolType<BasicSymbol>('d', "graphic", ::GraphicConfig, BasicSymbolSerializer)
     object FontMetrics : PrimitiveSymbolType('f', "fontmetrics")
     object Enum : SymbolType<TypedSymbol>('g', "enum", ::EnumConfig, TypedSymbolSerializer)
-    object Loc : PrimitiveSymbolType('l', "loc")
+    object Loc : SymbolType<BasicSymbol>('l', "loc", ::LocConfig, BasicSymbolSerializer)
     object Model : PrimitiveSymbolType('m', "model")
     object Npc : PrimitiveSymbolType('n', "npc")
     object Obj : PrimitiveSymbolType('o', "obj")
@@ -78,6 +81,7 @@ open class SymbolType<T : Symbol>(
     object Spotanim : PrimitiveSymbolType('t', "spotanim")
     object NpcUid : PrimitiveSymbolType('u', "npc_uid")
     object Inv : SymbolType<BasicSymbol>('v', "inv", ::InvConfig, BasicSymbolSerializer)
+    object Texture : PrimitiveSymbolType('x', "texture")
     object Category : PrimitiveSymbolType('y', "category")
     object Char : PrimitiveSymbolType('z', "char")
     object MapElement : PrimitiveSymbolType('µ', "mapelement")
@@ -125,6 +129,7 @@ open class SymbolType<T : Symbol>(
             Spotanim,
             NpcUid,
             Inv,
+            Texture,
             Category,
             Char,
             MapElement,
