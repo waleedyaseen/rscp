@@ -98,17 +98,6 @@ class Compiler(private val extractMode: ExtractMode, val graphicsDirectory: File
         return others + constants
     }
 
-    private fun <T : SymbolContributor> ParseResult<T>.runValidateCode() {
-        type.validate(this@Compiler, this)
-    }
-
-    /**
-     * Generate the symbol table information for the specified list of [Config].
-     */
-    private fun generateSymbols(contributors: List<SymbolContributor>) {
-        contributors.forEach { contributor -> contributor.contributeSymbols(sym) }
-    }
-
     /**
      * Compile the specified config [file].
      */
@@ -119,9 +108,22 @@ class Compiler(private val extractMode: ExtractMode, val graphicsDirectory: File
         if (extractMode == ExtractMode.SemInfo) {
             semanticInfo += parser.semInfo
         }
-        generateSymbols(result.units)
+        if (diagnostics.none { it.kind == DiagnosticKind.Error }) {
+            generateSymbols(result.units)
+        }
         result.runValidateCode()
         return result.units
+    }
+
+    private fun <T : SymbolContributor> ParseResult<T>.runValidateCode() {
+        type.validate(this@Compiler, this)
+    }
+
+    /**
+     * Generate the symbol table information for the specified list of [Config].
+     */
+    private fun generateSymbols(contributors: List<SymbolContributor>) {
+        contributors.forEach { contributor -> contributor.contributeSymbols(sym) }
     }
 
     /**
