@@ -13,5 +13,5 @@ interface CodeGenerator {
      * Generate byte-code data and writes them to the specified [outputFolder]. The file the generated
      * data will be written to is determined by the implementation.
      */
-    fun generateCode(outputFolder: File, sym: SymbolTable, side: Side)
+    fun generateCode(allUnits: List<CodeGenerator>, outputFolder: File, sym: SymbolTable, side: Side)
 }

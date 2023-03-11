@@ -45,7 +45,7 @@ class Interface(val type: InterfaceType, override val name: String, val componen
         additions.forEach { componentList.add(it) }
     }
 
-    override fun generateCode(outputFolder: File, sym: SymbolTable, side: Side) {
+    override fun generateCode(allUnits: List<CodeGenerator>, outputFolder: File, sym: SymbolTable, side: Side) {
         val interfaceDirectory = outputFolder.resolve("ifs").resolve(sym.lookupSymbol(type.symbolType, name)!!.id.toString())
         check(interfaceDirectory.exists() || interfaceDirectory.mkdirs())
         interfaceDirectory.listFiles()?.forEach { it.delete() }

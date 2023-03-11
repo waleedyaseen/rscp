@@ -1,5 +1,6 @@
 package me.waliedyassen.rscp.format.graphic
 
+import me.waliedyassen.rscp.CodeGenerator
 import me.waliedyassen.rscp.Compiler
 import me.waliedyassen.rscp.Side
 import me.waliedyassen.rscp.format.config.Config
@@ -127,7 +128,7 @@ class GraphicConfig(override val name: String) : Config(name, SymbolType.Graphic
         return sprites
     }
 
-    override fun generateCode(outputFolder: File, sym: SymbolTable, side: Side) {
+    override fun generateCode(allUnits: List<CodeGenerator>, outputFolder: File, sym: SymbolTable, side: Side) {
         val atlases = this.atlases ?: error("No atlases were generated")
         val graphicsDirectory = outputFolder.resolve("graphic")
         check(graphicsDirectory.exists() || graphicsDirectory.mkdirs())

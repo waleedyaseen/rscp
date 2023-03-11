@@ -132,7 +132,7 @@ class Compiler(private val extractMode: ExtractMode, val graphicsDirectory: File
         if (generators.isEmpty()) return
         check(directory.exists() || directory.mkdirs()) { "Failed to create the output directory '${directory}'" }
         logger.info { "Writing ${generators.size} configs to $directory" }
-        generators.forEach { generator -> generator.generateCode(directory, sym, side) }
+        generators.forEach { generator -> generator.generateCode(generators, directory, sym, side) }
     }
 
     /**
