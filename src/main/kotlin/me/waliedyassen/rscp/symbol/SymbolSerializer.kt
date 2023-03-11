@@ -92,7 +92,8 @@ object ClientScriptSymbolSerializer : SymbolSerializer<ClientScriptSymbol>() {
         val parts = line.split("!", limit = 3)
         val name = parts[0]
         val id = parts[1].toInt()
-        val arguments = if(parts[2].isBlank()) emptyList() else parts[2].split(",").map { SymbolType.lookup(it) }.toList()
+        val arguments =
+            if (parts[2].isBlank()) emptyList() else parts[2].split(",").map { SymbolType.lookup(it) }.toList()
         return ClientScriptSymbol(name, id, arguments)
     }
 

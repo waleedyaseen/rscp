@@ -38,7 +38,14 @@ sealed class FileType<T : SymbolContributor> {
     /**
      * Create a parser for the specified [file].
      */
-    abstract fun createParser(compiler: Compiler, file: File, extractSemInfo: Boolean): Parser
+    fun createParser(compiler: Compiler, file: File, extractSemInfo: Boolean): Parser {
+        return createParser(compiler, file.readText(), extractSemInfo);
+    }
+
+    /**
+     * Create a parser for the specified [text].
+     */
+    abstract fun createParser(compiler: Compiler, text: String, extractSemInfo: Boolean): Parser
 
     companion object {
 
@@ -65,15 +72,15 @@ sealed class FileType<T : SymbolContributor> {
 class ConfigFileType(private val type: SymbolType<*>) : FileType<Config>() {
 
     override fun parse(parser: Parser): ParseResult<Config> {
-        return ParseResult(this, parser.parseConfigs(type))
+        return ParseResult(this, parser.parseConfigs(type).map { it.config })
     }
 
     override fun validate(compiler: Compiler, result: ParseResult<Config>) {
         result.units.forEach { it.resolveReferences(compiler) }
     }
 
-    override fun createParser(compiler: Compiler, file: File, extractSemInfo: Boolean): Parser {
-        return Parser(compiler, file.readText(), extractSemInfo)
+    override fun createParser(compiler: Compiler, text: String, extractSemInfo: Boolean): Parser {
+        return Parser(compiler, text, extractSemInfo)
     }
 }
 
@@ -90,8 +97,8 @@ object ConstantFileType : FileType<Constant>() {
         // Do nothing.
     }
 
-    override fun createParser(compiler: Compiler, file: File, extractSemInfo: Boolean): Parser {
-        return Parser(compiler, file.readText(), extractSemInfo)
+    override fun createParser(compiler: Compiler, text: String, extractSemInfo: Boolean): Parser {
+        return Parser(compiler, text, extractSemInfo)
     }
 }
 
@@ -138,7 +145,12 @@ object InterfaceFileType : FileType<Interface>() {
         if (name == null || type == null) {
             return ParseResult(this, emptyList())
         }
-        val config = Interface(type, name, components.map { it as Component })
+        components.groupBy { it.config.name }.filterValues { it.size > 1 }.forEach { (name, configs) ->
+            configs.forEach {
+                parser.reportError(it.span, "Duplicate component name '$name'")
+            }
+        }
+        val config = Interface(type, name, components.map { it.config as Component })
         return ParseResult(this, listOf(config))
     }
 
@@ -155,7 +167,7 @@ object InterfaceFileType : FileType<Interface>() {
         }
     }
 
-    override fun createParser(compiler: Compiler, file: File, extractSemInfo: Boolean): Parser {
-        return Parser(compiler, file.readText(), extractSemInfo)
+    override fun createParser(compiler: Compiler, text: String, extractSemInfo: Boolean): Parser {
+        return Parser(compiler, text, extractSemInfo)
     }
 }

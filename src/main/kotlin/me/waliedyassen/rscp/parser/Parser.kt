@@ -66,15 +66,15 @@ class Parser(
     /**
      * Parse a list of all the valid [Config] in the file.
      */
-    fun parseConfigs(type: SymbolType<*>): List<Config> {
-        val configs = mutableListOf<Config>()
+    fun parseConfigs(type: SymbolType<*>): List<Syntax.Config> {
+        val configs = mutableListOf<Syntax.Config>()
         while (!lexer.isEof()) {
             if (lexer.skipWhitespace()) {
                 continue
             }
             val config = parseConfig(type) ?: continue
             storeSemInfo(config.span, "definition")
-            configs += config.config
+            configs += config
         }
         return configs
     }

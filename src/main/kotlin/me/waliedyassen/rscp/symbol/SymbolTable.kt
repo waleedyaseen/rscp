@@ -138,4 +138,11 @@ class SymbolTable {
         val highestId = list.symbols.maxOfOrNull { it.id } ?: -1
         return highestId + 1
     }
+
+    /**
+     * Clear all the stored symbols in this table.
+     */
+    fun clear() {
+        lists.clear()
+    }
 }
