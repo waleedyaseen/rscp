@@ -38,7 +38,7 @@ class EnumConfig(name: String) : Config(name, SymbolType.Enum) {
 
     override fun parseProperty(name: String, parser: Parser) {
         when (name) {
-            "inputtype" -> inputType = parser.parseType() ?: return parser.skipProperty()
+            "inputtype" -> inputType = parser.parseTypeOrAutoInt() ?: return parser.skipProperty()
             "outputtype" -> outputType = parser.parseType() ?: return parser.skipProperty()
             "default" -> {
                 if (outputType == SymbolType.Undefined) {
@@ -58,10 +58,15 @@ class EnumConfig(name: String) : Config(name, SymbolType.Enum) {
                     parser.reportPropertyError("outputtype must be specified before val")
                     return
                 }
-                val key = parser.parseDynamic(inputType) ?: return parser.skipProperty()
-                parser.parseComma() ?: return parser.skipProperty()
-                val value = parser.parseDynamic(outputType) ?: return parser.skipProperty()
-                values[key] = value
+                if (inputType == SymbolType.AutoInt) {
+                    val value = parser.parseDynamic(outputType) ?: return parser.skipProperty()
+                    values[values.size] = value
+                } else {
+                    val key = parser.parseDynamic(inputType) ?: return parser.skipProperty()
+                    parser.parseComma() ?: return parser.skipProperty()
+                    val value = parser.parseDynamic(outputType) ?: return parser.skipProperty()
+                    values[key] = value
+                }
             }
 
             "transmit" -> transmit = parser.parseBoolean()
@@ -101,6 +106,10 @@ class EnumConfig(name: String) : Config(name, SymbolType.Enum) {
         val packet = BinaryEncoder(32)
         if (side == Side.Server || transmit) {
             packet.code(1) {
+                var inputType = inputType
+                if (inputType == SymbolType.AutoInt) {
+                    inputType = SymbolType.Int
+                }
                 write1(inputType.legacyChar.code)
             }
             packet.code(2) {

@@ -469,6 +469,27 @@ class Parser(
     }
 
     /**
+     * Attempt to parse a type name literal.
+     */
+    fun parseTypeOrAutoInt(): SymbolType<*>? {
+        val token = parseIdentifier() ?: return null
+        if (token is Token.Dummy) {
+            return null
+        }
+        storeSemInfo(token.span, "type")
+        val identifier = token as Token.Identifier
+        if (identifier.text == "autoint") {
+            return SymbolType.AutoInt
+        }
+        val type = SymbolType.lookupOrNull(identifier.text)
+        if (type == null) {
+            reportError(identifier.span, "Unrecognized type name '${identifier.text}'")
+            return null
+        }
+        return type
+    }
+
+    /**
      * Attempt to parse a valid configuration symbol name and return the associated id for that symbol.
      * If no valid configuration is found or can be parsed, a -1 will be returned instead.
      */

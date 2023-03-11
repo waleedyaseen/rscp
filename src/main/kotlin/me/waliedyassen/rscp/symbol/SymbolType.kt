@@ -97,6 +97,7 @@ open class SymbolType<T : Symbol>(
     object Struct : SymbolType<BasicSymbol>('J', "struct", ::StructConfig, BasicSymbolSerializer)
     object DbRow : PrimitiveSymbolType('Ð', "dbrow")
     object Constant : SymbolType<ConstantSymbol>('^', "constant", null, ConstantSymbolSerializer)
+    object AutoInt : PrimitiveSymbolType('\u0000', "autoint")
 
 
     companion object {
