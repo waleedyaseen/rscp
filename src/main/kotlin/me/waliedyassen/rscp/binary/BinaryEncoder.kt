@@ -85,6 +85,21 @@ class BinaryEncoder(expectedSize: Int) {
     }
 
     /**
+     * Write a variable (either 2 or 4 bytes) sized integer to the buffer.
+     */
+    fun write2or4(value: Int) {
+        require(value >= -1)
+        if (value == -1) {
+            write2(32767)
+        } else if (value < 32767) {
+            write2(value)
+        } else {
+            write4(value)
+            data[pos - 4] = (data[pos - 4].toInt() or 0x80).toByte()
+        }
+    }
+
+    /**
      * Expands the [data] buffer if necessary. The necessity of the expansion is only true when we do not have
      * remaining byte space is less than the specified [required] amount.
      */

@@ -55,7 +55,7 @@ class Component(name: String) : Config(name, SymbolType.Component) {
     private var fill = false
     private var trans = 0
     private var text = ""
-    private var textFontId: Any? = null
+    private var textFont: Any? = null
     private var textHAlign = 0
     private var textValign = 0
     private var textParaHeight = 0
@@ -146,7 +146,7 @@ class Component(name: String) : Config(name, SymbolType.Component) {
             "text" -> text = parser.parseString()
 
             // Text
-            "font" -> textFontId = parser.parseDynamic(SymbolType.FontMetrics)
+            "font" -> textFont = parser.parseDynamic(SymbolType.FontMetrics)
             "halign" -> textHAlign = parser.parseInteger() ?: return parser.skipProperty()
             "valign" -> textValign = parser.parseInteger() ?: return parser.skipProperty()
             "paraheight" -> textParaHeight = parser.parseInteger() ?: return parser.skipProperty()
@@ -309,7 +309,7 @@ class Component(name: String) : Config(name, SymbolType.Component) {
         compiler.resolveReference(::model)
         compiler.resolveReference(::modelSeq)
         compiler.resolveReference(::graphic)
-        compiler.resolveReference(::textFontId)
+        compiler.resolveReference(::textFont)
         resolveHookReferences(compiler, onLoadHook)
         resolveHookReferences(compiler, onMouseOverHook)
         resolveHookReferences(compiler, onMouseLeaveHook)
@@ -349,8 +349,23 @@ class Component(name: String) : Config(name, SymbolType.Component) {
 
     override fun encode(side: Side, sym: SymbolTable): ByteArray {
         val encoder = BinaryEncoder(6)
+        var version = 0
+        if (version < 1) {
+            if (textFont != null && (textFont as Int) >= 65535) {
+                version = 1
+            } else if (model != null && (model as Int) >= 65535) {
+                version = 1
+            } else if (modelSeq != null && (modelSeq as Int) >= 65535) {
+                version = 1
+            }
+        }
         encoder.write1(-1)
-        encoder.write1(type)
+        if (version != 0) {
+            encoder.write1(type or 0x80)
+            encoder.write1(version)
+        } else {
+            encoder.write1(type)
+        }
         encoder.write2(contenttype)
         encoder.write2(x)
         encoder.write2(y)
@@ -381,14 +396,24 @@ class Component(name: String) : Config(name, SymbolType.Component) {
             }
 
             6 -> {
-                encoder.write2(if (model == null) -1 else model as Int)
+                val modelId = if (model == null) -1 else model as Int
+                if (version >= 1) {
+                    encoder.write2or4(modelId)
+                } else {
+                    encoder.write2(modelId)
+                }
                 encoder.write2(modelOriginX)
                 encoder.write2(modelOriginY)
                 encoder.write2(modelAngleX)
                 encoder.write2(modelAngleY)
                 encoder.write2(modelAngleZ)
                 encoder.write2(modelZoom)
-                encoder.write2(if (modelSeq == null) -1 else modelSeq as Int)
+                val modelSeqId = if (modelSeq == null) -1 else modelSeq as Int
+                if (version >= 1) {
+                    encoder.write2or4(modelSeqId)
+                } else {
+                    encoder.write2(modelSeqId)
+                }
                 encoder.writeBoolean(modelOrtho)
                 encoder.write2(0)
                 if (hSizeMode != 0) {
@@ -400,7 +425,12 @@ class Component(name: String) : Config(name, SymbolType.Component) {
             }
 
             4 -> {
-                encoder.write2(if (textFontId == null) -1 else textFontId as Int)
+                val textFontId = if (textFont == null) -1 else textFont as Int
+                if (version >= 1) {
+                    encoder.write2or4(textFontId)
+                } else {
+                    encoder.write2(textFontId)
+                }
                 encoder.writeString(text)
                 encoder.write1(textParaHeight)
                 encoder.write1(textHAlign)
@@ -486,6 +516,7 @@ class Component(name: String) : Config(name, SymbolType.Component) {
                     encoder.write1(0)
                     encoder.write4(value)
                 }
+
                 is Boolean -> {
                     encoder.write1(0)
                     encoder.write4(if (value) 1 else 0)
