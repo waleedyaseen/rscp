@@ -49,7 +49,10 @@ open class SymbolType<T : Symbol>(
         Inv,
         Texture,
         Synth,
-        Struct -> true
+        Struct,
+        Interface,
+        OverlayInterface,
+        TopLevelInterface -> true
 
         else -> false
     }
