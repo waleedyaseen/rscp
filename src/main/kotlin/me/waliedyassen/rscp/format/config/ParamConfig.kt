@@ -3,6 +3,7 @@ package me.waliedyassen.rscp.format.config
 import me.waliedyassen.rscp.Compiler
 import me.waliedyassen.rscp.Side
 import me.waliedyassen.rscp.binary.BinaryEncoder
+import me.waliedyassen.rscp.binary.encodeParamValue
 import me.waliedyassen.rscp.parser.Parser
 import me.waliedyassen.rscp.symbol.ConfigSymbol
 import me.waliedyassen.rscp.symbol.SymbolTable
@@ -53,13 +54,13 @@ class ParamConfig(name: String) : Config(name, SymbolType.Param) {
         if (side == Side.Server || transmit) {
             packet.code(1) { write1(type.legacyChar.code) }
             if (defaultInt != null) {
-                packet.code(2) { write4(defaultInt as Int) }
+                packet.code(2) { encodeParamValue(defaultInt!!) }
             }
             if (!autoDisable) {
                 packet.code(4)
             }
             if (defaultStr != null) {
-                packet.code(5) { writeString(defaultStr!!) }
+                packet.code(5) { encodeParamValue(defaultStr!!) }
             }
         }
         packet.terminateCode()
