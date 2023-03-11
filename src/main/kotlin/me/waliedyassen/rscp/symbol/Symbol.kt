@@ -1,5 +1,7 @@
 package me.waliedyassen.rscp.symbol
 
+import me.waliedyassen.rscp.format.dbtable.DbColumnProp
+
 /**
  * The base class for all the symbols, it holds the shared information between
  * all the symbols such as [name] and [id].
@@ -61,4 +63,14 @@ data class ClientScriptSymbol(
     override val name: String,
     override val id: Int,
     val arguments: List<SymbolType<*>>,
+) : Symbol()
+
+/**
+ * A [Symbol] implementation for "dbcolumns".
+ */
+data class DbColumnSymbol(
+    override val name: String,
+    override val id: Int,
+    val types: List<SymbolType<*>>,
+    val props: Set<DbColumnProp>
 ) : Symbol()

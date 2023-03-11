@@ -503,6 +503,16 @@ class Parser(
     /**
      * Attempt to parse a valid identifier then match it to a valid enum constant in [T].
      */
+    inline fun <reified T> isEnumLiteral(): Boolean where T : Enum<T>, T : LiteralEnum {
+        val literal = peekIdentifier() ?: return false
+        val identifier = literal as Token.Identifier
+        val values = enumValues<T>()
+        return values.find { it.literal == identifier.text } != null
+    }
+
+    /**
+     * Attempt to parse a valid identifier then match it to a valid enum constant in [T].
+     */
     inline fun <reified T> parseEnumLiteral(): T? where T : Enum<T>, T : LiteralEnum {
         val literal = parseIdentifier() ?: return null
         storeSemInfo(literal.span, "literal")

@@ -9,6 +9,8 @@ import me.waliedyassen.rscp.format.config.StructConfig
 import me.waliedyassen.rscp.format.config.VarbitConfig
 import me.waliedyassen.rscp.format.config.VarcConfig
 import me.waliedyassen.rscp.format.config.VarpConfig
+import me.waliedyassen.rscp.format.dbtable.DbRowConfig
+import me.waliedyassen.rscp.format.dbtable.DbTableConfig
 import me.waliedyassen.rscp.format.graphic.GraphicConfig
 import me.waliedyassen.rscp.format.iftype.Component
 
@@ -53,7 +55,9 @@ open class SymbolType<T : Symbol>(
         Struct,
         Interface,
         OverlayInterface,
-        TopLevelInterface -> true
+        TopLevelInterface,
+        DbRow,
+        DbTable -> true
 
         else -> false
     }
@@ -101,8 +105,11 @@ open class SymbolType<T : Symbol>(
     object VarBit : SymbolType<BasicSymbol>(-1, '\u0000', "varbit", ::VarbitConfig, BasicSymbolSerializer)
     object Param : SymbolType<ConfigSymbol>(-1, '\u0000', "param", ::ParamConfig, ConfigSymbolSerializer)
     object Struct : SymbolType<BasicSymbol>(73, 'J', "struct", ::StructConfig, BasicSymbolSerializer)
+    object DbRow : SymbolType<BasicSymbol>(74, 'Ð', "dbrow", ::DbRowConfig, BasicSymbolSerializer)
     object Constant : SymbolType<ConstantSymbol>(-1, '\u0000', "constant", null, ConstantSymbolSerializer)
     object AutoInt : PrimitiveSymbolType(-1, '\u0000', "autoint")
+    object DbTable : SymbolType<BasicSymbol>(-1, '\u0000', "dbtable", ::DbTableConfig, BasicSymbolSerializer)
+    object DbColumn : SymbolType<DbColumnSymbol>(-1, '\u0000', "dbcolumn", null, DbColumnSymbolSerializer)
 
 
     companion object {
@@ -149,6 +156,9 @@ open class SymbolType<T : Symbol>(
             VarBit,
             Param,
             Struct,
+            DbRow,
+            DbTable,
+            DbColumn,
             Constant,
         )
 

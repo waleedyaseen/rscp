@@ -76,12 +76,38 @@ class BinaryEncoder(expectedSize: Int) {
     }
 
     /**
+     * Write a variable-byte integer to the buffer.
+     */
+    fun writeVarInt(value: Int) {
+        var remaining = value
+        do {
+            if (remaining > 127) {
+                write1((remaining and 0x7F) or 0x80)
+            } else {
+                write1(remaining)
+            }
+            remaining = remaining shr 7
+        } while (remaining > 0)
+    }
+
+    /**
      * Write the code points of the specified [value] to the buffer followed by a 0 null-terminator.
      */
     fun writeString(value: String) {
         expandIfNecessary(value.length + 1)
         value.codePoints().forEach { write1(it) }
         write1(0)
+    }
+
+    /**
+     * Write a variable (either 2 or 4 bytes) sized integer to the buffer.
+     */
+    fun write1or2(value: Int) {
+        when (value) {
+            in 0..127 -> write1(value)
+            in -32768..32767 -> write2(value + 32768)
+            else -> error("Expected write1or2 value to be in either [1-127] or [-32768-32767] ranges")
+        }
     }
 
     /**

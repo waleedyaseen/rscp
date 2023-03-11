@@ -1,5 +1,7 @@
 package me.waliedyassen.rscp.symbol
 
+import me.waliedyassen.rscp.format.dbtable.DbColumnProp
+
 /**
  * Handles serialization operations for a symbol of type [T].
  */
@@ -96,4 +98,35 @@ object ClientScriptSymbolSerializer : SymbolSerializer<ClientScriptSymbol>() {
 
     override fun serialize(symbol: ClientScriptSymbol) =
         "${symbol.name}!${symbol.id}!${symbol.arguments.joinToString(",") { it.literal }}"
+}
+
+/**
+ * A [SymbolSerializer] implementation for [DbColumnSymbol] type.
+ */
+object DbColumnSymbolSerializer : SymbolSerializer<DbColumnSymbol>() {
+
+    override fun deserialize(line: String): DbColumnSymbol {
+        val parts = line.split("!")
+        val name = parts[0]
+        val id = parts[1].toInt()
+        val types = if (parts[2].isBlank()) {
+            emptyList()
+        } else
+            parts[2].splitToSequence(",").map { SymbolType.lookup(it) }.toList()
+        val props = if (parts[3].isBlank()) {
+            emptySet()
+        } else {
+            parts[3].splitToSequence(",").map { literal ->
+                enumValues<DbColumnProp>().find { it.literal == literal }
+                    ?: error("Could not find property for literal '$literal'")
+            }.toSet()
+        }
+        return DbColumnSymbol(name, id, types, props)
+    }
+
+    override fun serialize(symbol: DbColumnSymbol): String {
+        val types = symbol.types.joinToString(",") { it.literal }
+        val props = symbol.props.joinToString(",") { it.literal }
+        return "${symbol.name}!${symbol.id}!$types!$props"
+    }
 }

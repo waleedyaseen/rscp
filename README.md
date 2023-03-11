@@ -39,8 +39,9 @@ The following table contains all the current possible configurations that come w
 | Type | Extension | Support |
 | :--: | :--: | :--: |
 | Constants | `constants` | Complete |
-| Database Tables | `dbtable` | Not Started |
-| Database Rows | `dbrow` | Not Started |
+| Database Table | `dbtable` | Complete |
+| Database Row | `dbrow` | Complete |
+| Database Index | None | Complete |
 | Enum | `enum` | Complete |
 | Floor Overlay | `flo` | Not Started |
 | Floor Underlay | `flu` | Not Started |

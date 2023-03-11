@@ -37,3 +37,9 @@ fun BinaryEncoder.encodeParamValue(value: Any) {
         write4(intValue)
     }
 }
+
+fun BinaryEncoder.writeDbColumn(types: List<SymbolType<*>>, values: List<Any>) {
+    val tupleCount = values.size / types.size
+    write1or2(tupleCount)
+    values.forEach { encodeParamValue(it) }
+}
