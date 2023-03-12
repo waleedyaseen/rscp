@@ -427,6 +427,23 @@ class Parser(
     }
 
     /**
+     * Attempt to parse a valid coord grid value and null if it fails.
+     */
+    private fun parseCoordGrid(): Int? {
+        val token = lexer.lexCoordGrid()
+        if (token is Token.Dummy) {
+            return null
+        }
+        token as Token.CoordGrid
+        storeSemInfo(token.span, "number")
+        val parts = token.value.split("_").map { it.toInt() }
+        val level = parts[0]
+        val squareX = parts[1] shl 6 or parts[3]
+        val squareY = parts[2] shl 6 or parts[4]
+        return (level shl 28) or (squareX shl 14) or (squareY)
+    }
+
+    /**
      * Attempt to parse a valid text value and return 0 if it fails.
      */
     fun parseString(): String {
@@ -571,6 +588,7 @@ class Parser(
             SymbolType.Int -> parseInteger()
             SymbolType.Boolean -> parseBoolean()
             SymbolType.Graphic -> parseGraphic()
+            SymbolType.CoordGrid -> parseCoordGrid()
             else -> error("Unexpected symbol type: $outputType")
         }
     }

@@ -147,7 +147,7 @@ class Lexer(private val input: CharArray, var errorReportHandler: ErrorReportHan
         advance()
         return Token.RBrace(Span(start, index))
     }
-    
+
     /**
      * Returns `true` if a [Token.Equals] can be parsed next.
      */
@@ -323,7 +323,25 @@ class Lexer(private val input: CharArray, var errorReportHandler: ErrorReportHan
             return Token.Dummy(Span(index, index))
         }
         return Token.Number(Span(start, index), integer.toInt() * sign)
+    }
 
+    fun lexCoordGrid(): Token {
+        val builder = StringBuilder()
+        val start = index
+        if (!peek().isAsciiDigit()) {
+            reportError(Span(index, index), "Expected a digit but received '${peek()}'")
+            return Token.Dummy(Span(index, index))
+        }
+        while (peek() == '_' || peek().isAsciiDigit()) {
+            builder.append(peek())
+            advance()
+        }
+        val text = builder.toString()
+        if (!text.matches(COORDGRID_REGEX)) {
+            reportError(Span(index, index), "Could not convert '${text}' to a valid coordgrid")
+            return Token.Dummy(Span(index, index))
+        }
+        return Token.CoordGrid(Span(start, index), text)
     }
 
     /**
@@ -399,5 +417,9 @@ class Lexer(private val input: CharArray, var errorReportHandler: ErrorReportHan
         val token = Token.Dummy(Span(start, index))
         reportError(token.span, "Unexpected character '${found}'. Expected '$expected'")
         return token
+    }
+
+    companion object {
+        private val COORDGRID_REGEX = Regex("\\d+_\\d+_\\d+_\\d+_\\d+")
     }
 }

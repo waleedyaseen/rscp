@@ -77,6 +77,11 @@ abstract class Token {
     data class Number(override val span: Span, val value: Int) : Token()
 
     /**
+     * A token representing a coord grid literal.
+     */
+    data class CoordGrid(override val span: Span, val value: String) : Token()
+
+    /**
      * A token representing a valid identifier.
      */
     data class Identifier(override val span: Span, val text: String) : Token()
