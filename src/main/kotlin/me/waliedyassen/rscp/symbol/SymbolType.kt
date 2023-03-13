@@ -1,14 +1,6 @@
 package me.waliedyassen.rscp.symbol
 
-import me.waliedyassen.rscp.format.config.Config
-import me.waliedyassen.rscp.format.config.EnumConfig
-import me.waliedyassen.rscp.format.config.InvConfig
-import me.waliedyassen.rscp.format.config.LocConfig
-import me.waliedyassen.rscp.format.config.ParamConfig
-import me.waliedyassen.rscp.format.config.StructConfig
-import me.waliedyassen.rscp.format.config.VarbitConfig
-import me.waliedyassen.rscp.format.config.VarcConfig
-import me.waliedyassen.rscp.format.config.VarpConfig
+import me.waliedyassen.rscp.format.config.*
 import me.waliedyassen.rscp.format.dbtable.DbRowConfig
 import me.waliedyassen.rscp.format.dbtable.DbTableConfig
 import me.waliedyassen.rscp.format.graphic.GraphicConfig
@@ -57,8 +49,8 @@ open class SymbolType<T : Symbol>(
         OverlayInterface,
         TopLevelInterface,
         DbRow,
-        DbTable -> true
-
+        DbTable,
+        Flo -> true
         else -> false
     }
 
@@ -110,7 +102,7 @@ open class SymbolType<T : Symbol>(
     object AutoInt : PrimitiveSymbolType(-1, '\u0000', "autoint")
     object DbTable : SymbolType<BasicSymbol>(-1, '\u0000', "dbtable", ::DbTableConfig, BasicSymbolSerializer)
     object DbColumn : SymbolType<DbColumnSymbol>(-1, '\u0000', "dbcolumn", null, DbColumnSymbolSerializer)
-
+    object Flo : SymbolType<BasicSymbol>(-1, '\u0000', "flo", ::FloConfig, BasicSymbolSerializer)
 
     companion object {
 
@@ -160,6 +152,7 @@ open class SymbolType<T : Symbol>(
             DbTable,
             DbColumn,
             Constant,
+            Flo,
         )
 
         /**

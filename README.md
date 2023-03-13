@@ -43,7 +43,7 @@ The following table contains all the current possible configurations that come w
 | Database Row | `dbrow` | Complete |
 | Database Index | None | Complete |
 | Enum | `enum` | Complete |
-| Floor Overlay | `flo` | Not Started |
+| Floor Overlay | `flo` | Complete |
 | Floor Underlay | `flu` | Not Started |
 | Headbar | `headbar` | Not Started |
 | Hitmark | `hitmark` | Not Started |
