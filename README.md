@@ -44,7 +44,7 @@ The following table contains all the current possible configurations that come w
 | Database Index | None | Complete |
 | Enum | `enum` | Complete |
 | Floor Overlay | `flo` | Complete |
-| Floor Underlay | `flu` | Not Started |
+| Floor Underlay | `flu` | Complete |
 | Headbar | `headbar` | Not Started |
 | Hitmark | `hitmark` | Not Started |
 | IdentityKit | `idk` | Not Started |

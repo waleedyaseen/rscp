@@ -1,5 +1,6 @@
 package me.waliedyassen.rscp.symbol
 
+import me.waliedyassen.rscp.format.FluConfig
 import me.waliedyassen.rscp.format.config.*
 import me.waliedyassen.rscp.format.dbtable.DbRowConfig
 import me.waliedyassen.rscp.format.dbtable.DbTableConfig
@@ -50,7 +51,8 @@ open class SymbolType<T : Symbol>(
         TopLevelInterface,
         DbRow,
         DbTable,
-        Flo -> true
+        Flo,
+        Flu -> true
         else -> false
     }
 
@@ -103,6 +105,7 @@ open class SymbolType<T : Symbol>(
     object DbTable : SymbolType<BasicSymbol>(-1, '\u0000', "dbtable", ::DbTableConfig, BasicSymbolSerializer)
     object DbColumn : SymbolType<DbColumnSymbol>(-1, '\u0000', "dbcolumn", null, DbColumnSymbolSerializer)
     object Flo : SymbolType<BasicSymbol>(-1, '\u0000', "flo", ::FloConfig, BasicSymbolSerializer)
+    object Flu : SymbolType<BasicSymbol>(-1, '\u0000', "flu", ::FluConfig, BasicSymbolSerializer)
 
     companion object {
 
@@ -153,6 +156,7 @@ open class SymbolType<T : Symbol>(
             DbColumn,
             Constant,
             Flo,
+            Flu
         )
 
         /**
