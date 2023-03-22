@@ -14,7 +14,6 @@ import me.waliedyassen.rscp.symbol.SymbolTable
 import me.waliedyassen.rscp.symbol.SymbolType
 import me.waliedyassen.rscp.util.LiteralEnum
 import java.io.File
-import java.util.*
 
 data class DbColumn(
     val id: Int,
@@ -36,7 +35,7 @@ enum class DbColumnProp(override val literal: String) : LiteralEnum {
     List("LIST")
 }
 
-class DbTableConfig(override val name: String) : Config(name, SymbolType.DbTable) {
+class DbTableConfig(override val debugName: String) : Config(SymbolType.DbTable) {
 
     private val columns = mutableListOf<DbColumn>()
 
@@ -109,7 +108,7 @@ class DbTableConfig(override val name: String) : Config(name, SymbolType.DbTable
     override fun generateCode(allUnits: List<CodeGenerator>, outputFolder: File, sym: SymbolTable, side: Side) {
         // TODO(Walied): This is very slow when number of configs is high. Find a better solution around this.
         super.generateCode(allUnits, outputFolder, sym, side)
-        val id = sym.lookupSymbol(symbolType, name)!!.id
+        val id = sym.lookupSymbol(symbolType, debugName)!!.id
         val indexDirectory = outputFolder.resolve("dbtableindex/$id")
         indexDirectory.deleteRecursively()
         check(indexDirectory.mkdirs()) { "Failed to create the output directory '$indexDirectory'" }
@@ -131,7 +130,7 @@ class DbTableConfig(override val name: String) : Config(name, SymbolType.DbTable
     private fun generateMasterIndex(sym: SymbolTable, dbRowConfigs: List<DbRowConfig>): DbTableIndex {
         val index = DbTableIndex()
         dbRowConfigs.forEach { dbRowConfig ->
-            val id = sym.lookupSymbol(SymbolType.DbRow, dbRowConfig.name)!!.id
+            val id = sym.lookupSymbol(SymbolType.DbRow, dbRowConfig.debugName)!!.id
             index.add(0, 0, id)
         }
         return index
@@ -147,7 +146,7 @@ class DbTableConfig(override val name: String) : Config(name, SymbolType.DbTable
         val indexingDbRowConfigs = dbRowConfigs.filter { it.columns.contains(name) }
         val dbIndex = DbTableIndex(tupleTypes.size, tupleTypes.map { if (it is SymbolType.String) 2 else 0 }.toIntArray())
         for (indexingDbRowConfig in indexingDbRowConfigs) {
-            val id = sym.lookupSymbol(SymbolType.DbRow, indexingDbRowConfig.name)!!.id
+            val id = sym.lookupSymbol(SymbolType.DbRow, indexingDbRowConfig.debugName)!!.id
             val values = indexingDbRowConfig.columns[name]!!
             for ((index, value) in values.withIndex()) {
                 val tupleIndex = index % tupleSize
@@ -159,10 +158,10 @@ class DbTableConfig(override val name: String) : Config(name, SymbolType.DbTable
 
     override fun contributeSymbols(sym: SymbolTable) {
         super.contributeSymbols(sym)
-        val id = sym.lookupSymbol(SymbolType.DbTable, name)!!.id
+        val id = sym.lookupSymbol(SymbolType.DbTable, debugName)!!.id
         val columnList = sym.lookupList(SymbolType.DbColumn)
         val oldSym = columnList.symbols.filter { it.id shr 12 == id }.toSet()
-        val newSym = columns.map { column -> column.createSymbol(name, id) }.toSet()
+        val newSym = columns.map { column -> column.createSymbol(debugName, id) }.toSet()
         val deleted = oldSym - newSym
         val additions = newSym - oldSym
         deleted.forEach { columnList.remove(it) }

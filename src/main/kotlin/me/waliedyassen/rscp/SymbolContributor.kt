@@ -18,7 +18,7 @@ interface SymbolContributor {
     /**
      * The name of the symbol.
      */
-    val name: String
+    val debugName: String
 
     /**
      * Create a [Symbol] object that we can store in the symbol table.
@@ -30,7 +30,7 @@ interface SymbolContributor {
      */
     fun contributeSymbols(sym: SymbolTable) {
         val type = symbolType
-        val name = name
+        val name = debugName
         val old = sym.lookupSymbol(type, name)
         val id = old?.id ?: sym.generateId(type)
         val new = createSymbol(id)

@@ -34,7 +34,7 @@ data class Hook(var script: Any, val arguments: Array<Any>, val transmitList: Ar
     }
 }
 
-class Component(name: String) : Config(name, SymbolType.Component) {
+class Component(override val debugName: String) : Config(SymbolType.Component) {
 
     private var type = -1
     private var contenttype = 0

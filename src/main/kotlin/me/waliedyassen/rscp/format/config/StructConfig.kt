@@ -15,7 +15,7 @@ import me.waliedyassen.rscp.symbol.SymbolType
  *
  * @author Walied K. Yassen
  */
-class StructConfig(name: String) : Config(name, SymbolType.Struct) {
+class StructConfig(override val debugName: String) : Config(SymbolType.Struct) {
 
     /**
      * The 'params' attribute of the struct type.

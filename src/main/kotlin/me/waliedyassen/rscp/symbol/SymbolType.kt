@@ -1,6 +1,6 @@
 package me.waliedyassen.rscp.symbol
 
-import me.waliedyassen.rscp.format.FluConfig
+import me.waliedyassen.rscp.format.config.FluConfig
 import me.waliedyassen.rscp.format.config.*
 import me.waliedyassen.rscp.format.dbtable.DbRowConfig
 import me.waliedyassen.rscp.format.dbtable.DbTableConfig

@@ -14,7 +14,7 @@ import me.waliedyassen.rscp.symbol.TypedSymbol
  *
  * @author Walied K. Yassen
  */
-class EnumConfig(name: String) : Config(name, SymbolType.Enum) {
+class EnumConfig(override val debugName: String) : Config(SymbolType.Enum) {
 
     /**
      * The 'inputtype' attribute of the enum type.
@@ -100,7 +100,7 @@ class EnumConfig(name: String) : Config(name, SymbolType.Enum) {
         compiler.resolveReference(::default)
     }
 
-    override fun createSymbol(id: Int) = TypedSymbol(name, id, outputType)
+    override fun createSymbol(id: Int) = TypedSymbol(debugName, id, outputType)
 
     override fun encode(side: Side, sym: SymbolTable): ByteArray {
         val packet = BinaryEncoder(32)

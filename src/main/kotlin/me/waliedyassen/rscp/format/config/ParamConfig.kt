@@ -9,7 +9,7 @@ import me.waliedyassen.rscp.symbol.ConfigSymbol
 import me.waliedyassen.rscp.symbol.SymbolTable
 import me.waliedyassen.rscp.symbol.SymbolType
 
-class ParamConfig(name: String) : Config(name, SymbolType.Param) {
+class ParamConfig(override val debugName: String) : Config(SymbolType.Param) {
 
     var type: SymbolType<*> = SymbolType.Undefined
     private var defaultInt: Any? = null
@@ -47,7 +47,7 @@ class ParamConfig(name: String) : Config(name, SymbolType.Param) {
     override fun resolveReferences(compiler: Compiler) {
         compiler.resolveReference(::defaultInt)
     }
-    override fun createSymbol(id: Int) = ConfigSymbol(name, id, type, transmit)
+    override fun createSymbol(id: Int) = ConfigSymbol(debugName, id, type, transmit)
 
     override fun encode(side: Side, sym: SymbolTable): ByteArray {
         val packet = BinaryEncoder(7)

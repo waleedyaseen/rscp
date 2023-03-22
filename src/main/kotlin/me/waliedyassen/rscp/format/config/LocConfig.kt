@@ -12,7 +12,7 @@ import me.waliedyassen.rscp.symbol.SymbolType
 
 data class LocModel(var shape: Any, var model: Any)
 
-class LocConfig(debugName: String) : Config(debugName, SymbolType.Loc) {
+class LocConfig(override val debugName: String) : Config(SymbolType.Loc) {
 
     var models = mutableListOf<LocModel>()
     var lowModels = mutableListOf<LocModel>()

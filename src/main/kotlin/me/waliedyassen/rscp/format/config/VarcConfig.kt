@@ -8,7 +8,7 @@ import me.waliedyassen.rscp.symbol.SymbolTable
 import me.waliedyassen.rscp.symbol.SymbolType
 import me.waliedyassen.rscp.symbol.TypedSymbol
 
-class VarcConfig(name: String) : Config(name, SymbolType.VarClient) {
+class VarcConfig(override val debugName: String) : Config(SymbolType.VarClient) {
 
     var type: SymbolType<*> = SymbolType.Undefined
     var scope = VarLifetime.TEMPORARY
@@ -32,7 +32,7 @@ class VarcConfig(name: String) : Config(name, SymbolType.VarClient) {
         // Do nothing.
     }
 
-    override fun createSymbol(id: Int) = TypedSymbol(name, id, type)
+    override fun createSymbol(id: Int) = TypedSymbol(debugName, id, type)
 
     override fun encode(side: Side, sym: SymbolTable): ByteArray {
         val packet = BinaryEncoder(6)

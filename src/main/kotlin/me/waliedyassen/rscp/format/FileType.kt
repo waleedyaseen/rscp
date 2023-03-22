@@ -145,7 +145,7 @@ object InterfaceFileType : FileType<Interface>() {
         if (name == null || type == null) {
             return ParseResult(this, emptyList())
         }
-        components.groupBy { it.config.name }.filterValues { it.size > 1 }.forEach { (name, configs) ->
+        components.groupBy { it.config.debugName }.filterValues { it.size > 1 }.forEach { (name, configs) ->
             configs.forEach {
                 parser.reportError(it.span, "Duplicate component name '$name'")
             }
@@ -156,9 +156,9 @@ object InterfaceFileType : FileType<Interface>() {
 
     override fun validate(compiler: Compiler, result: ParseResult<Interface>) {
         result.units.forEach { inter ->
-            val prefix = "${inter.name}:"
+            val prefix = "${inter.debugName}:"
             inter.components.forEach {
-                if (!it.name.startsWith(prefix)) {
+                if (!it.debugName.startsWith(prefix)) {
                     // TODO(Walied): Move this else where or or make it have the correct span
                     compiler.addError(Span(0, 0), "The component name must start with '$prefix'")
                 }

@@ -25,7 +25,7 @@ enum class Format(override val literal: String) : LiteralEnum {
     TrueColour("truecolour")
 }
 
-class GraphicConfig(override val name: String) : Config(name, SymbolType.Graphic) {
+class GraphicConfig(override val debugName: String) : Config(SymbolType.Graphic) {
 
     private var atlasMode = AtlasMode.None
     private var format = Format.Palette
@@ -84,9 +84,9 @@ class GraphicConfig(override val name: String) : Config(name, SymbolType.Graphic
         var index = 0
         val spritesMap = spritesList.associateWith {
             if (atlasMode == AtlasMode.Group) {
-                "$name,${index++}"
+                "$debugName,${index++}"
             } else {
-                name
+                debugName
             }
         }
         atlases = spritesMap.asSequence()

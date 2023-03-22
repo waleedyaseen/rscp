@@ -7,7 +7,7 @@ import me.waliedyassen.rscp.parser.Parser
 import me.waliedyassen.rscp.symbol.SymbolTable
 import me.waliedyassen.rscp.symbol.SymbolType
 
-class FloConfig(override val name: String) : Config(name, SymbolType.Flo) {
+class FloConfig(override val debugName: String) : Config(SymbolType.Flo) {
 
     private var colour: Int? = null
     private var mapColour: Int? = null

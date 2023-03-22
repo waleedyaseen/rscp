@@ -21,7 +21,7 @@ enum class VarLifetime(val id: Int, override val literal: String) : LiteralEnum 
  *
  * @author Walied K. Yassen
  */
-class VarpConfig(name: String) : Config(name, SymbolType.VarPlayer) {
+class VarpConfig(override val debugName: String) : Config(SymbolType.VarPlayer) {
 
     /**
      * The `type` attribute of the varp.
@@ -55,7 +55,7 @@ class VarpConfig(name: String) : Config(name, SymbolType.VarPlayer) {
         // Do nothing.
     }
 
-    override fun createSymbol(id: Int) = TypedSymbol(name, id, type)
+    override fun createSymbol(id: Int) = TypedSymbol(debugName, id, type)
 
     override fun encode(side: Side, sym: SymbolTable): ByteArray {
         val expectedSize = 1 + (if (clientCode != 0) 3 else 0) + if (lifetime != VarLifetime.TEMPORARY) 2 else 0

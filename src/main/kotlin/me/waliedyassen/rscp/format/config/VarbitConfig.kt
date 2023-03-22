@@ -12,7 +12,7 @@ import me.waliedyassen.rscp.symbol.SymbolType
  *
  * @author Walied K. Yassen
  */
-class VarbitConfig(name: String) : Config(name, SymbolType.VarBit) {
+class VarbitConfig(override val debugName: String) : Config(SymbolType.VarBit) {
 
     /**
      * The 'startbit' attribute of the enum type.

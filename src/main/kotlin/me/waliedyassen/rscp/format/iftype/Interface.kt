@@ -24,16 +24,16 @@ enum class InterfaceType(val symbolType: SymbolType<*>, override val literal: St
 /**
  * A user interface configuration, which is a collection of [Component] objects.
  */
-class Interface(val type: InterfaceType, override val name: String, val components: List<Component>) :
+class Interface(val type: InterfaceType, override val debugName: String, val components: List<Component>) :
     SymbolContributor, CodeGenerator {
 
     override val symbolType: SymbolType<*> = type.symbolType
 
-    override fun createSymbol(id: Int) = BasicSymbol(name, id)
+    override fun createSymbol(id: Int) = BasicSymbol(debugName, id)
 
     override fun contributeSymbols(sym: SymbolTable) {
         super.contributeSymbols(sym)
-        val id = sym.lookupSymbol(type.symbolType, name)!!.id
+        val id = sym.lookupSymbol(type.symbolType, debugName)!!.id
         val componentList = sym.lookupList(SymbolType.Component)
         val oldSym = componentList.symbols.filter { it.id shr 16 == id }.toSet()
         val newSym = components.mapIndexed { index, component ->
@@ -46,11 +46,11 @@ class Interface(val type: InterfaceType, override val name: String, val componen
     }
 
     override fun generateCode(allUnits: List<CodeGenerator>, outputFolder: File, sym: SymbolTable, side: Side) {
-        val interfaceDirectory = outputFolder.resolve("ifs").resolve(sym.lookupSymbol(type.symbolType, name)!!.id.toString())
+        val interfaceDirectory = outputFolder.resolve("ifs").resolve(sym.lookupSymbol(type.symbolType, debugName)!!.id.toString())
         check(interfaceDirectory.exists() || interfaceDirectory.mkdirs())
         interfaceDirectory.listFiles()?.forEach { it.delete() }
         components.forEach {
-            val symbol = sym.lookupSymbol(SymbolType.Component, it.name)!!
+            val symbol = sym.lookupSymbol(SymbolType.Component, it.debugName)!!
             val id = symbol.id and 0xffff
             val componentFile = interfaceDirectory.resolve(id.toString())
             componentFile.writeBytes(it.encode(side, sym))

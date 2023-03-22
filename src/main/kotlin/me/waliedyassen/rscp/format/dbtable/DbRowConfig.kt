@@ -11,7 +11,7 @@ import me.waliedyassen.rscp.parser.Token
 import me.waliedyassen.rscp.symbol.SymbolTable
 import me.waliedyassen.rscp.symbol.SymbolType
 
-class DbRowConfig(name: String) : Config(name, SymbolType.DbRow) {
+class DbRowConfig(override val debugName: String) : Config(SymbolType.DbRow) {
 
     private var tableReference: Reference? = null
     var table: Int? = null

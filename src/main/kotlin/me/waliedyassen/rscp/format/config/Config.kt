@@ -16,8 +16,10 @@ import java.io.File
  *
  * @author Walied K. Yassen
  */
-abstract class Config(override val name: String, override val symbolType: SymbolType<*>) : SymbolContributor,
+abstract class Config(override val symbolType: SymbolType<*>) : SymbolContributor,
     CodeGenerator {
+
+    abstract override val debugName: String
 
     /**
      * Whether the configuration should be transmitted to the client side.
@@ -46,13 +48,13 @@ abstract class Config(override val name: String, override val symbolType: Symbol
      */
     abstract fun encode(side: Side, sym: SymbolTable): ByteArray
 
-    override fun createSymbol(id: Int): Symbol = BasicSymbol(name, id)
+    override fun createSymbol(id: Int): Symbol = BasicSymbol(debugName, id)
 
     override fun generateCode(allUnits: List<CodeGenerator>, outputFolder: File, sym: SymbolTable, side: Side) {
         val type = symbolType
         val typeDirectory = outputFolder.resolve(type.literal)
         check(typeDirectory.exists() || typeDirectory.mkdirs()) { "Failed to create the output directory '$typeDirectory'" }
-        val file = typeDirectory.resolve("${sym.lookupSymbol(type, name)!!.id}")
+        val file = typeDirectory.resolve("${sym.lookupSymbol(type, debugName)!!.id}")
         file.writeBytes(encode(side, sym))
     }
 }
