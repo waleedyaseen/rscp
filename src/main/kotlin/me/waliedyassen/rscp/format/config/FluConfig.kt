@@ -1,9 +1,8 @@
-package me.waliedyassen.rscp.format
+package me.waliedyassen.rscp.format.config
 
 import me.waliedyassen.rscp.Compiler
 import me.waliedyassen.rscp.Side
 import me.waliedyassen.rscp.binary.BinaryEncoder
-import me.waliedyassen.rscp.format.config.Config
 import me.waliedyassen.rscp.parser.Parser
 import me.waliedyassen.rscp.symbol.SymbolTable
 import me.waliedyassen.rscp.symbol.SymbolType
