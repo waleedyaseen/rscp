@@ -9,8 +9,16 @@ import me.waliedyassen.rscp.parser.Reference
 import me.waliedyassen.rscp.parser.parseParam
 import me.waliedyassen.rscp.symbol.SymbolTable
 import me.waliedyassen.rscp.symbol.SymbolType
+import me.waliedyassen.rscp.util.LiteralEnum
 
-data class LocModel(var shape: Any, var model: Any)
+data class LocModel(var shape: Any?, var model: Any)
+
+enum class ForceApproachDir(override val literal: String) : LiteralEnum {
+    North("north"),
+    East("east"),
+    South("south"),
+    West("west"),
+}
 
 class LocConfig(override val debugName: String) : Config(SymbolType.Loc) {
 
@@ -43,35 +51,47 @@ class LocConfig(override val debugName: String) : Config(SymbolType.Loc) {
     var resizeX: Int? = null
     var resizeY: Int? = null
     var resizeZ: Int? = null
-    var blockSides = 0
+    var forceApproach: ForceApproachDir? = null
     var xof: Int? = null
     var yof: Int? = null
     var zof: Int? = null
     var forceDecor = false
-    var placeObjs: Boolean? = null
+    var raiseObject: Boolean? = null
     var breakRouteFinding = false
-    var multiVar = 0
-    var multiVarbit = 0
+    var multiVarRef: Reference? = null
+    var multiVar: Int = -1
+    var multiVarbit: Int = -1
+    var multiLoc: MutableMap<Int, Any>? = null
+    var multiDefault: Any? = null
     var bgSoundId: Any? = null
-    var bgSoundDelayMin: Int? = null
-    var bgSundDelayMax: Int? = null
     var bgSoundRange = 0
+    var randomSoundDelayMin = 0
+    var randomSoundDelayMax = 0
+    var randomSounds: MutableList<Any>? = null
     var randseq = false
     var params = LinkedHashMap<Int, Any>()
 
     override fun parseProperty(name: String, parser: Parser) {
         when (name) {
-            "model" -> {
-                val shape = parser.parseDynamic(SymbolType.LocShape) ?: return parser.skipProperty()
-                parser.parseComma() ?: return parser.skipProperty()
+            in MODELX_NAMES -> {
                 val model = parser.parseDynamic(SymbolType.Model) ?: return parser.skipProperty()
+                val shape = if (parser.isComma()) {
+                    parser.parseComma() ?: return parser.skipProperty()
+                    parser.parseDynamic(SymbolType.LocShape) ?: return parser.skipProperty()
+                } else {
+                    null
+                }
                 models.add(LocModel(shape, model))
             }
 
-            "lowmodel" -> {
-                val shape = parser.parseDynamic(SymbolType.LocShape) ?: return parser.skipProperty()
-                parser.parseComma() ?: return parser.skipProperty()
+            in LOWMODELX_NAMES -> {
                 val model = parser.parseDynamic(SymbolType.Model) ?: return parser.skipProperty()
+                val shape = if (parser.isComma()) {
+                    parser.parseComma() ?: return parser.skipProperty()
+                    parser.parseDynamic(SymbolType.LocShape) ?: return parser.skipProperty()
+                } else {
+                    null
+                }
                 lowModels.add(LocModel(shape, model))
             }
 
@@ -119,32 +139,70 @@ class LocConfig(override val debugName: String) : Config(SymbolType.Loc) {
             "retex6d" -> retexDst[5] = parser.parseDynamic(SymbolType.Texture) ?: return parser.skipProperty()
             "category" -> category = parser.parseDynamic(SymbolType.Category) ?: return parser.skipProperty()
             "mirror" -> mirror = parser.parseBoolean()
-            "softshadows" -> softShadows = parser.parseBoolean()
+            "shadow" -> softShadows = parser.parseBoolean()
             "resizex" -> resizeX = parser.parseInteger() ?: return parser.skipProperty()
             "resizey" -> resizeY = parser.parseInteger() ?: return parser.skipProperty()
             "resizez" -> resizeZ = parser.parseInteger() ?: return parser.skipProperty()
             "mapscene" -> mapScene = parser.parseInteger() ?: return parser.skipProperty()
-            "blocknorth" -> blockSides = blockSides or (if (parser.parseBoolean()) 0x1 else 0x0)
-            "blockeast" -> blockSides = blockSides or (if (parser.parseBoolean()) 0x2 else 0x0)
-            "blocksouth" -> blockSides = blockSides or (if (parser.parseBoolean()) 0x4 else 0x0)
-            "blockwest" -> blockSides = blockSides or (if (parser.parseBoolean()) 0x8 else 0x0)
+            "forceapproach" -> forceApproach = parser.parseEnumLiteral() ?: return parser.skipProperty()
             "xof" -> xof = parser.parseInteger() ?: return parser.skipProperty()
             "yof" -> yof = parser.parseInteger() ?: return parser.skipProperty()
             "zof" -> zof = parser.parseInteger() ?: return parser.skipProperty()
-            // TODO: Multi loc
+            "multivar" -> multiVarRef = parser.parseReference(SymbolType.VarOrVarbit) ?: return parser.skipProperty()
+            "multiloc" -> parsePropertyMultiConfig(parser, ::multiDefault, ::multiLoc, SymbolType.Loc)
             "forcedecor" -> forceDecor = parser.parseBoolean()
             "breakroutefinding" -> breakRouteFinding = parser.parseBoolean()
-            "placeobjs" -> placeObjs = parser.parseBoolean()
+            "raiseobject" -> raiseObject = parser.parseBoolean()
             "mapfunction" -> mapFunction = parser.parseInteger() ?: return parser.skipProperty()
             "hillchange" -> hillChange = parser.parseInteger() ?: return parser.skipProperty()
             "randseq" -> randseq = parser.parseBoolean()
-            "bgsound" -> bgSoundId = parser.parseDynamic(SymbolType.Synth) ?: return parser.skipProperty()
-            "bgsoundrange" -> bgSoundRange = parser.parseInteger() ?: return parser.skipProperty()
+            "bgsound" -> {
+                bgSoundId = parser.parseDynamic(SymbolType.Synth) ?: return parser.skipProperty()
+                parser.parseComma() ?: return parser.skipProperty()
+                bgSoundRange = parser.parseInteger() ?: return parser.skipProperty()
+            }
+
+            "randomsound" -> {
+                randomSoundDelayMin = parser.parseInteger() ?: return parser.skipProperty()
+                parser.parseComma() ?: return parser.skipProperty()
+                randomSoundDelayMax = parser.parseInteger() ?: return parser.skipProperty()
+                parser.parseComma() ?: return parser.skipProperty()
+                bgSoundRange = parser.parseInteger() ?: return parser.skipProperty()
+                val synths = mutableListOf<Any>()
+                randomSounds = synths
+                do {
+                    parser.parseComma() ?: return parser.skipProperty()
+                    synths.add(parser.parseDynamic(SymbolType.Synth) ?: return parser.skipProperty())
+                } while (parser.isComma())
+            }
+
             "param" -> parser.parseParam(params)
+            "transmit" -> parser.parseBoolean()
+            else -> parser.unknownProperty()
         }
     }
 
     override fun verifyProperties(parser: Parser) {
+        if (!models.all { it.shape != null } && !models.all { it.shape == null }) {
+            parser.reportUnitError("'model' property must define shapes for all models or none.")
+        }
+        if (!lowModels.all { it.shape != null } && !lowModels.all { it.shape == null }) {
+            parser.reportUnitError("'lowmodel' property must define shapes for all models or none.")
+        }
+        if ((bgSoundId != null || randomSounds != null) && bgSoundRange !in 0..255) {
+            parser.reportUnitError("bgsound/randomsound range must be between [0-255]")
+        }
+        if (randomSounds != null) {
+            if (randomSoundDelayMin !in 0..65535) {
+                parser.reportUnitError("randomsound delay min must be between [0-65535]")
+            }
+            if (randomSoundDelayMax !in 0..65535) {
+                parser.reportUnitError("randomsound delay max must be between [0-65535]")
+            }
+            if (randomSoundDelayMin > randomSoundDelayMax) {
+                parser.reportUnitError("randomsound delay max must greater or equals to delay min")
+            }
+        }
     }
 
     override fun resolveReferences(compiler: Compiler) {
@@ -166,7 +224,7 @@ class LocConfig(override val debugName: String) : Config(SymbolType.Loc) {
         }
         retexDst.forEachIndexed { index, ref ->
             if (ref is Reference) {
-                retexDst[index] = compiler.resolveReference(ref, false)
+                retexDst[index] = compiler.resolveReference(ref, true)
             }
         }
         if (category != null) {
@@ -175,6 +233,13 @@ class LocConfig(override val debugName: String) : Config(SymbolType.Loc) {
         if (bgSoundId != null) {
             compiler.resolveReference(::bgSoundId)
         }
+        val randomSounds = randomSounds
+        randomSounds?.forEachIndexed { index, ref ->
+            if (ref is Reference) {
+                randomSounds[index] = compiler.resolveReference(ref)
+            }
+        }
+        resolveReferencesMultiConfig(compiler, ::multiLoc, ::multiDefault, ::multiVarRef, ::multiVar, ::multiVarbit)
     }
 
     override fun encode(side: Side, sym: SymbolTable): ByteArray {
@@ -183,6 +248,19 @@ class LocConfig(override val debugName: String) : Config(SymbolType.Loc) {
             packet.terminateCode()
             return packet.toByteArray()
         }
+        var version = 0
+        if (models.any { it.model as Int >= 65535 } || lowModels.any { it.model as Int >= 65535 }) {
+            version = 1
+        }
+        if (version < 1 && anim != null && anim as Int >= 65535) {
+            version = 1
+        }
+        if (version > 0) {
+            packet.write1(-1)
+            packet.write1(version)
+        }
+        packet.codeModels(models, version)
+        packet.codeModels(lowModels, version)
         if (locName != null) {
             packet.code(2)
             packet.writeString(locName!!)
@@ -215,14 +293,18 @@ class LocConfig(override val debugName: String) : Config(SymbolType.Loc) {
         }
         if (anim != null) {
             packet.code(24)
-            packet.write2(anim as Int)
+            if (version > 0) {
+                packet.write2or4(anim as Int)
+            } else {
+                packet.write2(anim as Int)
+            }
         }
         if (blockWalk == true) {
             packet.code(27)
         }
         if (wallOffset != null) {
             packet.code(28)
-            packet.code(wallOffset!!)
+            packet.write1(wallOffset!!)
         }
         if (ambient != null) {
             packet.code(29)
@@ -254,7 +336,7 @@ class LocConfig(override val debugName: String) : Config(SymbolType.Loc) {
         }
         val retextureCount = retexSrc.count { it != null }
         if (retextureCount > 0) {
-            packet.code(40)
+            packet.code(41)
             packet.write1(retextureCount)
             for (i in retexSrc.indices) {
                 val src = retexSrc[i]
@@ -293,9 +375,9 @@ class LocConfig(override val debugName: String) : Config(SymbolType.Loc) {
             packet.code(68)
             packet.write2(mapScene)
         }
-        if (blockSides != 0) {
+        forceApproach?.let {
             packet.code(69)
-            packet.write2(blockSides)
+            packet.write1((1 shl it.ordinal).inv() and 0xf)
         }
         if (xof != null) {
             packet.code(70)
@@ -315,23 +397,54 @@ class LocConfig(override val debugName: String) : Config(SymbolType.Loc) {
         if (breakRouteFinding) {
             packet.code(74)
         }
-        if (placeObjs != null) {
+        if (raiseObject != null) {
             packet.code(75)
-            packet.write1(if (placeObjs == true) 1 else 0)
+            packet.write1(if (raiseObject == true) 1 else 0)
         }
         if (bgSoundId != null) {
             packet.code(78)
             packet.write2(bgSoundId as Int)
             packet.write1(bgSoundRange)
         }
-        // TODO: 77, 79
+        val randomSounds = randomSounds
+        if (randomSounds != null) {
+            packet.code(79)
+            packet.write2(randomSoundDelayMin)
+            packet.write2(randomSoundDelayMax)
+            packet.write1(bgSoundRange)
+            packet.write1(randomSounds.size)
+            randomSounds.forEach { packet.write2(it as Int) }
+        }
+        val multiLoc = multiLoc
+        if (multiLoc != null) {
+            packet.code(if (multiDefault != null) 92 else 77)
+            packet.write2(multiVarbit)
+            packet.write2(multiVar)
+            if (multiDefault != null) {
+                if (version > 0) {
+                    packet.write2or4(multiDefault as Int)
+                } else {
+                    packet.write2(multiDefault as Int)
+                }
+            }
+            val maxState = multiLoc.maxOf { (state, _) -> state }
+            packet.write1(maxState)
+            for (state in 0..maxState) {
+                val loc = multiLoc[state] as Int? ?: -1
+                if (version > 0) {
+                    packet.write2or4(loc)
+                } else {
+                    packet.write2(loc)
+                }
+            }
+        }
         if (hillChange != null) {
             packet.code(81)
-            packet.write2(hillChange!!)
+            packet.write1(hillChange!!)
         }
         if (mapFunction != -1) {
             packet.code(82)
-            packet.write1(mapFunction)
+            packet.write2(mapFunction)
         }
         if (!randseq) {
             packet.code(89)
@@ -341,5 +454,39 @@ class LocConfig(override val debugName: String) : Config(SymbolType.Loc) {
         }
         packet.terminateCode()
         return packet.toByteArray()
+    }
+
+    companion object {
+        private val MODELX_NAMES = (1..12).map { "model$it" }.toHashSet()
+        private val LOWMODELX_NAMES = (1..12).map { "lowmodel$it" }.toHashSet()
+    }
+
+    private fun BinaryEncoder.codeModels(models: List<LocModel>, version: Int) {
+        if (models.isEmpty()) {
+            return // TODO(Walied): Is this more valid than encoding with 0 size
+        }
+        val haveShapes = models[0].shape == null
+        if (haveShapes) {
+            code(1)
+            write1(models.size)
+            models.forEach {
+                if (version > 0) {
+                    write2or4(it.model as Int)
+                } else {
+                    write2(it.model as Int)
+                }
+                write1(it.shape as Int)
+            }
+        } else {
+            code(5)
+            write1(models.size)
+            models.forEach {
+                if (version > 0) {
+                    write2or4(it.model as Int)
+                } else {
+                    write2(it.model as Int)
+                }
+            }
+        }
     }
 }
