@@ -105,8 +105,8 @@ class BinaryEncoder(expectedSize: Int) {
     fun write1or2(value: Int) {
         when (value) {
             in 0..127 -> write1(value)
-            in -32768..32767 -> write2(value + 32768)
-            else -> error("Expected write1or2 value to be in either [1-127] or [-32768-32767] ranges")
+            in 0..32767 -> write2(0x8000 or value)
+            else -> error("Expected write1or2 value to be in either [1-127] or [0-32767] ranges")
         }
     }
 
