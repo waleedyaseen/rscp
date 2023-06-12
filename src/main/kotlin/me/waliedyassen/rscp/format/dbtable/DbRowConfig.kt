@@ -95,11 +95,11 @@ class DbRowConfig(override val debugName: String) : Config(SymbolType.DbRow) {
         }
         if (columns.isNotEmpty()) {
             encoder.code(3) {
-                val highestColumnId = columns.maxOf {
-                    val column = sym.lookupSymbol(SymbolType.DbColumn, "${tableReference!!.name}:${it.key}")!!
-                    column.id shr 4 and 0xff
-                }
-                encoder.write1(highestColumnId + 1)
+                val highestColumnIndex = sym.lookupList(SymbolType.DbColumn)
+                    .symbols
+                    .filter { it.id ushr 12 == table }
+                    .maxOf { it.id shr 4 and 0xff }
+                encoder.write1(highestColumnIndex + 1)
                 columns.forEach { (name, values) ->
                     val column = sym.lookupSymbol(SymbolType.DbColumn, "${tableReference!!.name}:$name")!!
                     encoder.write1(column.id shr 4 and 0xff)
