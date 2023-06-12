@@ -114,8 +114,8 @@ class GraphicConfig(override val debugName: String) : Config(SymbolType.Graphic)
         val columns = atlasImage.width / atlasCellWidth
         val rows = atlasImage.height / atlasCellHeight
         val sprites = mutableListOf<BufferedImage>()
-        for (column in 0 until columns) {
-            for (row in 0 until rows) {
+        for (row in 0 until rows) {
+            for (column in 0 until columns) {
                 val image = atlasImage.getSubimage(
                     column * atlasCellWidth,
                     row * atlasCellHeight,
