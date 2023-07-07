@@ -3,6 +3,11 @@ package me.waliedyassen.rscp.symbol
 import me.waliedyassen.rscp.format.dbtable.DbColumnProp
 
 /**
+ * The separator used to separate the symbol file fields.
+ */
+private const val FIELD_SEPARATOR = "!"
+
+/**
  * Handles serialization operations for a symbol of type [T].
  */
 abstract class SymbolSerializer<T : Symbol> {
@@ -24,13 +29,13 @@ abstract class SymbolSerializer<T : Symbol> {
 object BasicSymbolSerializer : SymbolSerializer<BasicSymbol>() {
 
     override fun deserialize(line: String): BasicSymbol {
-        val parts = line.split("!")
+        val parts = line.split(FIELD_SEPARATOR)
         val name = parts[0]
         val id = parts[1].toInt()
         return BasicSymbol(name, id)
     }
 
-    override fun serialize(symbol: BasicSymbol) = "${symbol.name}!${symbol.id}"
+    override fun serialize(symbol: BasicSymbol) = "${symbol.name}$FIELD_SEPARATOR${symbol.id}"
 }
 
 /**
@@ -39,14 +44,14 @@ object BasicSymbolSerializer : SymbolSerializer<BasicSymbol>() {
 object TypedSymbolSerializer : SymbolSerializer<TypedSymbol>() {
 
     override fun deserialize(line: String): TypedSymbol {
-        val parts = line.split("!")
+        val parts = line.split(FIELD_SEPARATOR)
         val name = parts[0]
         val id = parts[1].toInt()
         val type = SymbolType.lookup(parts[2])
         return TypedSymbol(name, id, type)
     }
 
-    override fun serialize(symbol: TypedSymbol) = "${symbol.name}!${symbol.id}!${symbol.type.literal}"
+    override fun serialize(symbol: TypedSymbol) = "${symbol.name}$FIELD_SEPARATOR${symbol.id}$FIELD_SEPARATOR${symbol.type.literal}"
 }
 
 /**
@@ -55,7 +60,7 @@ object TypedSymbolSerializer : SymbolSerializer<TypedSymbol>() {
 object ConfigSymbolSerializer : SymbolSerializer<ConfigSymbol>() {
 
     override fun deserialize(line: String): ConfigSymbol {
-        val parts = line.split("!", limit = 4)
+        val parts = line.split(FIELD_SEPARATOR, limit = 4)
         val name = parts[0]
         val id = parts[1].toInt()
         val type = SymbolType.lookup(parts[2])
@@ -64,7 +69,7 @@ object ConfigSymbolSerializer : SymbolSerializer<ConfigSymbol>() {
     }
 
     override fun serialize(symbol: ConfigSymbol) =
-        "${symbol.name}!${symbol.id}!${symbol.type.literal}!${symbol.transmit}"
+        "${symbol.name}$FIELD_SEPARATOR${symbol.id}$FIELD_SEPARATOR${symbol.type.literal}$FIELD_SEPARATOR${symbol.transmit}"
 }
 
 /**
@@ -73,14 +78,14 @@ object ConfigSymbolSerializer : SymbolSerializer<ConfigSymbol>() {
 object ConstantSymbolSerializer : SymbolSerializer<ConstantSymbol>() {
 
     override fun deserialize(line: String): ConstantSymbol {
-        val parts = line.split("!", limit = 3)
+        val parts = line.split(FIELD_SEPARATOR, limit = 2)
         val name = parts[0]
         val id = parts[1].toInt()
         val value = parts[2]
         return ConstantSymbol(name, id, value)
     }
 
-    override fun serialize(symbol: ConstantSymbol) = "${symbol.name}!${symbol.id}!${symbol.value}"
+    override fun serialize(symbol: ConstantSymbol) = "${symbol.name}$FIELD_SEPARATOR${symbol.id}$FIELD_SEPARATOR${symbol.value}"
 }
 
 /**
@@ -89,7 +94,7 @@ object ConstantSymbolSerializer : SymbolSerializer<ConstantSymbol>() {
 object ClientScriptSymbolSerializer : SymbolSerializer<ClientScriptSymbol>() {
 
     override fun deserialize(line: String): ClientScriptSymbol {
-        val parts = line.split("!", limit = 3)
+        val parts = line.split(FIELD_SEPARATOR, limit = 3)
         val name = parts[0]
         val id = parts[1].toInt()
         val arguments =
@@ -98,7 +103,7 @@ object ClientScriptSymbolSerializer : SymbolSerializer<ClientScriptSymbol>() {
     }
 
     override fun serialize(symbol: ClientScriptSymbol) =
-        "${symbol.name}!${symbol.id}!${symbol.arguments.joinToString(",") { it.literal }}"
+        "${symbol.name}$FIELD_SEPARATOR${symbol.id}$FIELD_SEPARATOR${symbol.arguments.joinToString(",") { it.literal }}"
 }
 
 /**
@@ -107,7 +112,7 @@ object ClientScriptSymbolSerializer : SymbolSerializer<ClientScriptSymbol>() {
 object DbColumnSymbolSerializer : SymbolSerializer<DbColumnSymbol>() {
 
     override fun deserialize(line: String): DbColumnSymbol {
-        val parts = line.split("!")
+        val parts = line.split(FIELD_SEPARATOR)
         val name = parts[0]
         val id = parts[1].toInt()
         val types = if (parts[2].isBlank()) {
@@ -128,6 +133,6 @@ object DbColumnSymbolSerializer : SymbolSerializer<DbColumnSymbol>() {
     override fun serialize(symbol: DbColumnSymbol): String {
         val types = symbol.types.joinToString(",") { it.literal }
         val props = symbol.props.joinToString(",") { it.literal }
-        return "${symbol.name}!${symbol.id}!$types!$props"
+        return "${symbol.name}$FIELD_SEPARATOR${symbol.id}$FIELD_SEPARATOR$types$FIELD_SEPARATOR$props"
     }
 }
