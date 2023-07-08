@@ -5,7 +5,7 @@ import java.io.File
 /**
  * Holds all the symbols relating to a single type.
  */
-class SymbolList<T : Symbol> {
+class SymbolList<out T : Symbol> {
 
     /**
      * A look-up by name table for the symbols.
@@ -31,24 +31,30 @@ class SymbolList<T : Symbol> {
     /**
      * Adds the specified [symbol] to the list.
      */
-    fun add(symbol: T) {
+    fun add(symbol: @UnsafeVariance T) {
         if (tableByName.containsKey(symbol.name)) {
             error("Another symbol with the same name of \"${symbol.name}\" exists in the table")
         }
-        if (tableById.containsKey(symbol.id)) {
-            error("Another symbol with the same id of \"${symbol.id}\" exists in the table")
+        if (symbol is SymbolWithId) {
+            if (tableById.containsKey(symbol.id)) {
+                error("Another symbol with the same id of \"${symbol.id}\" exists in the table")
+            }
         }
         tableByName[symbol.name] = symbol
-        tableById[symbol.id] = symbol
+        if (symbol is SymbolWithId) {
+            tableById[symbol.id] = symbol
+        }
         modified = true
     }
 
     /**
      * Removes the specified [symbol] from the list.
      */
-    fun remove(symbol: T) {
+    fun remove(symbol: @UnsafeVariance T) {
         tableByName -= symbol.name
-        tableById -= symbol.id
+        if (symbol is SymbolWithId) {
+            tableById -= symbol.id
+        }
         modified = true
     }
 
@@ -98,7 +104,7 @@ class SymbolTable {
         @Suppress("UNCHECKED_CAST")
         val list = lists.getOrPut(type) { SymbolList<T>() } as SymbolList<T>
         file.bufferedWriter().use { writer ->
-            list.symbols.sortedBy { it.id }.forEach { symbol: T ->
+            list.symbols.sortedBy { it }.forEach { symbol: T ->
                 writer.write(type.serializer.serialize(symbol))
                 writer.newLine()
             }
@@ -133,7 +139,7 @@ class SymbolTable {
     /**
      * Returns the next free id for the specified symbol [type].
      */
-    fun generateId(type: SymbolType<*>): Int {
+    fun <T : SymbolWithId> generateId(type: SymbolType<T>): Int {
         val list = lookupList(type)
         val highestId = list.symbols.maxOfOrNull { it.id } ?: -1
         return highestId + 1

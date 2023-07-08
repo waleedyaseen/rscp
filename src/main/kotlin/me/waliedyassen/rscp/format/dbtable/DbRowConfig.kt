@@ -24,7 +24,7 @@ class DbRowConfig(override val debugName: String) : Config(SymbolType.DbRow) {
                 if (tableReference == null) {
                     return parser.reportPropertyError("Duplicate 'table' property")
                 }
-                table = parser.compiler.resolveReference(tableReference, false)
+                table = parser.compiler.resolveReferenceId(tableReference, false)
 
             }
 
@@ -82,7 +82,7 @@ class DbRowConfig(override val debugName: String) : Config(SymbolType.DbRow) {
         columns.values.forEach { list ->
             list.forEachIndexed { index, any ->
                 if (any is Reference) {
-                    list[index] = compiler.resolveReference(any)
+                    list[index] = compiler.resolveReferenceId(any)
                 }
             }
         }

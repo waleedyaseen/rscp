@@ -173,7 +173,7 @@ class DbTableConfig(override val debugName: String) : Config(SymbolType.DbTable)
             val defaults = column.defaults ?: return@forEach
             defaults.forEachIndexed { index, default ->
                 if (default is Reference) {
-                    defaults[index] = compiler.resolveReference(default, true)
+                    defaults[index] = compiler.resolveReferenceId(default, true)
                 }
             }
         }

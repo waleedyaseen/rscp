@@ -337,12 +337,12 @@ class Component(override val debugName: String) : Config(SymbolType.Component) {
         compiler.resolveReference(hook::script)
         hook.arguments.forEachIndexed { index, argument ->
             if (argument is Reference) {
-                hook.arguments[index] = compiler.resolveReference(argument)
+                hook.arguments[index] = compiler.resolveReferenceId(argument)
             }
         }
         hook.transmitList.forEachIndexed { index, argument ->
             if (argument is Reference) {
-                hook.transmitList[index] = compiler.resolveReference(argument)
+                hook.transmitList[index] = compiler.resolveReferenceId(argument)
             }
         }
     }

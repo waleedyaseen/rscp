@@ -16,12 +16,12 @@ import java.io.File
 /**
  * The value returned when doing a parse call.
  */
-data class ParseResult<T : SymbolContributor>(val type: FileType<T>, val units: List<T>)
+data class ParseResult<T : SymbolContributor<*>>(val type: FileType<T>, val units: List<T>)
 
 /**
  * Contains all the n eces
  */
-sealed class FileType<T : SymbolContributor> {
+sealed class FileType<T : SymbolContributor<*>> {
 
     /**
      * Run the specified [parser], which will essentially parse all the units that this

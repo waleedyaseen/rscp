@@ -10,8 +10,10 @@ import me.waliedyassen.rscp.parser.DiagnosticKind
 import me.waliedyassen.rscp.parser.Reference
 import me.waliedyassen.rscp.parser.SemanticInfo
 import me.waliedyassen.rscp.parser.Span
+import me.waliedyassen.rscp.symbol.Symbol
 import me.waliedyassen.rscp.symbol.SymbolTable
 import me.waliedyassen.rscp.symbol.SymbolType
+import me.waliedyassen.rscp.symbol.SymbolWithId
 import java.io.File
 import kotlin.reflect.KMutableProperty0
 
@@ -77,7 +79,7 @@ class Compiler(var extractMode: ExtractMode, val graphicsDirectory: File) {
     /**
      * Compile all the configs within the specified [directory].
      */
-    fun compileDirectory(directory: File): List<SymbolContributor> {
+    fun compileDirectory(directory: File): List<SymbolContributor<*>> {
         logger.info { "Compiling configs from directory $directory" }
         val handlers = directory.walkTopDown()
             .mapNotNull { file -> FileType.find(file.extension)?.let { type -> file to type } }
@@ -116,7 +118,7 @@ class Compiler(var extractMode: ExtractMode, val graphicsDirectory: File) {
     /**
      * Compile the specified config [file].
      */
-    fun compileFile(file: File): List<SymbolContributor> {
+    fun compileFile(file: File): List<SymbolContributor<*>> {
         val fileType = FileType.find(file.extension) ?: return emptyList()
         val parser = fileType.createParser(this, file, extractMode == ExtractMode.SemInfo)
         val result = fileType.parse(parser)
@@ -133,7 +135,7 @@ class Compiler(var extractMode: ExtractMode, val graphicsDirectory: File) {
     /**
      * Compile the specified config [file].
      */
-    fun compileText(text: String, extension: String): List<SymbolContributor> {
+    fun compileText(text: String, extension: String): List<SymbolContributor<*>> {
         val fileType = FileType.find(extension) ?: return emptyList()
         val parser = fileType.createParser(this, text, extractMode == ExtractMode.SemInfo)
         val result = fileType.parse(parser)
@@ -147,14 +149,14 @@ class Compiler(var extractMode: ExtractMode, val graphicsDirectory: File) {
         return result.units
     }
 
-    private fun <T : SymbolContributor> ParseResult<T>.runValidateCode() {
+    private fun <T : SymbolContributor<*>> ParseResult<T>.runValidateCode() {
         type.validate(this@Compiler, this)
     }
 
     /**
      * Generate the symbol table information for the specified list of [Config].
      */
-    private fun generateSymbols(contributors: List<SymbolContributor>) {
+    private fun generateSymbols(contributors: List<SymbolContributor<*>>) {
         contributors.forEach { contributor -> contributor.contributeSymbols(sym) }
     }
 
@@ -188,23 +190,34 @@ class Compiler(var extractMode: ExtractMode, val graphicsDirectory: File) {
      * Attempt to resolve the specified [reference] from the symbol table and return
      * the symbol id if the resolve was successful otherwise -1.
      */
-    fun resolveReference(reference: Reference?, permitNulls: Boolean = true): Int {
+    fun resolveReferenceId(reference: Reference?, permitNulls: Boolean = true): Int {
+        val symbol = resolveReference(reference, permitNulls) ?: return -1
+        check(symbol is SymbolWithId) { "Symbols of type ${symbol::class.simpleName} does not have an associated ID" }
+        return symbol.id
+    }
+
+    /**
+     * Attempt to resolve the specified [reference] from the symbol table. A [Symbol]
+     * object is returned if it is found otherwise `null`.
+     */
+    fun resolveReference(reference: Reference?, permitNulls: Boolean = true): Symbol? {
         if (reference == null) {
-            return -1
+            return null
         }
         val symbol = sym.lookupSymbol(reference.type, reference.name)
         if (reference.name == "null") {
             if (!permitNulls) {
                 addError(reference.span, "Null values are not permitted in here")
             }
-            return -1
+            return null
         }
         if (symbol == null) {
             val message = "Unresolved reference to '${reference.name}' of type '${reference.type.literal}'"
             addError(reference.span, message)
-            return -1
+            return null
         }
-        return symbol.id
+
+        return symbol
 
     }
 
@@ -218,7 +231,7 @@ class Compiler(var extractMode: ExtractMode, val graphicsDirectory: File) {
         if (current == null) {
             reference.set(-1)
         } else if (current is Reference) {
-            reference.set(resolveReference(current, permitNulls))
+            reference.set(resolveReferenceId(current, permitNulls))
         }
     }
 
@@ -231,7 +244,7 @@ class Compiler(var extractMode: ExtractMode, val graphicsDirectory: File) {
     fun resolveReference(reference: KMutableProperty0<Any>, permitNulls: Boolean = true) {
         val current = reference()
         if (current is Reference) {
-            reference.set(resolveReference(current, permitNulls))
+            reference.set(resolveReferenceId(current, permitNulls))
         }
     }
 

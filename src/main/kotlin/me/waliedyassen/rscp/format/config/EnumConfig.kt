@@ -91,8 +91,8 @@ class EnumConfig(override val debugName: String) : Config(SymbolType.Enum) {
 
     override fun resolveReferences(compiler: Compiler) {
         val transformedValues = values.map { (key, value) ->
-            val transformedKey = if (key is Reference) compiler.resolveReference(key) else key
-            val transformedValue = if (value is Reference) compiler.resolveReference(value) else value
+            val transformedKey = if (key is Reference) compiler.resolveReferenceId(key) else key
+            val transformedValue = if (value is Reference) compiler.resolveReferenceId(value) else value
             transformedKey to transformedValue
         }.toMap()
         values.clear()

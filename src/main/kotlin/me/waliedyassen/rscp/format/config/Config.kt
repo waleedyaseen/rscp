@@ -1,14 +1,8 @@
 package me.waliedyassen.rscp.format.config
 
-import me.waliedyassen.rscp.CodeGenerator
-import me.waliedyassen.rscp.Compiler
-import me.waliedyassen.rscp.Side
-import me.waliedyassen.rscp.SymbolContributor
+import me.waliedyassen.rscp.*
 import me.waliedyassen.rscp.parser.Parser
-import me.waliedyassen.rscp.symbol.BasicSymbol
-import me.waliedyassen.rscp.symbol.Symbol
-import me.waliedyassen.rscp.symbol.SymbolTable
-import me.waliedyassen.rscp.symbol.SymbolType
+import me.waliedyassen.rscp.symbol.*
 import java.io.File
 
 /**
@@ -16,7 +10,7 @@ import java.io.File
  *
  * @author Walied K. Yassen
  */
-abstract class Config(override val symbolType: SymbolType<*>) : SymbolContributor,
+abstract class Config(override val symbolType: SymbolType<out SymbolWithId>) : SymbolWithIdContributor<SymbolWithId>,
     CodeGenerator {
 
     abstract override val debugName: String
@@ -48,7 +42,7 @@ abstract class Config(override val symbolType: SymbolType<*>) : SymbolContributo
      */
     abstract fun encode(side: Side, sym: SymbolTable): ByteArray
 
-    override fun createSymbol(id: Int): Symbol = BasicSymbol(debugName, id)
+    override fun createSymbol(id: Int): SymbolWithId = BasicSymbol(debugName, id)
 
     override fun generateCode(allUnits: List<CodeGenerator>, outputFolder: File, sym: SymbolTable, side: Side) {
         val type = symbolType

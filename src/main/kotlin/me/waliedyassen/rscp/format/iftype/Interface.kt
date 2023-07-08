@@ -3,10 +3,9 @@ package me.waliedyassen.rscp.format.iftype
 import me.waliedyassen.rscp.CodeGenerator
 import me.waliedyassen.rscp.Side
 import me.waliedyassen.rscp.SymbolContributor
+import me.waliedyassen.rscp.SymbolWithIdContributor
 import me.waliedyassen.rscp.format.iftype.InterfaceType.Interface
-import me.waliedyassen.rscp.symbol.BasicSymbol
-import me.waliedyassen.rscp.symbol.SymbolTable
-import me.waliedyassen.rscp.symbol.SymbolType
+import me.waliedyassen.rscp.symbol.*
 import me.waliedyassen.rscp.util.LiteralEnum
 import java.io.File
 
@@ -14,7 +13,7 @@ import java.io.File
  * Controls what kind of [Interface] a configuration is.
  */
 @Suppress("unused")
-enum class InterfaceType(val symbolType: SymbolType<*>, override val literal: String) : LiteralEnum {
+enum class InterfaceType(val symbolType: SymbolType<out SymbolWithId>, override val literal: String) : LiteralEnum {
     Interface(SymbolType.Interface, "interface"),
     TopLevelInterface(SymbolType.TopLevelInterface, "toplevelinterface"),
     OverlayInterface(SymbolType.OverlayInterface, "overlayinterface"),
@@ -25,9 +24,9 @@ enum class InterfaceType(val symbolType: SymbolType<*>, override val literal: St
  * A user interface configuration, which is a collection of [Component] objects.
  */
 class Interface(val type: InterfaceType, override val debugName: String, val components: List<Component>) :
-    SymbolContributor, CodeGenerator {
+    SymbolWithIdContributor<SymbolWithId>, CodeGenerator {
 
-    override val symbolType: SymbolType<*> = type.symbolType
+    override val symbolType = type.symbolType
 
     override fun createSymbol(id: Int) = BasicSymbol(debugName, id)
 

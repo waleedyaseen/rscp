@@ -37,7 +37,7 @@ class StructConfig(override val debugName: String) : Config(SymbolType.Struct) {
 
     override fun resolveReferences(compiler: Compiler) {
         val newParams = params.map { (key, value) ->
-            val transformedValue = if (value is Reference) compiler.resolveReference(value) else value
+            val transformedValue = if (value is Reference) compiler.resolveReferenceId(value) else value
             key to transformedValue
         }.toMap()
         params.clear()

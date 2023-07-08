@@ -219,12 +219,12 @@ class LocConfig(override val debugName: String) : Config(SymbolType.Loc) {
         }
         retexSrc.forEachIndexed { index, ref ->
             if (ref is Reference) {
-                retexSrc[index] = compiler.resolveReference(ref, false)
+                retexSrc[index] = compiler.resolveReferenceId(ref, false)
             }
         }
         retexDst.forEachIndexed { index, ref ->
             if (ref is Reference) {
-                retexDst[index] = compiler.resolveReference(ref, true)
+                retexDst[index] = compiler.resolveReferenceId(ref, true)
             }
         }
         if (category != null) {
@@ -236,7 +236,7 @@ class LocConfig(override val debugName: String) : Config(SymbolType.Loc) {
         val randomSounds = randomSounds
         randomSounds?.forEachIndexed { index, ref ->
             if (ref is Reference) {
-                randomSounds[index] = compiler.resolveReference(ref)
+                randomSounds[index] = compiler.resolveReferenceId(ref)
             }
         }
         resolveReferencesMultiConfig(compiler, ::multiLoc, ::multiDefault, ::multiVarRef, ::multiVar, ::multiVarbit)

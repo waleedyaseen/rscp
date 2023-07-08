@@ -42,7 +42,7 @@ fun resolveReferencesMultiConfig(
     multiVarbitProperty: KMutableProperty0<Int>
 ) {
     multiProperty.set(multiProperty()
-        ?.mapValues { (_, value) -> compiler.resolveReference(value as Reference) }
+        ?.mapValues { (_, value) -> compiler.resolveReferenceId(value as Reference) }
         ?.toMutableMap())
     if (multiDefaultProperty() != null) {
         compiler.resolveReference(multiDefaultProperty)

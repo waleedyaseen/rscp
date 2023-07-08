@@ -80,12 +80,11 @@ object ConstantSymbolSerializer : SymbolSerializer<ConstantSymbol>() {
     override fun deserialize(line: String): ConstantSymbol {
         val parts = line.split(FIELD_SEPARATOR, limit = 2)
         val name = parts[0]
-        val id = parts[1].toInt()
-        val value = parts[2]
-        return ConstantSymbol(name, id, value)
+        val value = parts[1]
+        return ConstantSymbol(name, value)
     }
 
-    override fun serialize(symbol: ConstantSymbol) = "${symbol.name}$FIELD_SEPARATOR${symbol.id}$FIELD_SEPARATOR${symbol.value}"
+    override fun serialize(symbol: ConstantSymbol) = "${symbol.name}$FIELD_SEPARATOR${symbol.value}"
 }
 
 /**

@@ -7,7 +7,7 @@ import me.waliedyassen.rscp.symbol.SymbolType
  */
 fun Parser.parseParam(params: MutableMap<Int, Any>) {
     val paramValue = parseReference(SymbolType.Param)
-    val paramId = if (paramValue == null) null else compiler.resolveReference(paramValue)
+    val paramId = if (paramValue == null) null else compiler.resolveReferenceId(paramValue)
     parseComma()
     if (paramId != null && paramId != -1) {
         val param = compiler.sym.lookupList(SymbolType.Param).lookupById(paramId)!!
