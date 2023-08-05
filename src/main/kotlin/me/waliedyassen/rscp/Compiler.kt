@@ -204,7 +204,11 @@ class Compiler(var extractMode: ExtractMode, val graphicsDirectory: File) {
         if (reference == null) {
             return null
         }
-        val symbol = sym.lookupSymbol(reference.type, reference.name)
+        val fixedName = when(reference.type) {
+            SymbolType.ClientScript -> "[clientscript,${reference.name}]"
+            else -> reference.name
+        }
+        val symbol = sym.lookupSymbol(reference.type, fixedName)
         if (reference.name == "null") {
             if (!permitNulls) {
                 addError(reference.span, "Null values are not permitted in here")

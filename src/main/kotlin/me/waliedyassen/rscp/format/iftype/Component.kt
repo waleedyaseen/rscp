@@ -240,7 +240,7 @@ class Component(override val debugName: String) : Config(SymbolType.Component) {
 
     private fun parseHook(parser: Parser, hook: KMutableProperty0<Hook?>, transmitType: SymbolType<*>? = null) {
         val reference = parser.parseReference(SymbolType.ClientScript) ?: return parser.skipProperty()
-        val symbol = parser.compiler.sym.lookupSymbol(SymbolType.ClientScript, reference.name)
+        val symbol = parser.compiler.sym.lookupSymbol(SymbolType.ClientScript, "[clientscript,${reference.name}]")
         if (symbol == null) {
             parser.reportError(reference.span, "Could not resolve '${reference.name}' to a valid clientscript")
             return parser.skipProperty()
