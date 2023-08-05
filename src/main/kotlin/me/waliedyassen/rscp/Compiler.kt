@@ -63,7 +63,7 @@ class Compiler(var extractMode: ExtractMode, val graphicsDirectory: File) {
             val list = sym.lookupList(type)
             if (list.modified) {
                 logger.info { "Writing symbol table changes for '${type.literal}'" }
-                sym.write(type, directory.resolve("${type.literal}.tsv"))
+                sym.write(type, directory.resolve("${type.literal}.sym"))
             }
         }
     }
@@ -254,6 +254,6 @@ class Compiler(var extractMode: ExtractMode, val graphicsDirectory: File) {
 
     companion object {
         private val logger = InlineLogger()
-        private val SYMBOL_FILE_REGEX = Regex("(\\w+)\\.tsv")
+        private val SYMBOL_FILE_REGEX = Regex("(\\w+)\\.sym")
     }
 }
