@@ -43,7 +43,7 @@ object PackTool : CliktCommand() {
     private val symbolDirectory by option(
         "--symbols",
         help = "Path to the directory with all the *.sym files for symbols"
-    ).file().default(File("sym"))
+    ).file().default(File("symbols"))
 
     /**
      * The directory which contains all the graphics.
@@ -74,7 +74,7 @@ object PackTool : CliktCommand() {
         "-o",
         "--output",
         help = "The path to the directory which the generated binaries will be placed into"
-    ).file().default(File("bin"))
+    ).file().default(File("pack"))
 
     /**
      * When present, the compiler will output JSON string with the information needed. This option has an argument
