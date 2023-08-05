@@ -259,11 +259,11 @@ class Component(override val debugName: String) : Config(SymbolType.Component) {
                     "event_mousex" -> 0x80000001.toInt() to SymbolType.Int
                     "event_mousey" -> 0x80000002.toInt() to SymbolType.Int
                     "event_com" -> 0x80000003.toInt() to SymbolType.Component
-                    "event_opindex" -> 0x80000004.toInt() to SymbolType.Int
+                    "event_op" -> 0x80000004.toInt() to SymbolType.Int
                     "event_comsubid" -> 0x80000005.toInt() to SymbolType.Int
-                    "event_dragtarget" -> 0x80000006.toInt() to SymbolType.Component
-                    "event_dragtargetid" -> 0x80000007.toInt() to SymbolType.Int
-                    "event_key" -> 0x80000008.toInt() to SymbolType.Int
+                    "event_com2" -> 0x80000006.toInt() to SymbolType.Component
+                    "event_comsubid2" -> 0x80000007.toInt() to SymbolType.Int
+                    "event_keycode" -> 0x80000008.toInt() to SymbolType.Int
                     "event_keychar" -> 0x80000009.toInt() to SymbolType.Char
                     else -> null to null
                 }
