@@ -31,6 +31,7 @@ open class SymbolType<T : Symbol>(
         Seq,
         LocShape,
         Component,
+        NpcMode,
         Stat,
         NpcStat,
         Obj,
@@ -52,7 +53,8 @@ open class SymbolType<T : Symbol>(
         DbRow,
         DbTable,
         Flo,
-        Flu -> true
+        Flu,
+        Hunt -> true
         else -> false
     }
 
@@ -64,9 +66,8 @@ open class SymbolType<T : Symbol>(
     object Boolean : PrimitiveSymbolType(1, '1', "boolean")
     object Seq : PrimitiveSymbolType(6, 'A', "seq")
     object LocShape : PrimitiveSymbolType(8, 'H', "locshape")
-    object Component :
-        SymbolType<BasicSymbol>(9, 'I', "component", ::Component, BasicSymbolSerializer, extension = null)
-
+    object Component : SymbolType<BasicSymbol>(9, 'I', "component", ::Component, BasicSymbolSerializer, extension = null)
+    object NpcMode : PrimitiveSymbolType(12, 'N', "npc_mode")
     object NamedObj : PrimitiveSymbolType(13, 'O', "namedobj")
     object Synth : PrimitiveSymbolType(14, 'P', "synth")
     object Area : PrimitiveSymbolType(16, 'R', "area")
@@ -77,6 +78,7 @@ open class SymbolType<T : Symbol>(
     object Graphic : SymbolType<BasicSymbol>(23, 'd', "graphic", ::GraphicConfig, BasicSymbolSerializer)
     object FontMetrics : PrimitiveSymbolType(25, 'f', "fontmetrics")
     object Enum : SymbolType<TypedSymbol>(26, 'g', "enum", ::EnumConfig, TypedSymbolSerializer)
+    object Hunt : SymbolType<BasicSymbol>(27, 'h', "hunt", ::HuntConfig, BasicSymbolSerializer)
     object Loc : SymbolType<BasicSymbol>(30, 'l', "loc", ::LocConfig, BasicSymbolSerializer)
     object Model : PrimitiveSymbolType(31, 'm', "model")
     object Npc : PrimitiveSymbolType(32, 'n', "npc")
@@ -95,6 +97,7 @@ open class SymbolType<T : Symbol>(
     object ClientInterface : PrimitiveSymbolType(100, '©', "clientinterface")
     object NewVar : PrimitiveSymbolType(-1, '-', "newvar")
     object VarPlayer : SymbolType<TypedSymbol>(-1, '\u0000', "varp", ::VarpConfig, TypedSymbolSerializer)
+    object VarNpc : PrimitiveSymbolType(-1, '\u0000', "varn")
     object VarClient : SymbolType<TypedSymbol>(-1, '\u0000', "varc", ::VarcConfig, TypedSymbolSerializer)
     object VarBit : SymbolType<BasicSymbol>(-1, '\u0000', "varbit", ::VarbitConfig, BasicSymbolSerializer)
     object Param : SymbolType<ConfigSymbol>(-1, '\u0000', "param", ::ParamConfig, ConfigSymbolSerializer)
@@ -122,6 +125,7 @@ open class SymbolType<T : Symbol>(
             Seq,
             LocShape,
             Component,
+            NpcMode,
             NamedObj,
             Synth,
             Area,
@@ -132,6 +136,7 @@ open class SymbolType<T : Symbol>(
             Graphic,
             FontMetrics,
             Enum,
+            Hunt,
             Loc,
             Model,
             Npc,

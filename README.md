@@ -36,29 +36,30 @@ Options:
 # Supported Types
 The following table contains all the current possible configurations that come with the compiler:
 
-| Type | Extension | Support |
-| :--: | :--: | :--: |
-| Constants | `constants` | Complete |
-| Database Table | `dbtable` | Complete |
-| Database Row | `dbrow` | Complete |
-| Database Index | None | Complete |
-| Enum | `enum` | Complete |
-| Floor Overlay | `flo` | Complete |
-| Floor Underlay | `flu` | Complete |
-| Headbar | `headbar` | Not Started |
-| Hitmark | `hitmark` | Not Started |
-| IdentityKit | `idk` | Not Started |
-| Interface v3 | `if3` | Complete |
-| Inventory | `inv` | Complete |
-| Location | `loc` | Not Started |
-| Map Element | `mel` | Not Started |
-| NPC | `npc` | Not Started |
-| Object | `obj` | Not Started |
-| Parameter | `param` | Complete |
-| Sequence | `seq` | Not Started |
-| Spot Animation | `spotanim` | Not Started |
-| Structure | `struct` | Complete |
-| Var Bit | `varbit` | Complete |
-| Var Client | `varc` | Complete |
-| Var Player | `varp` | Complete |
-| Graphic | `graphic` | Complete |
+|      Type      |  Extension  | Support |
+|:--------------:|:-----------:| :--: |
+|   Constants    | `constants` | Complete |
+| Database Table |  `dbtable`  | Complete |
+|  Database Row  |   `dbrow`   | Complete |
+| Database Index |    None     | Complete |
+|      Hunt      |   `hunt`    | Complete |
+|      Enum      |   `enum`    | Complete |
+| Floor Overlay  |    `flo`    | Complete |
+| Floor Underlay |    `flu`    | Complete |
+|    Headbar     |  `headbar`  | Not Started |
+|    Hitmark     |  `hitmark`  | Not Started |
+|  IdentityKit   |    `idk`    | Not Started |
+|  Interface v3  |    `if3`    | Complete |
+|   Inventory    |    `inv`    | Complete |
+|    Location    |    `loc`    | Not Started |
+|  Map Element   |    `mel`    | Not Started |
+|      NPC       |    `npc`    | Not Started |
+|     Object     |    `obj`    | Not Started |
+|   Parameter    |   `param`   | Complete |
+|    Sequence    |    `seq`    | Not Started |
+| Spot Animation | `spotanim`  | Not Started |
+|   Structure    |  `struct`   | Complete |
+|    Var Bit     |  `varbit`   | Complete |
+|   Var Client   |   `varc`    | Complete |
+|   Var Player   |   `varp`    | Complete |
+|    Graphic     |  `graphic`  | Complete |

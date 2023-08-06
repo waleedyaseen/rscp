@@ -389,6 +389,18 @@ class Parser(
         return integer.value
     }
 
+
+    /**
+     * Attempt to parse a valid %var reference and return null if it fails.
+     */
+    fun parseVar(varType: SymbolType<*>): Any? {
+        val modulo = lexer.lexModulo()
+        if (modulo is Token.Dummy) {
+            return null
+        }
+        return parseReference(varType)
+    }
+
     /**
      * Attempt to parse a valid boolean value and return false if it fails.
      */

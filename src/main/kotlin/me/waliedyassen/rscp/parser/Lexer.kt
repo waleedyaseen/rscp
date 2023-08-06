@@ -218,6 +218,23 @@ class Lexer(private val input: CharArray, var errorReportHandler: ErrorReportHan
     }
 
     /**
+     * Returns `true` if a [Token.Modulo] can be parsed next.
+     */
+    fun isModulo() = peek() == '%'
+
+    /**
+     * Attempts to parse a [Token.Modulo] and returns [Token.Dummy] if it fails.
+     */
+    fun lexModulo(): Token {
+        if (!isModulo()) {
+            return unexpectedCharacter("%")
+        }
+        val start = index
+        advance()
+        return Token.Modulo(Span(start, index))
+    }
+
+    /**
      * Attempts to parse a [Token.Identifier] and returns [Token.Dummy] if it fails.
      */
     fun lexIdentifier(): Token {

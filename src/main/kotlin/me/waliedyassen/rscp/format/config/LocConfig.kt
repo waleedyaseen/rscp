@@ -40,21 +40,21 @@ class LocConfig(override val debugName: String) : Config(SymbolType.Loc) {
     var sharelight = false
     var occlude = false
     var anim: Any? = null
-    var wallOffset: Int? = null
+    var wallSize: Int? = null
     var ambient: Int? = null
     var contrast: Int? = null
     var options = arrayOfNulls<String>(5)
     var mapFunction = -1
     var mapScene = -1
     var mirror = false
-    var softShadows = true
+    var shadow = true
     var resizeX: Int? = null
     var resizeY: Int? = null
     var resizeZ: Int? = null
     var forceApproach: ForceApproachDir? = null
-    var xof: Int? = null
-    var yof: Int? = null
-    var zof: Int? = null
+    var offsetX: Int? = null
+    var offsetY: Int? = null
+    var offsetZ: Int? = null
     var forceDecor = false
     var raiseObject: Boolean? = null
     var breakRouteFinding = false
@@ -105,7 +105,7 @@ class LocConfig(override val debugName: String) : Config(SymbolType.Loc) {
             "sharelight" -> sharelight = parser.parseBoolean()
             "occlude" -> occlude = parser.parseBoolean()
             "anim" -> anim = parser.parseDynamic(SymbolType.Seq) ?: return parser.skipProperty()
-            "walloff" -> wallOffset = parser.parseInteger() ?: return parser.skipProperty()
+            "wallsize" -> wallSize = parser.parseInteger() ?: return parser.skipProperty()
             "ambient" -> ambient = parser.parseInteger() ?: return parser.skipProperty()
             "contrast" -> contrast = parser.parseInteger() ?: return parser.skipProperty()
             "op1" -> options[0] = parser.parseString()
@@ -139,15 +139,15 @@ class LocConfig(override val debugName: String) : Config(SymbolType.Loc) {
             "retex6d" -> retexDst[5] = parser.parseDynamic(SymbolType.Texture) ?: return parser.skipProperty()
             "category" -> category = parser.parseDynamic(SymbolType.Category) ?: return parser.skipProperty()
             "mirror" -> mirror = parser.parseBoolean()
-            "shadow" -> softShadows = parser.parseBoolean()
+            "shadow" -> shadow = parser.parseBoolean()
             "resizex" -> resizeX = parser.parseInteger() ?: return parser.skipProperty()
             "resizey" -> resizeY = parser.parseInteger() ?: return parser.skipProperty()
             "resizez" -> resizeZ = parser.parseInteger() ?: return parser.skipProperty()
             "mapscene" -> mapScene = parser.parseInteger() ?: return parser.skipProperty()
             "forceapproach" -> forceApproach = parser.parseEnumLiteral() ?: return parser.skipProperty()
-            "xof" -> xof = parser.parseInteger() ?: return parser.skipProperty()
-            "yof" -> yof = parser.parseInteger() ?: return parser.skipProperty()
-            "zof" -> zof = parser.parseInteger() ?: return parser.skipProperty()
+            "offsetx" -> offsetX = parser.parseInteger() ?: return parser.skipProperty()
+            "offsety" -> offsetY = parser.parseInteger() ?: return parser.skipProperty()
+            "offsetz" -> offsetZ = parser.parseInteger() ?: return parser.skipProperty()
             "multivar" -> multiVarRef = parser.parseReference(SymbolType.VarOrVarbit) ?: return parser.skipProperty()
             "multiloc" -> parsePropertyMultiConfig(parser, ::multiDefault, ::multiLoc, SymbolType.Loc)
             "forcedecor" -> forceDecor = parser.parseBoolean()
@@ -302,9 +302,9 @@ class LocConfig(override val debugName: String) : Config(SymbolType.Loc) {
         if (blockWalk == true) {
             packet.code(27)
         }
-        if (wallOffset != null) {
+        if (wallSize != null) {
             packet.code(28)
-            packet.write1(wallOffset!!)
+            packet.write1(wallSize!!)
         }
         if (ambient != null) {
             packet.code(29)
@@ -356,7 +356,7 @@ class LocConfig(override val debugName: String) : Config(SymbolType.Loc) {
         if (mirror) {
             packet.code(62)
         }
-        if (!softShadows) {
+        if (!shadow) {
             packet.code(64)
         }
         if (resizeX != null) {
@@ -379,17 +379,17 @@ class LocConfig(override val debugName: String) : Config(SymbolType.Loc) {
             packet.code(69)
             packet.write1((1 shl it.ordinal).inv() and 0xf)
         }
-        if (xof != null) {
+        if (offsetX != null) {
             packet.code(70)
-            packet.write2(xof!!)
+            packet.write2(offsetX!!)
         }
-        if (yof != null) {
+        if (offsetY != null) {
             packet.code(71)
-            packet.write2(yof!!)
+            packet.write2(offsetY!!)
         }
-        if (zof != null) {
+        if (offsetZ != null) {
             packet.code(72)
-            packet.write2(zof!!)
+            packet.write2(offsetZ!!)
         }
         if (forceDecor) {
             packet.code(73)
