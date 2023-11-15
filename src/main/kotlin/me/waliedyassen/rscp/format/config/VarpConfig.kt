@@ -60,7 +60,9 @@ class VarpConfig(override val debugName: String) : Config(SymbolType.VarPlayer) 
     }
 
     override fun verifyProperties(parser: Parser) {
-        // Do nothing.
+        if (dataType == SymbolType.Undefined) {
+            parser.reportUnitError("type property must be specified")
+        }
     }
 
     override fun resolveReferences(compiler: Compiler) {
