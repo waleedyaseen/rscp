@@ -16,6 +16,12 @@ enum class VarLifetime(val id: Int, override val literal: String) : LiteralEnum 
     SERVERPERMANENT(2, "serverperm");
 }
 
+@Suppress("unused")
+enum class VarTransmitLevel(val id: Int, override val literal: String) : LiteralEnum {
+    No(0, "no"),
+    Yes(1, "yes");
+}
+
 /**
  * Implementation for 'varp' type configuration.
  *
@@ -26,7 +32,7 @@ class VarpConfig(override val debugName: String) : Config(SymbolType.VarPlayer) 
     /**
      * The `type` attribute of the varp.
      */
-    private var type: SymbolType<*> = SymbolType.Undefined
+    private var dataType: SymbolType<*> = SymbolType.Undefined
 
     /**
      * The 'clientcode' attribute of the varp.
@@ -38,11 +44,17 @@ class VarpConfig(override val debugName: String) : Config(SymbolType.VarPlayer) 
      */
     private var lifetime = VarLifetime.TEMPORARY
 
+    /**
+     * The `transmit` attribute of the varp.
+     */
+    private var clientTransmitLevel = VarTransmitLevel.No
+
     override fun parseProperty(name: String, parser: Parser) {
         when (name) {
-            "type" -> type = parser.parseType() ?: return parser.skipProperty()
+            "type" -> dataType = parser.parseType() ?: return parser.skipProperty()
             "clientcode" -> clientCode = parser.parseInteger() ?: return parser.skipProperty()
             "scope" -> lifetime = parser.parseEnumLiteral() ?: return parser.skipProperty()
+            "transmit" -> clientTransmitLevel = parser.parseEnumLiteral() ?: return parser.skipProperty()
             else -> parser.unknownProperty()
         }
     }
@@ -55,22 +67,28 @@ class VarpConfig(override val debugName: String) : Config(SymbolType.VarPlayer) 
         // Do nothing.
     }
 
-    override fun createSymbol(id: Int) = TypedSymbol(debugName, id, type)
+    override fun createSymbol(id: Int) = TypedSymbol(debugName, id, dataType)
 
     override fun encode(side: Side, sym: SymbolTable): ByteArray {
         val expectedSize = 1 + (if (clientCode != 0) 3 else 0) + if (lifetime != VarLifetime.TEMPORARY) 2 else 0
         val packet = BinaryEncoder(expectedSize)
+
         if (side == Side.Server) {
+            packet.code(1)
+            packet.write1or2(dataType.id)
+
             if (lifetime != VarLifetime.TEMPORARY) {
-                packet.code(4) {
-                    write1(lifetime.id)
-                }
+                packet.code(2)
+                packet.write1(lifetime.id)
+            }
+            if (clientTransmitLevel != VarTransmitLevel.No) {
+                packet.code(3)
+                packet.write1(clientTransmitLevel.id)
             }
         }
         if (clientCode != 0) {
-            packet.code(5) {
-                write2(clientCode)
-            }
+            packet.code(5)
+            packet.write2(clientCode)
         }
         packet.terminateCode()
         return packet.toByteArray()
