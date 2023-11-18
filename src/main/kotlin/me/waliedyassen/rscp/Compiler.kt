@@ -239,7 +239,6 @@ class Compiler(var extractMode: ExtractMode, val graphicsDirectory: File) {
         }
     }
 
-
     /**
      * Attempt to resolve the specified [reference] from the symbol table and return
      * the symbol id if the resolve was successful otherwise -1.

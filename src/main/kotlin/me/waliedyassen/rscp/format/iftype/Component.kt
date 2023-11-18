@@ -7,8 +7,10 @@ import me.waliedyassen.rscp.format.config.Config
 import me.waliedyassen.rscp.parser.Parser
 import me.waliedyassen.rscp.parser.Reference
 import me.waliedyassen.rscp.parser.Token
+import me.waliedyassen.rscp.symbol.BasicSymbol
 import me.waliedyassen.rscp.symbol.SymbolTable
 import me.waliedyassen.rscp.symbol.SymbolType
+import me.waliedyassen.rscp.symbol.SymbolWithId
 import kotlin.reflect.KMutableProperty0
 
 data class Hook(var script: Any, val arguments: Array<Any>, val transmitList: Array<Any>) {
@@ -36,6 +38,14 @@ data class Hook(var script: Any, val arguments: Array<Any>, val transmitList: Ar
 
 class Component(override val debugName: String) : Config(SymbolType.Component) {
 
+    val qualifiedName: String
+        get() = if (debugName.indexOf(':') != -1) {
+            debugName
+        } else {
+            "$interfaceName:$debugName"
+        }
+
+    lateinit var interfaceName: String
     private var type = -1
     private var contenttype = 0
     private var x = 0
@@ -305,7 +315,7 @@ class Component(override val debugName: String) : Config(SymbolType.Component) {
     }
 
     override fun resolveReferences(compiler: Compiler) {
-        compiler.resolveReference(::layer)
+        compiler.resolveUnqualifiedReference(::layer)
         compiler.resolveReference(::model)
         compiler.resolveReference(::modelSeq)
         compiler.resolveReference(::graphic)
@@ -330,6 +340,10 @@ class Component(override val debugName: String) : Config(SymbolType.Component) {
         resolveHookReferences(compiler, onScrollWheelHook)
     }
 
+    override fun createSymbol(id: Int): SymbolWithId {
+        return BasicSymbol(qualifiedName, id)
+    }
+
     private fun resolveHookReferences(compiler: Compiler, hook: Hook?) {
         if (hook == null) {
             return
@@ -337,7 +351,7 @@ class Component(override val debugName: String) : Config(SymbolType.Component) {
         compiler.resolveReference(hook::script)
         hook.arguments.forEachIndexed { index, argument ->
             if (argument is Reference) {
-                hook.arguments[index] = compiler.resolveReferenceId(argument)
+                hook.arguments[index] = compiler.resolveUnqualifiedReferenceId(argument)
             }
         }
         hook.transmitList.forEachIndexed { index, argument ->
@@ -540,5 +554,22 @@ class Component(override val debugName: String) : Config(SymbolType.Component) {
         val transmits = hook.transmitList
         encoder.write1(transmits.size)
         repeat(transmits.size) { encoder.write4(transmits[it] as Int) }
+    }
+
+    private fun Compiler.resolveUnqualifiedReference(reference: KMutableProperty0<Any?>) {
+        val current = reference()
+        if (current is Reference) {
+            reference.set(resolveUnqualifiedReferenceId(current))
+        }
+    }
+
+    private fun Compiler.resolveUnqualifiedReferenceId(ref: Reference?): Int {
+        if (ref == null
+            || ref.type != SymbolType.Component
+            || ref.name == "null"
+            || ref.name.indexOf(':') != -1
+        )
+            return resolveReferenceId(ref)
+        return resolveReferenceId(ref.copy(name = qualifiedName))
     }
 }

@@ -49,7 +49,7 @@ class Interface(val type: InterfaceType, override val debugName: String, val com
         check(interfaceDirectory.exists() || interfaceDirectory.mkdirs())
         interfaceDirectory.listFiles()?.forEach { it.delete() }
         components.forEach {
-            val symbol = sym.lookupSymbol(SymbolType.Component, it.debugName)!!
+            val symbol = sym.lookupSymbol(SymbolType.Component, it.qualifiedName)!!
             val id = symbol.id and 0xffff
             val componentFile = interfaceDirectory.resolve(id.toString())
             componentFile.writeBytes(it.encode(side, sym))

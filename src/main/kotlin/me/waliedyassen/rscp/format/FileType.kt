@@ -142,6 +142,11 @@ object InterfaceFileType : FileType<Interface>() {
             parser.reportError(Span(0, 0), "Missing interface 'type' property")
         }
         val components = parser.parseConfigs(SymbolType.Component)
+        if (name != null) {
+            for (component in components) {
+                (component.config as Component).interfaceName = name
+            }
+        }
         if (name == null || type == null) {
             return ParseResult(this, emptyList())
         }
@@ -158,8 +163,7 @@ object InterfaceFileType : FileType<Interface>() {
         result.units.forEach { inter ->
             val prefix = "${inter.debugName}:"
             inter.components.forEach {
-                if (!it.debugName.startsWith(prefix)) {
-                    // TODO(Walied): Move this else where or or make it have the correct span
+                if (it.debugName.indexOf(':') != -1 && !it.debugName.startsWith(prefix)) {
                     compiler.addError(Span(0, 0), "The component name must start with '$prefix'")
                 }
                 it.resolveReferences(compiler)
