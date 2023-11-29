@@ -1,6 +1,8 @@
 package me.waliedyassen.rscp.symbol
 
 import me.waliedyassen.rscp.format.config.*
+import me.waliedyassen.rscp.format.config.varconfig.VarcConfig
+import me.waliedyassen.rscp.format.config.varconfig.VarpConfig
 import me.waliedyassen.rscp.format.dbtable.DbRowConfig
 import me.waliedyassen.rscp.format.dbtable.DbTableConfig
 import me.waliedyassen.rscp.format.graphic.GraphicConfig
