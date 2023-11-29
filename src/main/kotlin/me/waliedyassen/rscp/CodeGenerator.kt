@@ -14,4 +14,6 @@ interface CodeGenerator {
      * data will be written to is determined by the implementation.
      */
     fun generateCode(allUnits: List<CodeGenerator>, outputFolder: File, sym: SymbolTable, side: Side)
+
+    fun canGenerateFor(side: Side): Boolean = true
 }

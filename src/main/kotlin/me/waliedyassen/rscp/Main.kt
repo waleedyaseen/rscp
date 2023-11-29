@@ -119,7 +119,7 @@ object PackTool : CliktCommand() {
             val unitsGenerating = units.filterIsInstance<CodeGenerator>()
             sides.forEach { side ->
                 val dir = outputDirectory.resolve(side.name.lowercase())
-                compiler.generateCode(unitsGenerating, dir, side)
+                compiler.generateCode(unitsGenerating.filter { it.canGenerateFor(side) }, dir, side)
             }
             compiler.writeSymbols(symbolDirectory)
         }

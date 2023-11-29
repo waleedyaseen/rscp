@@ -19,6 +19,7 @@ enum class AtlasMode(override val literal: String) : LiteralEnum {
     File("file"),
     Group("group")
 }
+
 @Suppress("unused")
 enum class Format(override val literal: String) : LiteralEnum {
     Palette("palette"),
@@ -143,4 +144,6 @@ class GraphicConfig(override val debugName: String) : Config(SymbolType.Graphic)
     override fun encode(side: Side, sym: SymbolTable): ByteArray {
         return ByteArray(0)
     }
+
+    override fun canGenerateFor(side: Side) = side == Side.Client
 }
