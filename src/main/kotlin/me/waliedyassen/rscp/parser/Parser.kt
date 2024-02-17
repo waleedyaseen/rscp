@@ -402,6 +402,18 @@ class Parser(
     }
 
     /**
+     * Checks whether the next letter can be parsed as a valid boolean value.
+     */
+    fun isBoolean(): Boolean {
+        val token = peekIdentifier() ?: return false
+        if (token is Token.Dummy) {
+            return false
+        }
+        val identifier = token as Token.Identifier
+        return identifier.text == "true" || identifier.text == "false" || identifier.text == "yes" || identifier.text == "no"
+    }
+
+    /**
      * Attempt to parse a valid boolean value and return false if it fails.
      */
     fun parseBoolean(): Boolean {

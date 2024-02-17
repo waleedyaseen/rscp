@@ -56,7 +56,8 @@ open class SymbolType<T : Symbol>(
         DbTable,
         Flo,
         Flu,
-        Hunt -> true
+        Hunt,
+        Spotanim-> true
         else -> false
     }
 
@@ -86,7 +87,7 @@ open class SymbolType<T : Symbol>(
     object Npc : PrimitiveSymbolType(32, 'n', "npc")
     object Obj : PrimitiveSymbolType(33, 'o', "obj")
     object String : PrimitiveSymbolType(36, 's', "string")
-    object Spotanim : PrimitiveSymbolType(37, 't', "spotanim")
+    object Spotanim : SymbolType<BasicSymbol>(37, 't', "spotanim", ::SpotConfig, BasicSymbolSerializer)
     object NpcUid : PrimitiveSymbolType(38, 'u', "npc_uid")
     object Inv : SymbolType<BasicSymbol>(39, 'v', "inv", ::InvConfig, BasicSymbolSerializer)
     object Texture : PrimitiveSymbolType(40, 'x', "texture")
